@@ -28,8 +28,8 @@
 Puffle bot can be run as a normal Python program under any operating system. Do not forget to substitute your data, such as a `<bot_token>`(without <>)
 
 ```shell
-$ git clone https://github.com/ilyash0/discord-bot
-$ cd discord-bot
+$ git clone https://github.com/ilyash0/Puffle-bot
+$ cd Puffle-bot
 $ pip install -r requirements.txt
 $ python /discord-bot/bootstrap.py -du <db_username> -dp <db_password> -dn <db_name> -p <port> -t <bot_token> &
 ```
