@@ -8,6 +8,7 @@ from bot.data import db
 from bot.data.moderator import Logs
 from bot.penguin import Penguin
 from bot.data.penguin import PenguinIntegrations
+from bot.handlers.buttons import Question
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -50,7 +51,7 @@ async def card(interaction: discord.Interaction):
                           color=discord.Color.from_rgb(3, 91, 209))
     embed.set_thumbnail(url=f"https://play.cpps.app/avatar/{p.id}/cp?size=600")
     embed.add_field(name="ID", value=p.id)
-    embed.add_field(name="Имя", value=p.nickname)
+    embed.add_field(name="Имя", value=p.safe_name())
     embed.add_field(name="Монеты", value=p.coins)
     embed.add_field(name="Марки", value=len(p.stamps) + CountEpfAwards(p.inventory))
     embed.add_field(name="Возраст пингвина", value=f"{(datetime.now() - p.registration_date).days} дней")
@@ -86,6 +87,41 @@ async def login(interaction: discord.Interaction, penguin: str):
     await interaction.response.send_message(
         content=f"На ваш аккаунт была отправлена открытка с кодом *(если нет - перезайдите в игру)*. \n"
                 f"Напишите одноразовый код в этот канал")
+
+
+@bot.tree.command(name="logout", description="Отвязать свой Discord аккаунт от своего пингвина")
+async def logout(interaction: discord.Interaction):
+    p: Penguin = await getPenguinFromInteraction(interaction)
+
+    def run():
+        await PenguinIntegrations.delete.where(PenguinIntegrations.penguin_id == p.id).gino.status()
+
+        # noinspection PyUnresolvedReferences
+        await interaction.response.edit_message(content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан")
+
+    view = Question(interaction.user.id, run)
+    # noinspection PyUnresolvedReferences
+    await interaction.response.send_message(content=f"Вы уверены, что хотите отвязать аккаунт `{p.safe_name()}`?",
+                                            view=view)
+
+
+@bot.tree.command(name="guiderole", description="Получить роль экскурсовода")
+async def guideRole(interaction: discord.Interaction):
+    p: Penguin = await getPenguinFromInteraction(interaction)
+    roleID = interaction.guild.get_role(860201914334576650)
+
+    if 428 in p.inventory:
+        if roleID not in interaction.user.roles:
+            await interaction.user.add_roles(roleID)
+            # noinspection PyUnresolvedReferences
+            await interaction.response.send_message(
+                content=f"Вы получили роль {roleID}! Теперь вы можете писать в канале <#860201914334576650>")
+        else:
+            # noinspection PyUnresolvedReferences
+            await interaction.response.send_message(content=f"У вас уже есть роль {roleID}")
+    else:
+        # noinspection PyUnresolvedReferences
+        await interaction.response.send_message(content=f"Мы не нашли у вас шапку экскурсовода")
 
 
 @bot.tree.command(name="pay", description="Перевести свои монеты другому игроку")

@@ -37,7 +37,7 @@ class Penguin(penguin.Penguin):
 
     @property
     def safe_name(self):
-        return self.safe_nickname(self.server.config.lang)
+        return self.safe_nickname('ru')
 
     @property
     def member(self):
@@ -53,9 +53,6 @@ class Penguin(penguin.Penguin):
         await self.update(coins=self.coins - cost).apply()
 
         self.logger.info(f'{self.username} added \'{item.name}\' to their clothing inventory')
-
-        self.server.cache.delete(f'pins.{self.id}')
-        self.server.cache.delete(f'awards.{self.id}')
 
         return True
 
@@ -180,7 +177,6 @@ class Penguin(penguin.Penguin):
         await self.stamps.insert(stamp_id=stamp.id)
 
         self.logger.info(f'{self.username} earned stamp \'{stamp.name}\'')
-        self.server.cache.delete(f'stamps.{self.id}')
 
         return True
 
