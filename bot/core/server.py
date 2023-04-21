@@ -24,10 +24,6 @@ class Server:
     async def start(self):
         logger.add("logs/log.log")
 
-        # self.server = await asyncio.start_server(
-        #     self.client_connected, self.config.address, self.config.port
-        # )
-
         await self.db.set_bind(
             "postgresql://{}:{}@{}/{}".format(
                 self.config.database_username,
@@ -43,7 +39,3 @@ class Server:
 
         async with commands.bot:
             await commands.bot.start(self.config.token, reconnect=True)
-
-    # async def client_connected(self, reader, writer):
-    #     client_object = self.client_class(self, reader, writer)
-    #     await client_object.run()

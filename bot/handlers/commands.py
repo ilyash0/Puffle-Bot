@@ -1,38 +1,27 @@
 from datetime import datetime
 from random import sample
+
 from loguru import logger
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext.commands import Bot
 from bot.data import db
 from bot.data.moderator import Logs
 from bot.penguin import Penguin
 from bot.data.penguin import PenguinIntegrations
-from bot.handlers.buttons import Question
+from bot.handlers.buttons import Question, Continue
+from bot.handlers.modals import LoginModal
 
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="%", intents=intents)
-messageListener = []
+bot = Bot(command_prefix="%", intents=intents)
 
 
 @bot.event
 async def on_ready():
     logger.info("Bot ready")
     await bot.tree.sync()
-
-
-@bot.event
-async def on_message(message: discord.Message):
-    if len(messageListener) == 0:
-        return
-
-    for i, listener in enumerate(messageListener):
-        if message.author.id == listener['authorId'] and message.channel.id == listener['channel']:
-            function = listener['function']
-            messageListener.pop(i)
-            await function(message)
 
 
 # noinspection PyUnresolvedReferences
@@ -73,33 +62,40 @@ async def login(interaction: discord.Interaction, penguin: str):
 
     await p.add_inbox(302, details=authCode)
 
-    async def authApprove(message):
-        if message.content.upper() == authCode:
-            await message.channel.send('Аккаунты успешно привязаны!')
+    async def authApprove(newInteraction, authCodeInput):
+        await view.disableAllItems()
+        if authCodeInput.upper() == authCode:
+            await newInteraction.response.send_message('Аккаунты успешно привязаны!')
             await PenguinIntegrations.create(penguin_id=p.id, discord_id=str(user.id))
             return
 
-        await message.channel.send('Не верный код авторизации, попробуйте снова')
+        await newInteraction.response.send_message('Не верный код авторизации')
 
-    messageListener.append({"function": authApprove, "authorId": user.id, "channel": interaction.channel_id})
+    async def sendModal(newInteraction):
+        # noinspection PyUnresolvedReferences
+        await newInteraction.response.send_modal(loginModal)
+
+    loginModal = LoginModal(authApprove)
+    view = Continue(interaction, sendModal)
 
     # noinspection PyUnresolvedReferences
     await interaction.response.send_message(
         content=f"На ваш аккаунт была отправлена открытка с кодом *(если нет - перезайдите в игру)*. \n"
-                f"Напишите одноразовый код в этот канал")
+                f"Нажмите «Продолжить», что бы ввести одноразовый код", view=view)
 
 
 @bot.tree.command(name="logout", description="Отвязать свой Discord аккаунт от своего пингвина")
 async def logout(interaction: discord.Interaction):
     p: Penguin = await getPenguinFromInteraction(interaction)
 
-    def run():
+    async def run(newInteraction: discord.Interaction):
         await PenguinIntegrations.delete.where(PenguinIntegrations.penguin_id == p.id).gino.status()
 
         # noinspection PyUnresolvedReferences
-        await interaction.response.edit_message(content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан")
+        await newInteraction.response.send_message(content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан")
+        return
 
-    view = Question(interaction.user.id, run)
+    view = Question(interaction, run)
     # noinspection PyUnresolvedReferences
     await interaction.response.send_message(content=f"Вы уверены, что хотите отвязать аккаунт `{p.safe_name()}`?",
                                             view=view)
@@ -108,17 +104,23 @@ async def logout(interaction: discord.Interaction):
 @bot.tree.command(name="guiderole", description="Получить роль экскурсовода")
 async def guideRole(interaction: discord.Interaction):
     p: Penguin = await getPenguinFromInteraction(interaction)
-    roleID = interaction.guild.get_role(860201914334576650)
+    role: discord.Role = interaction.guild.get_role(860124814827061278)
+
+    if interaction.guild_id != 755445822920982548:
+        # noinspection PyUnresolvedReferences
+        await interaction.response.send_message(
+            content=f"Мы не нашли здесь нужную роль, перейдите на официальный сервер CPPS.app")
+        return
 
     if 428 in p.inventory:
-        if roleID not in interaction.user.roles:
-            await interaction.user.add_roles(roleID)
+        if role not in interaction.user.roles:
+            await interaction.user.add_roles(role)
             # noinspection PyUnresolvedReferences
             await interaction.response.send_message(
-                content=f"Вы получили роль {roleID}! Теперь вы можете писать в канале <#860201914334576650>")
+                content=f"Вы получили роль {role.mention}! Теперь вы можете писать в канале <#860201914334576650>")
         else:
             # noinspection PyUnresolvedReferences
-            await interaction.response.send_message(content=f"У вас уже есть роль {roleID}")
+            await interaction.response.send_message(content=f"У вас уже есть роль {role.mention}")
     else:
         # noinspection PyUnresolvedReferences
         await interaction.response.send_message(content=f"Мы не нашли у вас шапку экскурсовода")

@@ -104,8 +104,8 @@ class Penguin(db.Model):
 
         super().__init__(*args, **kwargs)
 
-    def safe_nickname(self, language_bitmask):
-        return self.nickname if self.approval & language_bitmask else "P" + str(self.id)
+    def safe_nickname(self):
+        return self.nickname if self.approval else "P" + str(self.id)
 
     async def status_field_set(self, field_bitmask):
         if (self.status_field & field_bitmask) == 0:

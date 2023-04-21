@@ -35,11 +35,9 @@ class Penguin(penguin.Penguin):
         self.inventory = await PenguinItemCollection.get_collection(self.id)
         self.stamps = await PenguinStampCollection.get_collection(self.id)
 
-    @property
     def safe_name(self):
-        return self.safe_nickname('ru')
+        return self.safe_nickname()
 
-    @property
     def member(self):
         return int(self.is_member)
 
