@@ -1,8 +1,8 @@
-import discord
+import disnake
 
 
-class Question(discord.ui.View):
-    def __init__(self, interaction: discord.Interaction, function):
+class Question(disnake.ui.View):
+    def __init__(self, interaction: disnake.Interaction, function):
         super().__init__(timeout=300)
         self.interaction = interaction
         self.userID = interaction.user.id
@@ -16,8 +16,8 @@ class Question(discord.ui.View):
     async def on_timeout(self):
         await self.disableAllItems()
 
-    @discord.ui.button(label="Да", style=discord.ButtonStyle.green)
-    async def yesButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @disnake.ui.button(label="Да", style=disnake.ButtonStyle.green)
+    async def yesButton(self, button: disnake.ui.Button, interaction: disnake.Interaction):
         if interaction.user.id != self.userID:
             # noinspection PyUnresolvedReferences
             await interaction.response.send_message(content=f"Это кнопка не для вас", ephemeral=True)
@@ -25,8 +25,8 @@ class Question(discord.ui.View):
         await self.disableAllItems()
         await self.function(interaction)
 
-    @discord.ui.button(label="Нет", style=discord.ButtonStyle.red)
-    async def noButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @disnake.ui.button(label="Нет", style=disnake.ButtonStyle.red)
+    async def noButton(self, button: disnake.ui.Button, interaction: disnake.Interaction):
         if interaction.user.id != self.userID:
             # noinspection PyUnresolvedReferences
             await interaction.response.send_message(content=f"Это кнопка не для вас", ephemeral=True)
@@ -36,8 +36,8 @@ class Question(discord.ui.View):
         await interaction.response.send_message(content=f"Отменено")
 
 
-class Continue(discord.ui.View):
-    def __init__(self, interaction: discord.Interaction, function):
+class Continue(disnake.ui.View):
+    def __init__(self, interaction: disnake.Interaction, function):
         super().__init__(timeout=300)
         self.interaction = interaction
         self.userID = interaction.user.id
@@ -51,8 +51,8 @@ class Continue(discord.ui.View):
     async def on_timeout(self):
         await self.disableAllItems()
 
-    @discord.ui.button(label="Продолжить", style=discord.ButtonStyle.blurple)
-    async def continueButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @disnake.ui.button(label="Продолжить", style=disnake.ButtonStyle.blurple)
+    async def continueButton(self, button: disnake.ui.Button, interaction: disnake.Interaction):
         if interaction.user.id != self.userID:
             # noinspection PyUnresolvedReferences
             await interaction.response.send_message(content=f"Это кнопка не для вас", ephemeral=True)

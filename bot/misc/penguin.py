@@ -41,6 +41,15 @@ class Penguin(penguin.Penguin):
     def member(self):
         return int(self.is_member)
 
+    def countEpfAwards(self):
+        result: int = 0
+        AWARD_STAMP_IDS = list(range(801, 807)) + list(range(808, 812)) + list(range(813, 821)) + [822, 823, 8007, 8008]
+
+        for stamp in AWARD_STAMP_IDS:
+            if stamp in self.inventory:
+                result += 1
+        return result
+
     async def add_inventory(self, item, cost=None):
         if item.id in self.inventory:
             return False
@@ -214,3 +223,6 @@ class Penguin(penguin.Penguin):
         if self.id is not None:
             return f'<Penguin ID=\'{self.id}\' Username=\'{self.username}\'>'
         return super().__repr__()
+
+
+

@@ -1,15 +1,12 @@
+import disnake
 from loguru import logger
-
-# from bot.penguin import Penguin
 from bot.data import db
-from bot.handlers import commands
+from bot.core.puffleBot import PuffleBot
 
 
 class Server:
     def __init__(self, config):
-        self.server = None
-        self.redis = None
-        self.cache = None
+        self.bot = None
         self.config = config
         self.db = db
         self.peers_by_ip = {}
@@ -34,8 +31,16 @@ class Server:
         )
 
         logger.info("Booting discord bot")
+        intents = disnake.Intents.default()
+        # noinspection PyDunderSlots,PyUnresolvedReferences
+        intents.message_content = True
 
-        logger.info(f"Listening on {self.config.address}:{self.config.port}")
+        self.bot = PuffleBot(command_prefix="!", intents=intents,
+                             test_guilds=[755445822920982548], owner_id=527140180696629248)
+        self.bot.load_cogs()
 
-        async with commands.bot:
-            await commands.bot.start(self.config.token, reconnect=True)
+        try:
+            await self.bot.start(self.config.token)
+        finally:
+            if not self.bot.is_closed():
+                await self.bot.close()
