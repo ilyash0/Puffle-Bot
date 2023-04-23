@@ -11,6 +11,7 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--name', action='store', help='Discord bot server name')
     parser.add_argument('-a', '--address', action='store', default='0.0.0.0',
                         help='Discord bot server address')
+    parser.add_argument('-p', '--port', action='store', help='Houdini server port', default=8000, type=int)
     # parser.add_argument('-l', '--lang', action='store', default='en', help='Discord bot language',
     #                     choices=['en', 'fr', 'pt', 'es', 'de', 'ru'])
     parser.add_argument('-t', '--token', action='store', help='Token for Discord bot')
@@ -35,8 +36,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    args.port = 8000
-    args.name = 'discordBot'
     factory_instance = Server(args)
     loop = asyncio.get_event_loop()
     try:

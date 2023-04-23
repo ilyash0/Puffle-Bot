@@ -25,10 +25,13 @@ class PuffleBot(Bot):
         logger.info("Bot ready")
 
     async def on_error(self, event_method: str, *args, **kwargs):
-        logger.error(event_method)
+        logger.error(f"{event_method}.{args}.{kwargs}")
 
     async def on_command_error(self, context, exception):
         logger.error(exception)
 
         if isinstance(exception, MissingPermissions):
             await context.send(f"{context.author}, у вас недостаточно прав для выполнения данной команды!")
+
+    async def on_slash_command_error(self, interaction, exception):
+        logger.error(exception)

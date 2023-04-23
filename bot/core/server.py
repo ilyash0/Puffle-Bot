@@ -1,4 +1,6 @@
+import asyncio
 import disnake
+from disnake.ext.commands import CommandSyncFlags
 from loguru import logger
 from bot.data import db
 from bot.core.puffleBot import PuffleBot
@@ -6,6 +8,7 @@ from bot.core.puffleBot import PuffleBot
 
 class Server:
     def __init__(self, config):
+        self.server = None
         self.bot = None
         self.config = config
         self.db = db
@@ -30,13 +33,20 @@ class Server:
             )
         )
 
+        # this need for kill server on port
+        self.server = await asyncio.start_server(
+            self.client_connected, self.config.address,
+            self.config.port
+        )
+
         logger.info("Booting discord bot")
         intents = disnake.Intents.default()
-        # noinspection PyDunderSlots,PyUnresolvedReferences
         intents.message_content = True
+        command_sync_flags = CommandSyncFlags.default()
+        command_sync_flags.sync_commands = True
 
-        self.bot = PuffleBot(command_prefix="!", intents=intents,
-                             test_guilds=[755445822920982548], owner_id=527140180696629248)
+        self.bot = PuffleBot(command_prefix="!", intents=intents, command_sync_flags=command_sync_flags,
+                             owner_id=527140180696629248)  # test_guilds=[755445822920982548],
         self.bot.load_cogs()
 
         try:
@@ -44,3 +54,6 @@ class Server:
         finally:
             if not self.bot.is_closed():
                 await self.bot.close()
+
+    async def client_connected(self, reader, writer):
+        ...
