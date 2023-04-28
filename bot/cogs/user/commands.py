@@ -4,12 +4,15 @@ from random import sample
 from loguru import logger
 import disnake
 from disnake.ext.commands import Cog, Param, slash_command
+
+from bot.data import db
 from bot.data.moderator import Logs
 from bot.misc.penguin import Penguin
 from bot.data.penguin import PenguinIntegrations
 from bot.misc.buttons import Question, Continue
 from bot.misc.modals import LoginModal
-from bot.misc.utils import getPenguinFromInteraction
+from bot.misc.select import SelectPenguins
+from bot.misc.utils import getPenguinFromInteraction, getPenguinOrNoneFromInteraction
 
 
 class UserCommands(Cog):
@@ -34,7 +37,7 @@ class UserCommands(Cog):
         embed.add_field(name="ID", value=p.id)
         embed.add_field(name="Имя", value=p.safe_name())
         embed.add_field(name="Монеты", value=p.coins)
-        embed.add_field(name="Марки", value=len(p.stamps) + p.countEpfAwards())
+        embed.add_field(name="Марки", value=len(p.stamps) + p.count_epf_awards())
         embed.add_field(name="Возраст пингвина", value=f"{(datetime.now() - p.registration_date).days} дней")
         embed.add_field(name="Сотрудник", value="Да" if p.moderator else "Нет")
         await interaction.response.send_message(embed=embed)
@@ -54,8 +57,15 @@ class UserCommands(Cog):
         async def authApprove(modalInteraction, authCodeInput):
             await view.disableAllItems()
             if authCodeInput.upper() == authCode:
+                currentPenguin: Penguin = await getPenguinOrNoneFromInteraction(interaction)
+                if currentPenguin is not None:
+                    await modalInteraction.response.send_message(
+                        f'Аккаунты успешно привязаны! Ваш текущий аккаунт `{currentPenguin.safe_name()}`')
+                    await p.set_integration(str(user.id))
+                    return
+
                 await modalInteraction.response.send_message('Аккаунты успешно привязаны!')
-                await PenguinIntegrations.create(penguin_id=p.id, discord_id=str(user.id))
+                await p.set_integration(str(user.id), True)
                 return
 
             await modalInteraction.response.send_message('Не верный код авторизации')
@@ -74,10 +84,28 @@ class UserCommands(Cog):
     async def logout(self, interaction):
         p: Penguin = await getPenguinFromInteraction(interaction)
 
-        async def run(newInteraction):
-            await PenguinIntegrations.delete.where(PenguinIntegrations.penguin_id == p.id).gino.status()
+        async def run(buttonInteraction):
+            await p.delete_integration(str(interaction.user.id))
 
-            await newInteraction.response.send_message(content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан")
+            penguin_ids = await db.select([PenguinIntegrations.penguin_id]).where(
+                (PenguinIntegrations.discord_id == str(interaction.user.id))).gino.all()
+
+            if len(penguin_ids) == 1:
+                newCurrentPenguin: Penguin = await Penguin.get(penguin_ids[0][0])
+                await newCurrentPenguin.set_integration_current_status(interaction.user.id, True)
+                await buttonInteraction.response.send_message(
+                    content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан. "
+                            f"Теперь ваш текущий аккаунт `{newCurrentPenguin.safe_name()}`")
+                return
+
+            if len(penguin_ids) == 0:
+                await buttonInteraction.response.send_message(
+                    content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан.")
+                return
+
+            await buttonInteraction.response.send_message(
+                content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан. "
+                        f"Чтобы выбрать текущий аккаунт воспользуйтесь командой `/switch`")
             return
 
         view = Question(interaction, run)
@@ -111,8 +139,7 @@ class UserCommands(Cog):
                   amount: int = Param(description='Количество монет')):
         p: Penguin = await getPenguinFromInteraction(interaction)
 
-        receiver.lower()
-        receiverId = await Penguin.select('id').where(Penguin.username == receiver).gino.first()
+        receiverId = await Penguin.select('id').where(Penguin.username == receiver.lower()).gino.first()
         receiverId = int(receiverId[0])
         r: Penguin = await Penguin.get(receiverId)
 
@@ -139,6 +166,38 @@ class UserCommands(Cog):
 
         await interaction.response.send_message(
             content=f"Вы успешно передали `{amount}` монет игроку `{receiver}`!")
+
+    @slash_command(name="switch", description="Сменить текущий аккаунт")
+    async def switch(self, interaction):
+        p: Penguin = await getPenguinFromInteraction(interaction)
+
+        penguin_ids = await db.select([PenguinIntegrations.penguin_id]).where(
+            (PenguinIntegrations.discord_id == str(interaction.user.id))).gino.all()
+
+        if len(penguin_ids) == 1:
+            await interaction.response.send_message(
+                content=f"У вас привязан только один аккаунт. "
+                        f"Вы можете привязать ещё несколько с помощью команды `/login`")
+            return
+
+        async def run(selectInteraction, penguin_id):
+            newCurrentPenguin: Penguin = await Penguin.get(penguin_id)
+
+            await p.set_integration_current_status(interaction.user.id, False)
+            await newCurrentPenguin.set_integration_current_status(interaction.user.id, True)
+
+            await selectInteraction.response.send_message(
+                content=f"Успешно. Теперь ваш текущий аккаунт `{newCurrentPenguin.safe_name()}`")
+            return
+
+        view = disnake.ui.View()
+        penguinsList = [{"safe_name": (await Penguin().get(penguin_id[0])).safe_name(), "id": penguin_id[0]} for
+                        penguin_id in penguin_ids]
+        view.add_item(SelectPenguins(penguinsList, run, interaction.user.id))
+
+        await interaction.response.send_message(
+            content=f"Ваш текущий аккаунт: `{p.safe_name()}`. Какой аккаунт вы хотите сделать текущим?",
+            view=view)
 
 
 def setup(bot):

@@ -182,3 +182,4 @@ class PenguinIntegrations(db.Model):
     penguin_id = db.Column(db.ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
                            nullable=False)
     discord_id = db.Column(db.String, primary_key=True, nullable=False)
+    current = db.Column(db.Boolean, server_default=db.text("false"))

@@ -2,8 +2,8 @@ import disnake
 
 
 class LoginModal(disnake.ui.Modal):
-    def __init__(self, authApprove):
-        self.authApprove = authApprove
+    def __init__(self, function):
+        self.function = function
 
         components = [
             disnake.ui.TextInput(label="Одноразовый код аутентификации", required=True,
@@ -13,4 +13,4 @@ class LoginModal(disnake.ui.Modal):
 
     async def callback(self, interaction: disnake.ModalInteraction):
         authCode = interaction.text_values["authCodeInput"]
-        await self.authApprove(interaction, authCode)
+        await self.function(interaction, authCode)
