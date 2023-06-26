@@ -2,7 +2,7 @@ import disnake
 
 
 class Buttons(disnake.ui.View):
-    def __init__(self, inter, function, timeout: int = 90):
+    def __init__(self, inter, function, timeout: int = 900):
         super().__init__(timeout=timeout)
         self.inter = inter
         self.userID = inter.user.id
