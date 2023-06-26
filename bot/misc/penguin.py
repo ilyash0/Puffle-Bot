@@ -3,6 +3,7 @@ from bot.data import penguin
 from bot.data.item import PenguinItemCollection
 from bot.data.mail import PenguinPostcard
 from bot.data.penguin import PenguinIntegrations
+from bot.data.plugin import PenguinAttributeCollection
 from bot.data.stamp import PenguinStampCollection
 
 
@@ -35,6 +36,7 @@ class Penguin(penguin.Penguin):
     async def setup(self):
         self.inventory = await PenguinItemCollection.get_collection(self.id)
         self.stamps = await PenguinStampCollection.get_collection(self.id)
+        self.attributes = await PenguinAttributeCollection.get_collection(self.id)
 
     def safe_name(self):
         return self.safe_nickname()
