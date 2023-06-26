@@ -24,7 +24,7 @@ class UserCommands(Cog):
 
     @slash_command(name="ilyash", description=":D")
     async def ilyash(self, inter: ApplicationCommandInteraction):
-        await inter.response.send(content=f"Теперь вы пешка иляша!")
+        await inter.response.send_message(content=f"Теперь вы пешка иляша!")
 
     @slash_command(name="card", description="Показывает полезную информацию о твоём аккаунте")
     async def card(self, inter: ApplicationCommandInteraction):

@@ -22,7 +22,7 @@ class PuffleBot(Bot):
     async def on_ready(self):
         await self.change_presence(activity=disnake.Game(name="CPPS.APP"))
 
-        logger.info("Bot ready")
+        logger.info(f"Bot {self.user} ready")
 
     async def on_error(self, event_method: str, *args, **kwargs):
         logger.error(f"{event_method}.{args}.{kwargs}")
