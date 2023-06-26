@@ -30,6 +30,6 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # PyCharm
-../../../Downloads/discord bot/.idea/
+.idea/
 
 logs/

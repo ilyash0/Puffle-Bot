@@ -1,15 +1,15 @@
+import asyncio
+import disnake
+from disnake.ext.commands import CommandSyncFlags
 from loguru import logger
-
-# from bot.penguin import Penguin
 from bot.data import db
-from bot.handlers import commands
+from bot.core.puffleBot import PuffleBot
 
 
 class Server:
     def __init__(self, config):
         self.server = None
-        self.redis = None
-        self.cache = None
+        self.bot = None
         self.config = config
         self.db = db
         self.peers_by_ip = {}
@@ -24,10 +24,6 @@ class Server:
     async def start(self):
         logger.add("logs/log.log")
 
-        # self.server = await asyncio.start_server(
-        #     self.client_connected, self.config.address, self.config.port
-        # )
-
         await self.db.set_bind(
             "postgresql://{}:{}@{}/{}".format(
                 self.config.database_username,
@@ -37,13 +33,27 @@ class Server:
             )
         )
 
+        # this need for kill server on port
+        self.server = await asyncio.start_server(
+            self.client_connected, self.config.address,
+            self.config.port
+        )
+
         logger.info("Booting discord bot")
+        intents = disnake.Intents.default()
+        intents.message_content = True
+        command_sync_flags = CommandSyncFlags.default()
+        command_sync_flags.sync_commands = True
 
-        logger.info(f"Listening on {self.config.address}:{self.config.port}")
+        self.bot = PuffleBot(command_prefix="!", intents=intents, command_sync_flags=command_sync_flags,
+                             owner_id=527140180696629248)  # test_guilds=[755445822920982548],
+        self.bot.load_cogs()
 
-        async with commands.bot:
-            await commands.bot.start(self.config.token, reconnect=True)
+        try:
+            await self.bot.start(self.config.token)
+        finally:
+            if not self.bot.is_closed():
+                await self.bot.close()
 
-    # async def client_connected(self, reader, writer):
-    #     client_object = self.client_class(self, reader, writer)
-    #     await client_object.run()
+    async def client_connected(self, reader, writer):
+        ...

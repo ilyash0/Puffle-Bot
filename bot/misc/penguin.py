@@ -2,6 +2,8 @@ from loguru import logger
 from bot.data import penguin
 from bot.data.item import PenguinItemCollection
 from bot.data.mail import PenguinPostcard
+from bot.data.penguin import PenguinIntegrations
+from bot.data.plugin import PenguinAttributeCollection
 from bot.data.stamp import PenguinStampCollection
 
 
@@ -34,14 +36,22 @@ class Penguin(penguin.Penguin):
     async def setup(self):
         self.inventory = await PenguinItemCollection.get_collection(self.id)
         self.stamps = await PenguinStampCollection.get_collection(self.id)
+        self.attributes = await PenguinAttributeCollection.get_collection(self.id)
 
-    @property
     def safe_name(self):
-        return self.safe_nickname(self.server.config.lang)
+        return self.safe_nickname()
 
-    @property
     def member(self):
         return int(self.is_member)
+
+    def count_epf_awards(self):
+        result: int = 0
+        AWARD_STAMP_IDS = list(range(801, 807)) + list(range(808, 812)) + list(range(813, 821)) + [822, 823, 8007, 8008]
+
+        for stamp in AWARD_STAMP_IDS:
+            if stamp in self.inventory:
+                result += 1
+        return result
 
     async def add_inventory(self, item, cost=None):
         if item.id in self.inventory:
@@ -53,9 +63,6 @@ class Penguin(penguin.Penguin):
         await self.update(coins=self.coins - cost).apply()
 
         self.logger.info(f'{self.username} added \'{item.name}\' to their clothing inventory')
-
-        self.server.cache.delete(f'pins.{self.id}')
-        self.server.cache.delete(f'awards.{self.id}')
 
         return True
 
@@ -180,7 +187,6 @@ class Penguin(penguin.Penguin):
         await self.stamps.insert(stamp_id=stamp.id)
 
         self.logger.info(f'{self.username} earned stamp \'{stamp.name}\'')
-        self.server.cache.delete(f'stamps.{self.id}')
 
         return True
 
@@ -215,6 +221,15 @@ class Penguin(penguin.Penguin):
     async def add_coins(self, coins):
         await self.update(coins=self.coins + coins).apply()
         return self.coins
+
+    async def set_integration(self, userID, currentStatus=False):
+        await PenguinIntegrations.create(penguin_id=self.id, discord_id=str(userID), current=currentStatus)
+
+    async def set_integration_current_status(self, userID, currentStatus):
+        await (await PenguinIntegrations.get([self.id, str(userID)])).update(current=currentStatus).apply()
+
+    async def delete_integration(self, userID):
+        await (await PenguinIntegrations.get([self.id, str(userID)])).delete()
 
     def __repr__(self):
         if self.id is not None:
