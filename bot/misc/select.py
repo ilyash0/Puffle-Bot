@@ -18,10 +18,10 @@ class SelectPenguins(Select):
 
     async def callback(self, interaction: MessageInteraction):
         if interaction.user.id != self.userID:
-            await interaction.response.send_message(content=f"Ай-ай-ай,не суй пальцы в розетку", ephemeral=True)
+            await interaction.send(content=f"Ай-ай-ай,не суй пальцы в розетку", ephemeral=True)
             return
         if self.disabled:
-            await interaction.response.send_message(content=f"Вы уже сменили аккаунт", ephemeral=True)
+            await interaction.send(content=f"Вы уже сменили аккаунт", ephemeral=True)
             return
         self.disabled = True
 

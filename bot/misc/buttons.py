@@ -27,18 +27,16 @@ class Question(Buttons):
     @disnake.ui.button(label="Да", style=disnake.ButtonStyle.green, custom_id="yes")
     async def yesButton(self, _, inter: disnake.CommandInteraction):
         if inter.user.id != self.userID:
-            await inter.response.send_message(content=f"Это кнопка не для вас", ephemeral=True)
-            return
+            return await inter.send(content=f"Это кнопка не для вас", ephemeral=True)
         await self.disableAllItems()
         await self.function(inter)
 
     @disnake.ui.button(label="Нет", style=disnake.ButtonStyle.red, custom_id="no")
     async def noButton(self, _, inter: disnake.CommandInteraction):
         if inter.user.id != self.userID:
-            await inter.response.send_message(content=f"Это кнопка не для вас", ephemeral=True)
-            return
+            return await inter.send(content=f"Это кнопка не для вас", ephemeral=True)
         await self.disableAllItems()
-        await inter.response.send_message(content=f"Отменено")
+        await inter.send(content=f"Отменено")
 
 
 class Logout(Buttons):
@@ -48,16 +46,14 @@ class Logout(Buttons):
     @disnake.ui.button(label="Отмена", style=disnake.ButtonStyle.gray, custom_id="no")
     async def noButton(self, _, inter: disnake.CommandInteraction):
         if inter.user.id != self.userID:
-            await inter.response.send_message(content=f"Это кнопка не для вас", ephemeral=True)
-            return
+            return await inter.send(content=f"Это кнопка не для вас", ephemeral=True)
         await self.disableAllItems()
-        await inter.response.send_message(content=f"Отменено")
+        await inter.send(content=f"Отменено")
 
     @disnake.ui.button(label="Выйти", style=disnake.ButtonStyle.red, custom_id="yes")
     async def yesButton(self, _, inter: disnake.CommandInteraction):
         if inter.user.id != self.userID:
-            await inter.response.send_message(content=f"Это кнопка не для вас", ephemeral=True)
-            return
+            return await inter.send(content=f"Это кнопка не для вас", ephemeral=True)
         await self.disableAllItems()
         await self.function(inter)
 
@@ -69,8 +65,7 @@ class Continue(Buttons):
     @disnake.ui.button(label="Продолжить", style=disnake.ButtonStyle.blurple, custom_id="continue")
     async def continueButton(self, _, inter: disnake.CommandInteraction):
         if inter.user.id != self.userID:
-            await inter.response.send_message(content=f"Это кнопка не для вас", ephemeral=True)
-            return
+            return await inter.send(content=f"Это кнопка не для вас", ephemeral=True)
         await self.function(inter)
 
 

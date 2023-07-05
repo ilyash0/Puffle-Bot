@@ -11,6 +11,6 @@ class LoginModal(disnake.ui.Modal):
 
         super().__init__(title="Привяжите свои аккаунты", components=components, custom_id="login")
 
-    async def callback(self, interaction: disnake.ModalInteraction):
-        authCode = interaction.text_values["authCodeInput"]
-        await self.function(interaction, authCode)
+    async def callback(self, inter: disnake.ModalInteraction):
+        authCode = inter.text_values["authCodeInput"]
+        await self.function(inter, authCode)

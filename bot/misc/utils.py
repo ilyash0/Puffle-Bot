@@ -5,7 +5,7 @@ from bot.misc.penguin import Penguin
 async def getPenguinFromInter(inter):
     user = await Users.get(inter.user.id)
     if user is None:
-        await inter.response.send_message(
+        await inter.send(
             content=f"Мы не нашли вашего пингвина. Пожалуйста воспользуйтесь командой </login:1099629339110289442>",
             ephemeral=True)
         return

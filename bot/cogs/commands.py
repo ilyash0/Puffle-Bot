@@ -22,7 +22,7 @@ class UserCommands(Cog):
 
     @slash_command(name="ilyash", description=":D")
     async def ilyash(self, inter: ApplicationCommandInteraction):
-        await inter.response.send_message(content=f"Теперь вы пешка иляша!")
+        await inter.send(content=f"Теперь вы пешка иляша!")
 
     @slash_command(name="card", description="Показывает полезную информацию о твоём аккаунте")
     async def card(self, inter: ApplicationCommandInteraction):
@@ -42,13 +42,11 @@ class UserCommands(Cog):
         embed.add_field(name="Марки", value=len(p.stamps) + p.count_epf_awards())
         embed.add_field(name="Возраст пингвина", value=f"{(datetime.now() - p.registration_date).days} дней")
         embed.add_field(name="Сотрудник", value="Да" if p.moderator else "Нет")
-        await inter.response.send_message(embed=embed)
+        await inter.send(embed=embed)
 
     @slash_command(name="login", description="Привязать свой Discord аккаунт к пингвину")
     async def login(self, inter: ApplicationCommandInteraction):
-        view = Login()
-        return await inter.response.send_message(
-            content=f"Перейдите на сайт и пройдите авторизацию", view=view)
+        return await inter.send(content=f"Перейдите на сайт и пройдите авторизацию", view=Login())
 
     @slash_command(name="logout", description="Отвязать свой Discord аккаунт от своего пингвина")
     async def logout(self, inter: ApplicationCommandInteraction):
@@ -61,24 +59,21 @@ class UserCommands(Cog):
 
             if len(penguin_ids) == 0:
                 await user.update(penguin_id=None).apply()
-                return await buttonInter.response.send_message(
-                    content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан.")
+                return await buttonInter.send(content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан.")
 
             if len(penguin_ids) == 1:
                 newCurrentPenguin: Penguin = await Penguin.get(penguin_ids[0][0])
                 await user.update(penguin_id=penguin_ids[0][0]).apply()
-                return await buttonInter.response.send_message(
+                return await buttonInter.send(
                     content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан. "
                             f"Теперь ваш текущий аккаунт `{newCurrentPenguin.safe_name()}`")
 
-            return await buttonInter.response.send_message(
+            return await buttonInter.send(
                 content=f"Ваш аккаунт `{p.safe_name()}` успешно отвязан. "
                         f"Чтобы выбрать текущий аккаунт воспользуйтесь командой </switch:1100480798647398422>")
 
-        view = Logout(inter, run)
-
-        await inter.response.send_message(content=f"Вы уверены, что хотите выйти с аккаунта `{p.safe_name()}`?",
-                                          view=view)
+        await inter.send(content=f"Вы уверены, что хотите выйти с аккаунта `{p.safe_name()}`?",
+                         view=Logout(inter, run))
 
     @slash_command(name="pay", description="Перевести свои монеты другому игроку")
     async def pay(self, inter: ApplicationCommandInteraction,
@@ -91,16 +86,13 @@ class UserCommands(Cog):
         r: Penguin = await Penguin.get(receiverId)
 
         if amount <= 0:
-            return await inter.response.send_message(
-                content='Пожалуйста введите правильное число монет')
+            return await inter.send(content='Пожалуйста введите правильное число монет')
 
         if p.id == r.id:
-            return await inter.response.send_message(
-                content="Вы не можете передать монеты самому себе!")
+            return await inter.send(content="Вы не можете передать монеты самому себе!")
 
         if p.coins < amount:
-            return await inter.response.send_message(
-                content='У вас недостаточно монет для перевода')
+            return await inter.send(content='У вас недостаточно монет для перевода')
 
         await p.update(coins=p.coins - amount).apply()
         await r.update(coins=r.coins + amount).apply()
@@ -111,8 +103,7 @@ class UserCommands(Cog):
                           text=f"Перевёл игроку {r.username} {int(amount)} монет. Через Discord бота", room_id=0,
                           server_id=8000)
 
-        await inter.response.send_message(
-            content=f"Вы успешно передали `{amount}` монет игроку `{receiver}`!")
+        await inter.send(content=f"Вы успешно передали `{amount}` монет игроку `{receiver}`!")
 
     @slash_command(name="switch", description="Сменить текущий аккаунт")
     async def switch(self, inter: ApplicationCommandInteraction):
@@ -122,12 +113,12 @@ class UserCommands(Cog):
             (PenguinIntegrations.discord_id == inter.user.id)).gino.all()
 
         if len(penguin_ids) == 0:
-            return await inter.response.send_message(
+            return await inter.send(
                 content=f"У вас не привязан ни один аккаунт. "
                         f"Это можно исправить с помощью команды </login:1099629339110289442>")
 
         if len(penguin_ids) == 1:
-            return await inter.response.send_message(
+            return await inter.send(
                 ephemeral=True,
                 content=f"У вас привязан только один аккаунт. "
                         f"Вы можете привязать ещё несколько с помощью команды </login:1099629339110289442>")
@@ -138,7 +129,7 @@ class UserCommands(Cog):
 
             await user.update(penguin_id=penguin_id).apply()
 
-            return await selectInter.response.send_message(
+            return await selectInter.send(
                 content=f"Успешно. Теперь ваш текущий аккаунт `{newCurrentPenguin.safe_name()}`")
 
         view = disnake.ui.View()
@@ -147,11 +138,11 @@ class UserCommands(Cog):
         view.add_item(SelectPenguins(penguinsList, run, inter.user.id))
 
         if p is None:
-            return await inter.response.send_message(
+            return await inter.send(
                 content=f"Ваш текущий аккаунт не выбран. Какой аккаунт вы хотите сделать текущим?",
                 view=view)
 
-        return await inter.response.send_message(
+        return await inter.send(
             content=f"Ваш текущий аккаунт: `{p.safe_name()}`. Какой аккаунт вы хотите сделать текущим?",
             view=view)
 
