@@ -30,9 +30,13 @@ if __name__ == '__main__':
                                 default='password',
                                 help='Postgresql database password')
     database_group.add_argument('-dn', '--database-name', action='store',
-                                dest='database_name',
+                                dest='database_name_cp',
                                 default='postgres',
-                                help='Postgresql database name')
+                                help='Postgresql database name for club penguin')
+    database_group.add_argument('-dn2', '--database-name2', action='store',
+                                dest='database_name_pb',
+                                default='pufflebot',
+                                help='Postgresql database name for puffle bot')
 
     args = parser.parse_args()
 

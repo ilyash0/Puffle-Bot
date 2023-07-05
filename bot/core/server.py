@@ -2,7 +2,7 @@ import asyncio
 import disnake
 from disnake.ext.commands import CommandSyncFlags
 from loguru import logger
-from bot.data import db
+from bot.data import db_cp, db_pb
 from bot.core.puffleBot import PuffleBot
 
 
@@ -11,12 +11,11 @@ class Server:
         self.server = None
         self.bot = None
         self.config = config
-        self.db = db
+        self.db_cp = db_cp
+        self.db_pb = db_pb
         self.peers_by_ip = {}
 
         self.attributes = {}
-
-        # self.client_class = Penguin
 
         self.penguins_by_id = {}
         self.penguins_by_username = {}
@@ -24,12 +23,21 @@ class Server:
     async def start(self):
         logger.add("logs/log.log")
 
-        await self.db.set_bind(
+        await self.db_cp.set_bind(
             "postgresql://{}:{}@{}/{}".format(
                 self.config.database_username,
                 self.config.database_password,
                 self.config.database_address,
-                self.config.database_name,
+                self.config.database_name_cp,
+            )
+        )
+
+        await self.db_pb.set_bind(
+            "postgresql://{}:{}@{}/{}".format(
+                self.config.database_username,
+                self.config.database_password,
+                self.config.database_address,
+                self.config.database_name_pb,
             )
         )
 

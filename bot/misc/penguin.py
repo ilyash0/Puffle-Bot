@@ -1,10 +1,9 @@
 from loguru import logger
-from bot.data import penguin
-from bot.data.item import PenguinItemCollection
-from bot.data.mail import PenguinPostcard
-from bot.data.penguin import PenguinIntegrations
-from bot.data.plugin import PenguinAttributeCollection
-from bot.data.stamp import PenguinStampCollection
+from bot.data.clubpenguin import penguin
+from bot.data.clubpenguin.item import PenguinItemCollection
+from bot.data.clubpenguin.mail import PenguinPostcard
+from bot.data.clubpenguin.plugin import PenguinAttributeCollection
+from bot.data.clubpenguin.stamp import PenguinStampCollection
 
 
 class Penguin(penguin.Penguin):
@@ -221,15 +220,6 @@ class Penguin(penguin.Penguin):
     async def add_coins(self, coins):
         await self.update(coins=self.coins + coins).apply()
         return self.coins
-
-    async def set_integration(self, userID, currentStatus=False):
-        await PenguinIntegrations.create(penguin_id=self.id, discord_id=str(userID), current=currentStatus)
-
-    async def set_integration_current_status(self, userID, currentStatus):
-        await (await PenguinIntegrations.get([self.id, str(userID)])).update(current=currentStatus).apply()
-
-    async def delete_integration(self, userID):
-        await (await PenguinIntegrations.get([self.id, str(userID)])).delete()
 
     def __repr__(self):
         if self.id is not None:

@@ -2,10 +2,10 @@ import disnake
 
 
 class Buttons(disnake.ui.View):
-    def __init__(self, inter, function, timeout: int = 900):
+    def __init__(self, inter, function, timeout=900):
         super().__init__(timeout=timeout)
         self.inter = inter
-        self.userID = inter.user.id
+        self.userID = inter.user.id if inter is not None else None
         self.function = function
 
     async def disableAllItems(self):
@@ -69,3 +69,12 @@ class Continue(Buttons):
             await inter.response.send_message(content=f"Это кнопка не для вас", ephemeral=True)
             return
         await self.function(inter)
+
+
+class Login(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+
+    @disnake.ui.button(label="Войти", url="https://cpps.app/discord/login")
+    async def loginButton(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        ...
