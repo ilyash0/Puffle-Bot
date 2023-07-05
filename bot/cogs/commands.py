@@ -18,7 +18,7 @@ class UserCommands(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        logger.info("Users commands ready")
+        logger.info(f"Loads {len(self.get_slash_commands())} public users commands")
 
     @slash_command(name="ilyash", description=":D")
     async def ilyash(self, inter: ApplicationCommandInteraction):
