@@ -1,5 +1,4 @@
 from datetime import datetime
-from random import sample
 
 from disnake import ApplicationCommandInteraction
 from loguru import logger
@@ -128,7 +127,8 @@ class UserCommands(Cog):
                         f"Это можно исправить с помощью команды </login:1099629339110289442>")
 
         if len(penguin_ids) == 1:
-            return await inter.response.send_message(ephemeral=True,
+            return await inter.response.send_message(
+                ephemeral=True,
                 content=f"У вас привязан только один аккаунт. "
                         f"Вы можете привязать ещё несколько с помощью команды </login:1099629339110289442>")
 
