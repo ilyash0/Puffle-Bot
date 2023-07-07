@@ -3,7 +3,7 @@ from io import BytesIO
 from requests import get
 from disnake import Embed
 
-# ids
+# Ids
 cppsapp_server_id = 755445822920982548
 test_server_id = 830884170934124585
 rules_webhook_id = 1126642813543657525
@@ -26,6 +26,10 @@ guild_ids = [cppsapp_server_id, test_server_id]
 
 # Bytearrays
 avatarImageBytearray = BytesIO(get(avatarImageLink).content).getvalue()
+
+# Bot commands
+loginCommand = "</login:1099629339110289442>"
+switchCommand = "</switch:1100480798647398422>"
 
 # Custom emojis
 emojiLaughing = "<:laughing:788392697336954920>"
