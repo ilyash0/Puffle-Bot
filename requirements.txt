@@ -3,3 +3,6 @@ gino~=1.0.1
 disnake==2.9.0
 loguru~=0.7.0
 requests==2.31.0
+
+bs4~=0.0.1
+beautifulsoup4~=4.12.2

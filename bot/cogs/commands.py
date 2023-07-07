@@ -1,12 +1,16 @@
+import ast
 from datetime import datetime
 
+from bs4 import BeautifulSoup
 from disnake import ApplicationCommandInteraction
 from loguru import logger
 import disnake
 from disnake.ext.commands import Cog, Param, slash_command
+from requests import Session
 
 from bot.data import db_pb
 from bot.data.clubpenguin.moderator import Logs
+from bot.misc.constants import online_url, headers
 from bot.misc.penguin import Penguin
 from bot.data.pufflebot.users import Users, PenguinIntegrations
 from bot.misc.buttons import Logout, Login
@@ -145,6 +149,16 @@ class UserCommands(Cog):
         return await inter.send(
             content=f"Ваш текущий аккаунт: `{p.safe_name()}`. Какой аккаунт вы хотите сделать текущим?",
             view=view)
+
+    @slash_command(name="online", description="Показывает количество игроков которые сейчас онлайн")
+    async def online(self, inter: ApplicationCommandInteraction):
+        with Session() as s:
+            s.headers.update(headers)
+            response = s.get(online_url)
+            soup = BeautifulSoup(response.text, "html.parser")
+
+        online: int = ast.literal_eval(soup.text)[0]['3104']
+        await inter.send(content=f"В нашей игре сейчас `{online}` человек/а онлайн")
 
 
 def setup(bot):

@@ -2,19 +2,24 @@ from io import BytesIO
 
 from requests import get
 from disnake import Embed
-     
+
 # ids
 cppsapp_server_id = 755445822920982548
 test_server_id = 830884170934124585
-rules_webhook_id = 1126228044084949083
-rules_message_id = 1126228045854937178
-about_message_id = 1126228166961287228
+rules_webhook_id = 1126642813543657525
+rules_message_id = 1126642815544344628
+about_message_id = 1126642785219530782
 
 # Links
 avatarImageLink = "https://sun9-53.userapi.com/impg/u2ZUQnEo_eY4SgbIGIWy860tArL6mIeeObol1w/WoMi6hnW2QE.jpg?size=1536x1536&quality=96&sign=be7a5cade4cbb255a120f937271f327c"
 enFullRulesLink = "https://docs.google.com/document/d/1gqgdoT1BeAUGahlAr3zrPqWmr3yDh0irG3sRVqMNt1c/"
 ruFullRulesLink = "https://wiki.cpps.app/index.php?title=Правила"
 placeholderImageLink = "https://cdn.discordapp.com/attachments/937328189859057674/944647455109156884/1.png"
+online_url = "https://play.cpps.app/ru/online"
+
+# Dicts
+headers = {
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"}
 
 # Arrays
 guild_ids = [cppsapp_server_id, test_server_id]
