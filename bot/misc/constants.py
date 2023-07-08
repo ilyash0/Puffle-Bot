@@ -40,6 +40,7 @@ emojiVk = "<:VK:1121760227994382459>"
 emojiYt = "<:yt:1121764618239496263>"
 emojiGameFavicon = "<:favicon:1121758719634571405>"
 emojiWikiFavicon = "<:wiki:1121764147307237447>"
+emojiCuteSad = "<:cuteSad:794874872835735553>"
 
 # ========== EMBEDS ==========
 
