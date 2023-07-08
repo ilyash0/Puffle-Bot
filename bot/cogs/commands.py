@@ -137,7 +137,7 @@ class UserCommands(Cog):
             response = s.get(online_url)
             soup = BeautifulSoup(response.text, "html.parser")
 
-        online: int = ast.literal_eval(soup.text)[0]['3104']
+        online = int(ast.literal_eval(soup.text)[0]['3104'])
         if online == 0:
             textMessage = f"В нашей игре сейчас никого нет {emojiCuteSad}"
         else:
