@@ -15,7 +15,7 @@ from bot.misc.penguin import Penguin
 from bot.data.pufflebot.users import Users, PenguinIntegrations
 from bot.misc.buttons import Logout, Login
 from bot.misc.select import SelectPenguins
-from bot.misc.utils import getPenguinFromInter, getPenguinOrNoneFromId
+from bot.misc.utils import getPenguinFromInter, getPenguinOrNoneFromId, transferCoinsAndReturnStatus
 
 
 class UserCommands(Cog):
@@ -79,25 +79,7 @@ class UserCommands(Cog):
         receiverId = int(receiverId[0])
         r: Penguin = await Penguin.get(receiverId)
 
-        if amount <= 0:
-            return await inter.send('Пожалуйста введите правильное число монет')
-
-        if p.id == r.id:
-            return await inter.send("Вы не можете передать монеты самому себе!")
-
-        if p.coins < amount:
-            return await inter.send('У вас недостаточно монет для перевода')
-
-        await p.update(coins=p.coins - amount).apply()
-        await r.update(coins=r.coins + amount).apply()
-        await Logs.create(penguin_id=int(r.id), type=4,
-                          text=f"Получил от {p.username} {int(amount)} монет. Через Discord бота", room_id=0,
-                          server_id=8000)
-        await Logs.create(penguin_id=int(p.id), type=4,
-                          text=f"Перевёл игроку {r.username} {int(amount)} монет. Через Discord бота", room_id=0,
-                          server_id=8000)
-
-        await inter.send(f"Вы успешно передали `{amount}` монет игроку `{receiver}`!")
+        await inter.send((await transferCoinsAndReturnStatus(p, r, amount)))
 
     @slash_command(name="switch", description="Сменить текущий аккаунт")
     async def switch(self, inter: ApplicationCommandInteraction):
