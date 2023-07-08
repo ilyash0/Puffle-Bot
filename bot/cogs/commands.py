@@ -10,7 +10,7 @@ from requests import Session
 
 from bot.data import db_pb
 from bot.data.clubpenguin.moderator import Logs
-from bot.misc.constants import online_url, headers, loginCommand
+from bot.misc.constants import online_url, headers, loginCommand, emojiCuteSad
 from bot.misc.penguin import Penguin
 from bot.data.pufflebot.users import Users, PenguinIntegrations
 from bot.misc.buttons import Logout, Login
@@ -138,7 +138,11 @@ class UserCommands(Cog):
             soup = BeautifulSoup(response.text, "html.parser")
 
         online: int = ast.literal_eval(soup.text)[0]['3104']
-        await inter.send(f"В нашей игре сейчас `{online}` человек/а онлайн")
+        if online == 0:
+            textMessage = f"В нашей игре сейчас никого нет {emojiCuteSad}"
+        else:
+            textMessage = f"В нашей игре сейчас `{online}` человек/а онлайн"
+        await inter.send(textMessage)
 
 
 def setup(bot):
