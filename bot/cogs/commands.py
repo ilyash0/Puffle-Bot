@@ -9,7 +9,6 @@ from disnake.ext.commands import Cog, Param, slash_command
 from requests import Session
 
 from bot.data import db_pb
-from bot.data.clubpenguin.moderator import Logs
 from bot.misc.constants import online_url, headers, loginCommand, emojiCuteSad
 from bot.misc.penguin import Penguin
 from bot.data.pufflebot.users import Users, PenguinIntegrations
@@ -22,7 +21,7 @@ class UserCommands(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        logger.info(f"Loads {len(self.get_slash_commands())} public users commands")
+        logger.info(f"Loads {len(self.get_application_commands())} public users app commands")
 
     @slash_command(name="ilyash", description=":D")
     async def ilyash(self, inter: ApplicationCommandInteraction):
@@ -79,7 +78,11 @@ class UserCommands(Cog):
         receiverId = int(receiverId[0])
         r: Penguin = await Penguin.get(receiverId)
 
-        await inter.send((await transferCoinsAndReturnStatus(p, r, amount)))
+        statusDict = await transferCoinsAndReturnStatus(p, r, amount)
+        if statusDict["code"] == 400:
+            await inter.send(statusDict["message"], ephemeral=True)
+
+        await inter.send(statusDict["message"])
 
     @slash_command(name="switch", description="Сменить текущий аккаунт")
     async def switch(self, inter: ApplicationCommandInteraction):
