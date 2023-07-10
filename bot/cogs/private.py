@@ -4,8 +4,13 @@ from disnake.ext.commands import Cog, slash_command
 from loguru import logger
 
 from bot.misc.buttons import Rules
-from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedAboutImage, embedAbout, guild_ids, \
-    avatarImageBytearray
+from bot.misc.constants import (
+    embedRuleImageRu,
+    embedRuleRu,
+    embedAboutImage,
+    embedAbout,
+    guild_ids,
+    avatarImageBytearray)
 from bot.misc.select import About
 
 
@@ -13,7 +18,7 @@ class PrivateCommands(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        logger.info(f"Loads {len(self.get_slash_commands())} private commands")
+        logger.info(f"Loaded {len(self.get_application_commands())} private app commands")
 
     @slash_command(name="transfer", description="Transfer images from the current channel to the forum",
                    guild_ids=guild_ids)

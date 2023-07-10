@@ -54,32 +54,33 @@ async def getPenguinOrNoneFromId(user_id: int):
     return p
 
 
-async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amount: int) -> str:
+async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amount: int) -> dict:
     """
-    Transfer coins between two penguins and return a status message.
+    Transfer coins between two penguins and return a status dictionary.
 
     Parameters
     ----------
     sender: Penguin
-        The penguin sending the coins.
+        The penguin object representing the sender of the coins.
     receiver: Penguin
-        The penguin receiving the coins.
+        The penguin object representing the receiver of the coins.
     amount: int
         The number of coins to transfer.
 
     Returns
     ----------
-    str
-        A status message indicating whether the transfer was successful or not.
+    dict
+        A dictionary containing the status code and message.
     """
+    # TODO: Make a notification system
     if amount <= 0:
-        return "Пожалуйста введите правильное число монет"
+        return {"code": 400, "message": "Пожалуйста введите правильное число монет"}
 
-    if sender == receiver:
-        return "Вы не можете передать монеты самому себе!"
+    if sender.id == receiver.id:
+        return {"code": 400, "message": "Вы не можете передать монеты самому себе!"}
 
     if sender.coins < amount:
-        return "У вас недостаточно монет для перевода"
+        return {"code": 400, "message": "У вас недостаточно монет для перевода"}
 
     await sender.update(coins=sender.coins - amount).apply()
     await receiver.update(coins=receiver.coins + amount).apply()
@@ -90,4 +91,4 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
                       text=f"Перевёл игроку {receiver.username} {int(amount)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
 
-    return f"Вы успешно передали `{amount}` монет игроку `{receiver.safe_name()}`!"
+    return {"code": 200, "message": f"Вы успешно передали `{amount}` монет игроку `{receiver.safe_name()}`!"}
