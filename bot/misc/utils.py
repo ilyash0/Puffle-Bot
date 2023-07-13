@@ -2,6 +2,7 @@ from disnake import ApplicationCommandInteraction
 
 from bot.data.clubpenguin.moderator import Logs
 from bot.data.pufflebot.users import Users
+from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import loginCommand
 from bot.misc.penguin import Penguin
 
@@ -54,7 +55,7 @@ async def getPenguinOrNoneFromUserId(user_id: int):
     return p
 
 
-async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amount: int) -> dict:
+async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amount: int, message: str = None) -> dict:
     """
     Transfer coins between two penguins and return a status dictionary.
 
@@ -66,13 +67,14 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
         The penguin object representing the receiver of the coins.
     amount: int
         The number of coins to transfer.
+    message : str, optional
+        An optional message to include with the transfer.
 
     Returns
     ----------
     dict
         A dictionary containing the status code and message.
     """
-    # TODO: Make a notification system
     if amount <= 0:
         return {"code": 400, "message": "Пожалуйста введите правильное число монет"}
 
@@ -90,5 +92,6 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
     await Logs.create(penguin_id=int(sender.id), type=4,
                       text=f"Перевёл игроку {receiver.username} {int(amount)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
+    await notifyCoinsReceive(sender, receiver, amount, message)
 
     return {"code": 200, "message": f"Вы успешно передали `{amount}` монет игроку `{receiver.safe_name()}`!"}

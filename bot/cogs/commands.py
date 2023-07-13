@@ -52,15 +52,15 @@ class UserCommands(Cog):
 
     @slash_command(name="pay", description="Перевести свои монеты другому игроку")
     async def pay(self, inter: ApplicationCommandInteraction,
-                  receiver: str = Param(description='Получатель (его ник в игре)'),
-                  amount: int = Param(description='Количество монет')):
+                  receiver: disnake.Member = Param(description='Получатель'),
+                  amount: int = Param(description='Количество монет'),
+                  message: str = Param(default=None, description='Сообщение получателю')):
         p: Penguin = await getPenguinFromInter(inter)
+        r: Penguin = await getPenguinOrNoneFromUserId(receiver.id)
+        if r is None:
+            return await inter.send(f"Мы не нашли пингвина у указанного вами пользователя.", ephemeral=True)
 
-        receiverId = await Penguin.select('id').where(Penguin.username == receiver.lower()).gino.first()
-        receiverId = int(receiverId[0])
-        r: Penguin = await Penguin.get(receiverId)
-
-        statusDict = await transferCoinsAndReturnStatus(p, r, amount)
+        statusDict = await transferCoinsAndReturnStatus(p, r, amount, message)
         if statusDict["code"] == 400:
             await inter.send(statusDict["message"], ephemeral=True)
 
