@@ -4,6 +4,8 @@ from disnake.ext.commands import CommandSyncFlags
 from loguru import logger
 from bot.data import db_cp, db_pb
 from bot.core.puffleBot import PuffleBot
+from bot.handlers import DummyEventListenerManager
+import bot.handlers
 
 
 class Server:
@@ -13,6 +15,7 @@ class Server:
         self.config = config
         self.db_cp = db_cp
         self.db_pb = db_pb
+        self.dummy_event_listeners = DummyEventListenerManager(self)
 
     async def start(self):
         logger.add("logs/log.log")
@@ -50,6 +53,9 @@ class Server:
         self.bot = PuffleBot(intents=intents, command_sync_flags=command_sync_flags,
                              owner_id=527140180696629248)  # test_guilds=[755445822920982548],
         self.bot.load_cogs()
+
+        await self.dummy_event_listeners.setup(bot.handlers)
+        await self.dummy_event_listeners.fire('boot', self)
 
         try:
             await self.bot.start(self.config.token)

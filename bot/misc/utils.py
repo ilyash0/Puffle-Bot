@@ -32,7 +32,7 @@ async def getPenguinFromInter(inter: ApplicationCommandInteraction):
     return p
 
 
-async def getPenguinOrNoneFromId(user_id: int):
+async def getPenguinOrNoneFromUserId(user_id: int):
     """
     Get a penguin object from a user ID.
 

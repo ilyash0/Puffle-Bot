@@ -1,9 +1,11 @@
 import disnake
+from disnake import Embed
 
 from bot.data.pufflebot.users import PenguinIntegrations
 from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedRuleImageEn, embedRuleEn, embedRolesRu, \
     embedRolesEn, enFullRulesLink, ruFullRulesLink, switchCommand
 from bot.misc.penguin import Penguin
+from bot.misc.utils import getPenguinFromInter, transferCoinsAndReturnStatus
 
 
 class Buttons(disnake.ui.View):
@@ -75,6 +77,55 @@ class Continue(Buttons):
     @disnake.ui.button(label="Продолжить", style=disnake.ButtonStyle.blurple, custom_id="continue")
     async def continueButton(self, _, inter: disnake.CommandInteraction):
         ...
+
+
+class FundraisingButtons(disnake.ui.View):
+    # TODO: Make the "other amount" button
+    def __init__(self, fundraising: Fundraising, message: disnake.Message, receiver: Penguin, backers: int):
+        super().__init__(timeout=None)
+        self.fundraising = fundraising
+        self.message = message
+        self.receiver = receiver
+        self.raised = fundraising.raised
+        self.goal = fundraising.goal
+        self.backers = backers
+
+    async def donate(self, inter: disnake.CommandInteraction, coins: int):
+        p: Penguin = await getPenguinFromInter(inter)
+        statusDict = await transferCoinsAndReturnStatus(p, self.receiver, int(coins))
+        if statusDict["code"] == 400:
+            return await inter.send(statusDict["message"], ephemeral=True)
+
+        self.raised += int(coins)
+        embed = Embed(color=0x2B2D31, title=self.message.embeds[0].title)
+        embed.add_field("Собрано монет", f"{self.raised}{f' из {self.goal}' if self.goal else ''}")
+        embed.set_footer(text=f"Спонсоры: {self.backers + 1}")
+
+        if not await FundraisingBackers.get([self.message.id, p.id]):
+            self.backers += 1
+            await FundraisingBackers.create(message_id=self.message.id, receiver_penguin_id=self.receiver.id,
+                                            backer_penguin_id=p.id)
+
+        embed.set_footer(text=f"Спонсоры: {self.backers}")
+
+        await self.message.edit(embed=embed)
+        await self.fundraising.update(raised=self.raised).apply()
+        await inter.send(statusDict["message"], ephemeral=True)
+
+    @disnake.ui.button(label="100", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
+                       custom_id="100")
+    async def coins100Button(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        await self.donate(inter, int(button.label))
+
+    @disnake.ui.button(label="500", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
+                       custom_id="500")
+    async def coins500Button(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        await self.donate(inter, int(button.label))
+
+    @disnake.ui.button(label="1000", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
+                       custom_id="1000")
+    async def coins1000Button(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        await self.donate(inter, int(button.label))
 
 
 class Login(disnake.ui.View):

@@ -2,12 +2,12 @@ import os
 
 import disnake
 from disnake import Webhook, Game
-from disnake.ext.commands import InteractionBot, MissingPermissions
+from disnake.ext.commands import InteractionBot
 from loguru import logger
 import bot.cogs
-from bot.misc.buttons import Rules
+from bot.handlers.buttons import Rules
 from bot.misc.constants import rules_message_id, about_message_id, rules_webhook_id
-from bot.misc.select import About
+from bot.handlers.select import About
 
 
 class PuffleBot(InteractionBot):
@@ -31,16 +31,10 @@ class PuffleBot(InteractionBot):
             rules_webhook: Webhook = await self.fetch_webhook(rules_webhook_id)
             rules_message = await rules_webhook.fetch_message(rules_message_id)
             self.add_view(Rules(rules_message), message_id=rules_message_id)
+
         if about_message_id is not None:
             view = disnake.ui.View(timeout=None)
             view.add_item(About())
             self.add_view(view, message_id=about_message_id)
 
-    async def on_error(self, event_method: str, *args, **kwargs):
-        logger.error(f"{event_method}.{args}.{kwargs}")
 
-    async def on_slash_command_error(self, inter, exception):
-        logger.error(exception)
-
-        if isinstance(exception, MissingPermissions):
-            await inter.response.send(f"У вас недостаточно прав для выполнения данной команды!", ephemeral=True)

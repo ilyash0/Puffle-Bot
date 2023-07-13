@@ -3,7 +3,7 @@ from disnake import ApplicationCommandInteraction, AllowedMentions, Webhook
 from disnake.ext.commands import Cog, slash_command
 from loguru import logger
 
-from bot.misc.buttons import Rules
+from bot.handlers.buttons import Rules
 from bot.misc.constants import (
     embedRuleImageRu,
     embedRuleRu,
@@ -11,7 +11,7 @@ from bot.misc.constants import (
     embedAbout,
     guild_ids,
     avatarImageBytearray)
-from bot.misc.select import About
+from bot.handlers.select import About
 
 
 class PrivateCommands(Cog):
