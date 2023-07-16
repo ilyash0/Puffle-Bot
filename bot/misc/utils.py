@@ -1,13 +1,14 @@
 from disnake import ApplicationCommandInteraction
 
 from bot.data.clubpenguin.moderator import Logs
-from bot.data.pufflebot.users import Users
-from bot.handlers.notification import notifyCoinsReceive
+from bot.data.pufflebot.user import User
 from bot.misc.constants import loginCommand
 from bot.misc.penguin import Penguin
 
+penguins_by_id = {}
 
-async def getPenguinFromInter(inter: ApplicationCommandInteraction):
+
+async def getPenguinFromInter(inter: ApplicationCommandInteraction, *, cache=True) -> Penguin:
     """
     Retrieves a penguin object from the database based on the discord user ID.
     **If the penguin is not found, the function sends a response to the interaction**
@@ -16,24 +17,30 @@ async def getPenguinFromInter(inter: ApplicationCommandInteraction):
     ----------
     inter: ApplicationCommandInteraction
         The interaction object representing the user's command.
+    cache : bool, optional
+        Whether to cache the penguin object, by default True
 
     Returns
     ----------
     Penguin
         The penguin object retrieved from the database.
     """
-    user = await Users.get(inter.user.id)
+    user = await User.get(inter.user.id)
     if user is None:
         await inter.send(
             f"Мы не нашли вашего пингвина. Пожалуйста воспользуйтесь командой {loginCommand}",
             ephemeral=True)
         return
+    if cache and user.penguin_id in penguins_by_id:
+        return penguins_by_id[user.penguin_id]
+
     p = await Penguin.get(user.penguin_id)
     await p.setup()
+    penguins_by_id[user.penguin_id] = p
     return p
 
 
-async def getPenguinOrNoneFromUserId(user_id: int):
+async def getPenguinOrNoneFromUserId(user_id: int, *, cache=True) -> Penguin:
     """
     Get a penguin object from a user ID.
 
@@ -41,21 +48,27 @@ async def getPenguinOrNoneFromUserId(user_id: int):
     ----------
     user_id: int
         The ID of the discord user to get the penguin object for.
+    cache : bool, optional
+        Whether to cache the penguin object, by default True
 
     Returns
     -------
     Optional[Penguin]
         The penguin object, or `None` if the user is not found.
     """
-    user = await Users.get(user_id)
+    user = await User.get(user_id)
     if user is None:
         return None
+    if cache and user.penguin_id in penguins_by_id:
+        return penguins_by_id[user.penguin_id]
+
     p = await Penguin.get(user.penguin_id)
     await p.setup()
+    penguins_by_id[user.penguin_id] = p
     return p
 
 
-async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amount: int, message: str = None) -> dict:
+async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amount: int) -> dict:
     """
     Transfer coins between two penguins and return a status dictionary.
 
@@ -67,8 +80,6 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
         The penguin object representing the receiver of the coins.
     amount: int
         The number of coins to transfer.
-    message : str, optional
-        An optional message to include with the transfer.
 
     Returns
     ----------
@@ -92,6 +103,5 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
     await Logs.create(penguin_id=int(sender.id), type=4,
                       text=f"Перевёл игроку {receiver.username} {int(amount)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
-    await notifyCoinsReceive(sender, receiver, amount, message)
 
     return {"code": 200, "message": f"Вы успешно передали `{amount}` монет игроку `{receiver.safe_name()}`!"}
