@@ -1,9 +1,10 @@
 import disnake
 from disnake import Embed
 
-from bot.data.pufflebot.users import PenguinIntegrations
+from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
+from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedRuleImageEn, embedRuleEn, embedRolesRu, \
-    embedRolesEn, enFullRulesLink, ruFullRulesLink, switchCommand
+    embedRolesEn, enFullRulesLink, ruFullRulesLink
 from bot.misc.penguin import Penguin
 from bot.misc.utils import getPenguinFromInter, transferCoinsAndReturnStatus
 
@@ -22,63 +23,6 @@ class Buttons(disnake.ui.View):
         await self.disableAllItems()
 
 
-class Question(Buttons):
-    def __init__(self, inter, function):
-        super().__init__(inter, function)
-
-    @disnake.ui.button(label="Да", style=disnake.ButtonStyle.green, custom_id="yes")
-    async def yesButton(self, _, inter: disnake.CommandInteraction):
-        ...
-
-    @disnake.ui.button(label="Нет", style=disnake.ButtonStyle.red, custom_id="no")
-    async def noButton(self, _, inter: disnake.CommandInteraction):
-        ...
-
-
-class Logout(Buttons):
-    def __init__(self, inter: disnake.CommandInteraction, p, user, penguin_ids):
-        super().__init__(inter, timeout=None)
-        self.p = p
-        self.user = user
-        self.penguin_ids = penguin_ids
-
-    async def on_timeout(self):
-        ...
-
-    @disnake.ui.button(label="Отмена", style=disnake.ButtonStyle.gray, custom_id="cancel")
-    async def cancelButton(self, _, inter: disnake.CommandInteraction):
-        await self.disableAllItems()
-        await inter.send(f"Отменено", ephemeral=True)
-
-    @disnake.ui.button(label="Выйти", style=disnake.ButtonStyle.red, custom_id="logout")
-    async def logoutButton(self, _, inter: disnake.CommandInteraction):
-        await self.disableAllItems()
-        await PenguinIntegrations.delete.where(PenguinIntegrations.penguin_id == self.p.id).gino.status()
-        if len(self.penguin_ids) == 1:
-            await self.user.update(penguin_id=None).apply()
-            return await inter.send(f"Ваш аккаунт `{self.p.safe_name()}` успешно отвязан.", ephemeral=True)
-
-        if len(self.penguin_ids) == 2:
-            newCurrentPenguin: Penguin = await Penguin.get(self.penguin_ids[0][0])
-            await self.user.update(penguin_id=self.penguin_ids[0][0]).apply()
-            return await inter.send(
-                f"Ваш аккаунт `{self.p.safe_name()}` успешно отвязан. "
-                f"Сейчас ваш текущий аккаунт `{newCurrentPenguin.safe_name()}`", ephemeral=True)
-
-        return await inter.send(
-            f"Ваш аккаунт `{self.p.safe_name()}` успешно отвязан. "
-            f"Чтобы выбрать текущий аккаунт воспользуйтесь командой {switchCommand}", ephemeral=True)
-
-
-class Continue(Buttons):
-    def __init__(self, inter: disnake.CommandInteraction, function):
-        super().__init__(inter, function)
-
-    @disnake.ui.button(label="Продолжить", style=disnake.ButtonStyle.blurple, custom_id="continue")
-    async def continueButton(self, _, inter: disnake.CommandInteraction):
-        ...
-
-
 class FundraisingButtons(disnake.ui.View):
     # TODO: Make the "other amount" button
     def __init__(self, fundraising: Fundraising, message: disnake.Message, receiver: Penguin, backers: int):
@@ -93,8 +37,9 @@ class FundraisingButtons(disnake.ui.View):
     async def donate(self, inter: disnake.CommandInteraction, coins: int):
         p: Penguin = await getPenguinFromInter(inter)
         statusDict = await transferCoinsAndReturnStatus(p, self.receiver, int(coins))
+        await inter.send(statusDict["message"], ephemeral=True)
         if statusDict["code"] == 400:
-            return await inter.send(statusDict["message"], ephemeral=True)
+            return
 
         self.raised += int(coins)
         embed = Embed(color=0x2B2D31, title=self.message.embeds[0].title)
@@ -110,7 +55,7 @@ class FundraisingButtons(disnake.ui.View):
 
         await self.message.edit(embed=embed)
         await self.fundraising.update(raised=self.raised).apply()
-        await inter.send(statusDict["message"], ephemeral=True)
+        await notifyCoinsReceive(p, self.receiver, int(coins))
 
     @disnake.ui.button(label="100", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
                        custom_id="100")
@@ -126,15 +71,6 @@ class FundraisingButtons(disnake.ui.View):
                        custom_id="1000")
     async def coins1000Button(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         await self.donate(inter, int(button.label))
-
-
-class Login(disnake.ui.View):
-    def __init__(self):
-        super().__init__()
-
-    @disnake.ui.button(label="Войти", url="https://cpps.app/discord/login")
-    async def loginButton(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
-        ...
 
 
 class Rules(disnake.ui.View):
