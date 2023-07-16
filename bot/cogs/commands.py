@@ -8,6 +8,7 @@ import disnake
 from disnake.ext.commands import Cog, Param, slash_command
 from requests import Session
 
+from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import online_url, headers, emojiCuteSad
 from bot.misc.penguin import Penguin
 from bot.misc.utils import getPenguinFromInter, getPenguinOrNoneFromUserId, transferCoinsAndReturnStatus
@@ -52,19 +53,39 @@ class UserCommands(Cog):
 
     @slash_command(name="pay", description="Перевести свои монеты другому игроку")
     async def pay(self, inter: ApplicationCommandInteraction,
-                  receiver: disnake.Member = Param(description='Получатель'),
+                  receiver: str = Param(description='Получатель (его ник в игре)'),
                   amount: int = Param(description='Количество монет'),
                   message: str = Param(default=None, description='Сообщение получателю')):
+        p: Penguin = await getPenguinFromInter(inter)
+        receiverId = await Penguin.select('id').where(Penguin.username == receiver.lower()).gino.first()
+        r: Penguin = await Penguin.get(int(receiverId[0]))
+
+        if r is None:
+            return await inter.send(f"Мы не нашли указанного пингвина.", ephemeral=True)
+
+        statusDict = await transferCoinsAndReturnStatus(p, r, amount)
+        if statusDict["code"] == 400:
+            return await inter.send(statusDict["message"], ephemeral=True)
+
+        await inter.send(statusDict["message"])
+        await notifyCoinsReceive(p, r, amount, message)
+
+    @slash_command(name="pay2", description="Перевести свои монеты другому пользователю")
+    async def pay2(self, inter: ApplicationCommandInteraction,
+                   receiver: disnake.User = Param(description='Получатель'),
+                   amount: int = Param(description='Количество монет'),
+                   message: str = Param(default=None, description='Сообщение получателю')):
         p: Penguin = await getPenguinFromInter(inter)
         r: Penguin = await getPenguinOrNoneFromUserId(receiver.id)
         if r is None:
             return await inter.send(f"Мы не нашли пингвина у указанного вами пользователя.", ephemeral=True)
 
-        statusDict = await transferCoinsAndReturnStatus(p, r, amount, message)
+        statusDict = await transferCoinsAndReturnStatus(p, r, amount)
         if statusDict["code"] == 400:
-            await inter.send(statusDict["message"], ephemeral=True)
+            return await inter.send(statusDict["message"], ephemeral=True)
 
         await inter.send(statusDict["message"])
+        await notifyCoinsReceive(p, r, amount, message)
 
     @slash_command(name="online", description="Показывает количество игроков которые сейчас онлайн")
     async def online(self, inter: ApplicationCommandInteraction):
