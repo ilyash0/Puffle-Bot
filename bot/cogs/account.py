@@ -63,6 +63,14 @@ class AccountManagementCommands(Cog):
             f"Ваш текущий аккаунт: `{p.safe_name()}`. Какой аккаунт вы хотите сделать текущим?",
             view=view, ephemeral=True)
 
+    @slash_command(name="settings", description="Настройки пользователя бота")
+    async def settings(self, inter: ApplicationCommandInteraction):
+        p: Penguin = await getPenguinFromInter(inter)
+        user: User = await User.get(inter.user.id)
+
+        await inter.send("Можете изменить свои настройки здесь.\n# Уведомления", view=Settings(inter, user),
+                         ephemeral=True)
+
 
 class Login(disnake.ui.View):
     def __init__(self):
@@ -106,6 +114,49 @@ class Logout(Buttons):
         return await inter.send(
             f"Ваш аккаунт `{self.p.safe_name()}` успешно отвязан. "
             f"Чтобы выбрать текущий аккаунт воспользуйтесь командой {switchCommand}", ephemeral=True)
+
+
+class Settings(disnake.ui.View):
+    def __init__(self, original_inter, user):
+        super().__init__()
+        self.original_inter = original_inter
+        self.user: User = user
+
+    @disnake.ui.button(label="Все", style=disnake.ButtonStyle.green, custom_id="allNotify")
+    async def allNotify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        await inter.response.defer()
+        if self.user.enabled_notify:
+            button.style = disnake.ButtonStyle.gray
+            self.children[1].disabled = True
+            self.children[2].disabled = True
+        else:
+            button.style = disnake.ButtonStyle.green
+            self.children[1].disabled = False
+            self.children[2].disabled = False
+        self.user.enabled_notify = not self.user.enabled_notify
+        await self.original_inter.edit_original_response(view=self)
+
+    @disnake.ui.button(label="О пополнении баланса", style=disnake.ButtonStyle.green,
+                       custom_id="coinsNotify")
+    async def coinsNotify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        await inter.response.defer()
+        if self.user.enabled_coins_notify:
+            button.style = disnake.ButtonStyle.gray
+        else:
+            button.style = disnake.ButtonStyle.green
+        self.user.enabled_coins_notify = not self.user.enabled_coins_notify
+        await self.original_inter.edit_original_response(view=self)
+
+    @disnake.ui.button(label="Об окончании подписки", style=disnake.ButtonStyle.green,
+                       custom_id="membershipNotify")
+    async def membershipNotify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        await inter.response.defer()
+        if self.user.enabled_membership_notify:
+            button.style = disnake.ButtonStyle.gray
+        else:
+            button.style = disnake.ButtonStyle.green
+        self.user.enabled_membership_notify = not self.user.enabled_membership_notify
+        await self.original_inter.edit_original_response(view=self)
 
 
 def setup(bot):

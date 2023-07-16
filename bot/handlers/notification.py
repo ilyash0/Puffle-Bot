@@ -38,6 +38,9 @@ async def notifyCoinsReceive(senderPenguin: Penguin, receiverPenguin: Penguin, c
     receiver = await bot.fetch_user(int(receiverId[0]))
     senderId = await User.select("id").where(User.penguin_id == senderPenguin.id).gino.first()
     sender = await bot.fetch_user(int(senderId[0]))
+    user = await User.get(receiver.id)
+    if not user.enabled_coins_notify:
+        return
 
     embed = Embed(color=0xB7F360, title=f"{sender.global_name} перевел(а) Вам {coins}м")
     if message:
@@ -49,26 +52,30 @@ async def notifyCoinsReceive(senderPenguin: Penguin, receiverPenguin: Penguin, c
 
 
 async def notifyMembershipEnded(p: Penguin):
+    user = await User.query.where(User.penguin_id == p.id).gino.first()
+    if not user.enabled_membership_notify:
+        return
+
     embed = Embed(color=0xFFD947, title=f"Подписка закончилась")
     embed.set_footer(text=f"Аккаунт: {p.safe_name()}",
                      icon_url=f"https://play.cpps.app/avatar/{p.id}/cp?size=600")
     embed.set_image(url="https://cpps.app/NO%20MEMBERSHIP.png")
 
-    userId = await User.select("id").where(User.penguin_id == p.id).gino.first()
-    user = await bot.fetch_user(int(userId[0]))
-    await sendNotify(user, embed, view=MembershipButton())
+    await sendNotify(await bot.fetch_user(user.id), embed, view=MembershipButton())
 
 
 async def notifyMembershipSoonEnded(p: Penguin):
+    user = await User.query.where(User.penguin_id == p.id).gino.first()
+    if not user.enabled_membership_notify:
+        return
+
     embed = Embed(color=0xFFD947, title=f"Подписка скоро закончится",
                   description="Войдите в игру, что бы больше не получать напоминания")
     embed.add_field("До конца подписки", f"{p.membership_days_remain} дней", inline=False)
     embed.set_footer(text=f"Аккаунт: {p.safe_name()}",
                      icon_url=f"https://play.cpps.app/avatar/{p.id}/cp?size=600")
 
-    userId = await User.select("id").where(User.penguin_id == p.id).gino.first()
-    user = await bot.fetch_user(int(userId[0]))
-    await sendNotify(user, embed, view=MembershipButton())
+    await sendNotify(await bot.fetch_user(user.id), embed, view=MembershipButton())
 
 
 async def sendNotify(user: disnake.User, embed, *, view=None):

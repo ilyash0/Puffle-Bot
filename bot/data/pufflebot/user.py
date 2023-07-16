@@ -9,6 +9,7 @@ class User(db_pb.Model):
     language = db_pb.Column(db_pb.String(2), nullable=False, server_default=db_pb.text("ru"))
     enabled_notify = db_pb.Column(db_pb.Boolean, nullable=False, server_default=db_pb.text("true"))
     enabled_coins_notify = db_pb.Column(db_pb.Boolean, nullable=False, server_default=db_pb.text("true"))
+    enabled_membership_notify = db_pb.Column(db_pb.Boolean, nullable=False, server_default=db_pb.text("true"))
 
 
 class PenguinIntegrations(db_pb.Model):
