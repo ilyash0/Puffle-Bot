@@ -1,7 +1,12 @@
+from datetime import datetime
+
 from loguru import logger
+
+from bot.data import db_cp
 from bot.data.clubpenguin import penguin
 from bot.data.clubpenguin.item import PenguinItemCollection
 from bot.data.clubpenguin.mail import PenguinPostcard
+from bot.data.clubpenguin.penguin import PenguinMembership
 from bot.data.clubpenguin.plugin import PenguinAttributeCollection
 from bot.data.clubpenguin.stamp import PenguinStampCollection
 
@@ -20,6 +25,7 @@ class Penguin(penguin.Penguin):
     def __init__(self, *args):
         super().__init__(*args)
 
+        self.membership_expires_aware = None
         self.muted = False
 
         self.login_key = None
@@ -36,6 +42,35 @@ class Penguin(penguin.Penguin):
         self.inventory = await PenguinItemCollection.get_collection(self.id)
         self.stamps = await PenguinStampCollection.get_collection(self.id)
         self.attributes = await PenguinAttributeCollection.get_collection(self.id)
+
+        membership_history = PenguinMembership.query.where(PenguinMembership.penguin_id == self.id)
+        current_timestamp = datetime.now()
+        very_old_memberships = await PenguinMembership.query.where((PenguinMembership.penguin_id == self.id)).order_by(
+            PenguinMembership.start.asc()).gino.first()
+
+        async with db_cp.transaction():
+            async for membership_record in membership_history.gino.iterate():
+                membership_recurring = membership_record.expires is None
+                membership_active = membership_recurring or membership_record.expires >= current_timestamp
+
+                if membership_record.start < current_timestamp:
+                    if membership_active:
+                        self.is_member = True
+
+                        if not membership_recurring:
+                            self.membership_days_remain = (
+                                        membership_record.expires.date() - datetime.now().date()).days
+                            self.membership_expires_aware = membership_record.expires_aware
+                    else:
+                        if self.membership_days_remain < 0:
+                            days_since_expiry = (membership_record.expires.date() - datetime.now().date()).days
+                            self.membership_days_remain = min(self.membership_days_remain, days_since_expiry)
+
+                membership_end_date = current_timestamp if membership_active else membership_record.expires
+                if very_old_memberships is None:
+                    self.membership_days_total += (membership_end_date - membership_record.start).days
+                else:
+                    self.membership_days_total = (current_timestamp - very_old_memberships.start).days
 
     def safe_name(self):
         return self.safe_nickname()
@@ -110,8 +145,7 @@ class Penguin(penguin.Penguin):
             await penguin_care_item.update(
                 quantity=penguin_care_item.quantity + quantity).apply()
         else:
-            penguin_care_item = await self.puffle_items.insert(item_id=care_item_id,
-                                                               quantity=quantity)
+            await self.puffle_items.insert(item_id=care_item_id, quantity=quantity)
 
         cost = cost if cost is not None else care_item.cost
         await self.update(coins=self.coins - cost).apply()
