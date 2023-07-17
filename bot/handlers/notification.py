@@ -34,7 +34,7 @@ async def check_membership():
 
 async def notifyCoinsReceive(senderPenguin: Penguin, receiverPenguin: Penguin, coins, message=None):
     receiverId = await PenguinIntegrations.select("discord_id").where(
-        PenguinIntegrations.penguin_id == senderPenguin.id).gino.first()
+        PenguinIntegrations.penguin_id == receiverPenguin.id).gino.first()
     receiver = await bot.fetch_user(int(receiverId[0]))
     senderId = await User.select("id").where(User.penguin_id == senderPenguin.id).gino.first()
     sender = await bot.fetch_user(int(senderId[0]))
