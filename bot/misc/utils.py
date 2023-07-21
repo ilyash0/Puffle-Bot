@@ -31,13 +31,7 @@ async def getPenguinFromInter(inter: ApplicationCommandInteraction, *, cache=Tru
             f"Мы не нашли вашего пингвина. Пожалуйста воспользуйтесь командой {loginCommand}",
             ephemeral=True)
         return
-    if cache and user.penguin_id in penguins_by_id:
-        return penguins_by_id[user.penguin_id]
-
-    p = await Penguin.get(user.penguin_id)
-    await p.setup()
-    penguins_by_id[user.penguin_id] = p
-    return p
+    return await getPenguinFromPenguinId(user.penguin_id, cache=cache)
 
 
 async def getPenguinOrNoneFromUserId(user_id: int, *, cache=True) -> Penguin:
@@ -59,12 +53,31 @@ async def getPenguinOrNoneFromUserId(user_id: int, *, cache=True) -> Penguin:
     user = await User.get(user_id)
     if user is None:
         return None
-    if cache and user.penguin_id in penguins_by_id:
-        return penguins_by_id[user.penguin_id]
+    return await getPenguinFromPenguinId(user.penguin_id, cache=cache)
 
-    p = await Penguin.get(user.penguin_id)
+
+async def getPenguinFromPenguinId(penguin_id: int, *, cache=True) -> Penguin:
+    """
+    Get a penguin object from a penguin ID.
+
+    Parameters
+    ----------
+    penguin_id: int
+        The ID of the discord user to get the penguin object for.
+    cache : bool, optional
+        Whether to cache the penguin object, by default True
+
+    Returns
+    -------
+    Optional[Penguin]
+        The penguin object, or `None` if the user is not found.
+    """
+    if cache and penguin_id in penguins_by_id:
+        return penguins_by_id[penguin_id]
+
+    p = await Penguin.get(penguin_id)
     await p.setup()
-    penguins_by_id[user.penguin_id] = p
+    penguins_by_id[penguin_id] = p
     return p
 
 

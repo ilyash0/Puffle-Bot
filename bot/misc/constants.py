@@ -42,6 +42,7 @@ emojiGameFavicon = "<:favicon:1121758719634571405>"
 emojiWikiFavicon = "<:wiki:1121764147307237447>"
 emojiCuteSad = "<:cuteSad:794874872835735553>"
 emojiCoin = "<:coin:788877461588279336>"
+emojiStamp = "<:stamp:1131352118788362341>"
 
 # ========== EMBEDS ==========
 

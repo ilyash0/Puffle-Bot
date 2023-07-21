@@ -8,10 +8,13 @@ import disnake
 from disnake.ext.commands import Cog, Param, slash_command
 from requests import Session
 
+from bot.data import db_pb
+from bot.data.clubpenguin.stamp import PenguinStamp
 from bot.handlers.notification import notifyCoinsReceive
-from bot.misc.constants import online_url, headers, emojiCuteSad
+from bot.misc.constants import online_url, headers, emojiCuteSad, emojiCoin, emojiGame, emojiStamp
 from bot.misc.penguin import Penguin
-from bot.misc.utils import getPenguinFromInter, getPenguinOrNoneFromUserId, transferCoinsAndReturnStatus
+from bot.misc.utils import getPenguinFromInter, getPenguinOrNoneFromUserId, transferCoinsAndReturnStatus, \
+    getPenguinFromPenguinId
 
 
 class UserCommands(Cog):
@@ -58,11 +61,11 @@ class UserCommands(Cog):
                   message: str = Param(default=None, description='Сообщение получателю')):
         p: Penguin = await getPenguinFromInter(inter)
         receiverId = await Penguin.select('id').where(Penguin.username == receiver.lower()).gino.first()
+
+        if receiverId is None:
+            return await inter.send(f"Мы не нашли указанного пингвина", ephemeral=True)
+
         r: Penguin = await Penguin.get(int(receiverId[0]))
-
-        if r is None:
-            return await inter.send(f"Мы не нашли указанного пингвина.", ephemeral=True)
-
         statusDict = await transferCoinsAndReturnStatus(p, r, amount)
         if statusDict["code"] == 400:
             return await inter.send(statusDict["message"], ephemeral=True)
@@ -100,6 +103,81 @@ class UserCommands(Cog):
         else:
             textMessage = f"В нашей игре сейчас `{online}` человек/а онлайн"
         await inter.send(textMessage)
+
+    @slash_command(name="top", description="Топ 10 игроков острова")
+    async def top(self, inter: ApplicationCommandInteraction,
+                  category=Param(description="Категория топа", choices=["coins", "online", "stamps"])):
+        await inter.response.defer()
+        if category == "coins":
+            embed = disnake.Embed(title=f"{emojiCoin} Богачи острова", color=0x035BD1,
+                                  description="## Пингвин — монеты\n")
+            result = await Penguin.query \
+                .where((Penguin.moderator == False) & (Penguin.permaban == False) & (Penguin.character == None)) \
+                .order_by(Penguin.coins.desc()).limit(10).gino.all()
+            for i, penguin in enumerate(result):
+                embed.description += f"{i + 1}. {penguin.nickname} — {'{0:,}'.format(penguin.coins).replace(',', ' ')}\n"
+            view = TopCoinsButton()
+
+        elif category == "online":
+            embed = disnake.Embed(title=f"{emojiGame} Самые активные на острове", color=0x035BD1,
+                                  description="## Пингвин — минуты\n")
+            result = await Penguin.query.where((Penguin.permaban == False) & (Penguin.character == None)) \
+                .order_by(Penguin.minutes_played.desc()).limit(10).gino.all()
+            for i, penguin in enumerate(result):
+                embed.description += f"{i + 1}. {penguin.nickname} — {'{0:,}'.format(penguin.minutes_played).replace(',', ' ')}\n"
+            view = TopOnlineButton()
+
+        elif category == "stamps":
+            embed = disnake.Embed(title=f"{emojiStamp} Лучшие сыщики марок", color=0x035BD1,
+                                  description="## Пингвин — марки\n")
+            penguins_ids_list = await PenguinStamp.select('penguin_id') \
+                .group_by(PenguinStamp.penguin_id) \
+                .order_by(db_pb.func.count(PenguinStamp.stamp_id).desc()) \
+                .limit(10).gino.all()
+            result = []
+            for penguin_id in penguins_ids_list:
+                p = await getPenguinFromPenguinId(int(penguin_id[0]))
+                result.append({"nickname": p.nickname, "stamps": len(p.stamps) + p.count_epf_awards()})
+            result.sort(key=lambda x: x["stamps"], reverse=True)
+            for i, p in enumerate(result):
+                embed.description += f"{i + 1}. {p['nickname']} — {p['stamps']}\n"
+            view = TopStampsButton()
+
+        else:
+            embed = disnake.Embed(title=f"{emojiCuteSad} произошла ошибка", color=0x035BD1)
+            view = None
+
+        await inter.send(embed=embed, view=view)
+
+
+class TopOnlineButton(disnake.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
+                       url="https://play.cpps.app/ru/top/?top=online")
+    async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        ...
+
+
+class TopCoinsButton(disnake.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
+                       url="https://play.cpps.app/ru/top/?top=coins")
+    async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        ...
+
+
+class TopStampsButton(disnake.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
+                       url="https://play.cpps.app/ru/top/?top=stamp")
+    async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        ...
 
 
 def setup(bot):
