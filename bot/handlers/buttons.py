@@ -2,6 +2,7 @@ import disnake
 from disnake import Embed
 
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
+from bot.handlers.modals import FundraisingModal
 from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedRuleImageEn, embedRuleEn, embedRolesRu, \
     embedRolesEn, enFullRulesLink, ruFullRulesLink
@@ -24,7 +25,6 @@ class Buttons(disnake.ui.View):
 
 
 class FundraisingButtons(disnake.ui.View):
-    # TODO: Make the "other amount" button
     def __init__(self, fundraising: Fundraising, message: disnake.Message, receiver: Penguin, backers: int):
         super().__init__(timeout=None)
         self.fundraising = fundraising
@@ -42,8 +42,9 @@ class FundraisingButtons(disnake.ui.View):
             return
 
         self.raised += int(coins)
-        embed = Embed(color=0x2B2D31, title=self.message.embeds[0].title)
-        embed.add_field("Собрано монет", f"{self.raised}{f' из {self.goal}' if self.goal else ''}")
+        embed = self.message.embeds[0]
+        embed.add_field(embed.fields[0].name, f"{self.raised}{f' из {self.goal}' if self.goal else ''}")
+        embed.remove_field(0)
         embed.set_footer(text=f"Спонсоры: {self.backers + 1}")
 
         if not await FundraisingBackers.get([self.message.id, p.id]):
@@ -71,6 +72,12 @@ class FundraisingButtons(disnake.ui.View):
                        custom_id="1000")
     async def coins1000Button(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         await self.donate(inter, int(button.label))
+
+    @disnake.ui.button(label="Другая сумма", style=disnake.ButtonStyle.gray,
+                       custom_id="other")
+    async def otherSumButton(self, _, inter: disnake.CommandInteraction):
+        await inter.response.send_modal(
+            modal=FundraisingModal(self.donate, f"Сбор монет для {self.receiver.safe_name()}"))
 
 
 class Rules(disnake.ui.View):

@@ -5,9 +5,11 @@ from disnake import Webhook, Game
 from disnake.ext.commands import InteractionBot
 from loguru import logger
 import bot.cogs
-from bot.handlers.buttons import Rules
+from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
+from bot.handlers.buttons import Rules, FundraisingButtons
 from bot.misc.constants import rules_message_id, about_message_id, rules_webhook_id
 from bot.handlers.select import About
+from bot.misc.penguin import Penguin
 
 
 class PuffleBot(InteractionBot):
@@ -37,4 +39,13 @@ class PuffleBot(InteractionBot):
             view.add_item(About())
             self.add_view(view, message_id=about_message_id)
 
-
+        for fundraising in await Fundraising.query.gino.all():
+            try:
+                channel = await self.fetch_channel(fundraising.channel_id)
+                message = await channel.fetch_message(fundraising.message_id)
+                p = await Penguin.get(fundraising.penguin_id)
+                backers = len(
+                    await FundraisingBackers.query.where(FundraisingBackers.message_id == message.id).gino.all())
+                self.add_view(FundraisingButtons(fundraising, message, p, backers), message_id=message.id)
+            except disnake.NotFound:
+                await fundraising.delete()
