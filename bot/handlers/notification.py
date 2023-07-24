@@ -42,10 +42,11 @@ async def notifyCoinsReceive(senderPenguin: Penguin, receiverPenguin: Penguin, c
     if not user.enabled_coins_notify:
         return
 
-    embed = Embed(color=0xB7F360, title=f"{sender.global_name} перевел(а) Вам {coins}м")
+    embed = Embed(color=0xB7F360, title=f"Пингвин под ником «{senderPenguin.safe_name()}» перевел(а) Вам {coins}м")
     if message:
         embed.add_field("Сообщение", message, inline=False)
     embed.add_field("Баланс", f"{receiverPenguin.coins} {emojiCoin}", inline=False)
+    embed.add_field("Пользователь", f"{sender.mention}", inline=False)
     embed.set_footer(text=f"Ваш аккаунт: {receiverPenguin.safe_name()}",
                      icon_url=f"https://play.cpps.app/avatar/{receiverPenguin.id}/cp?size=600")
     await sendNotify(receiver, embed)
