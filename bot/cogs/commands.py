@@ -115,7 +115,7 @@ class UserCommands(Cog):
                 .where((Penguin.moderator == False) & (Penguin.permaban == False) & (Penguin.character == None)) \
                 .order_by(Penguin.coins.desc()).limit(10).gino.all()
             for i, penguin in enumerate(result):
-                embed.description += f"{i + 1}. {penguin.nickname} — {'{0:,}'.format(penguin.coins).replace(',', ' ')}\n"
+                embed.description += f"{i + 1}. {penguin.nickname} — {f'{penguin.coins:,}'.replace(',', ' ')}\n"
             view = TopCoinsButton()
 
         elif category == "online":
@@ -124,7 +124,7 @@ class UserCommands(Cog):
             result = await Penguin.query.where((Penguin.permaban == False) & (Penguin.character == None)) \
                 .order_by(Penguin.minutes_played.desc()).limit(10).gino.all()
             for i, penguin in enumerate(result):
-                embed.description += f"{i + 1}. {penguin.nickname} — {'{0:,}'.format(penguin.minutes_played).replace(',', ' ')}\n"
+                embed.description += f"{i + 1}. {penguin.nickname} — {f'{penguin.minutes_played:,}'.replace(',', ' ')}\n"
             view = TopOnlineButton()
 
         elif category == "stamps":

@@ -27,10 +27,9 @@ async def getPenguinFromInter(inter: ApplicationCommandInteraction, *, cache=Tru
     """
     user = await User.get(inter.user.id)
     if user is None:
-        await inter.send(
+        return await inter.send(
             f"Мы не нашли вашего пингвина. Пожалуйста воспользуйтесь командой {loginCommand}",
             ephemeral=True)
-        return
     return await getPenguinFromPenguinId(user.penguin_id, cache=cache)
 
 
@@ -72,8 +71,8 @@ async def getPenguinFromPenguinId(penguin_id: int, *, cache=True) -> Penguin:
     Optional[Penguin]
         The penguin object, or `None` if the user is not found.
     """
-    if cache and penguin_id in penguins_by_id:
-        return penguins_by_id[penguin_id]
+    # if cache and penguin_id in penguins_by_id:
+    #     return penguins_by_id[penguin_id]
 
     p = await Penguin.get(penguin_id)
     await p.setup()

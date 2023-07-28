@@ -43,7 +43,8 @@ class FundraisingButtons(disnake.ui.View):
 
         self.raised += int(coins)
         embed = self.message.embeds[0]
-        embed.add_field(embed.fields[0].name, f"{self.raised}{f' из {self.goal}' if self.goal else ''}")
+        embed.add_field(embed.fields[0].name,
+                        f"{self.raised:,}{f' из {self.goal:,}' if self.goal else ''}".replace(',', ' '))
         embed.remove_field(0)
         embed.set_footer(text=f"Спонсоры: {self.backers + 1}")
 

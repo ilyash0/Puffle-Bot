@@ -42,7 +42,7 @@ class FundraisingCommands(Cog):
 
         embed = Embed(color=0x2B2D31, title=title)
         embed.set_author(name=inter.author.name, icon_url=inter.author.avatar.url)
-        embed.add_field("Собрано монет", f"0{f' из {goal}' if goal else ''}")
+        embed.add_field("Собрано монет", f"0{f' из {goal:,}' if goal else ''}".replace(',', ' '))
         embed.set_footer(text="Спонсоры: 0")
         message: disnake.Message = await inter.channel.send(embed=embed)
 
