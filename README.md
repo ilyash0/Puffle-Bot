@@ -2,7 +2,6 @@
    Puffle Bot
 </h1>
 
-#
 
 <div align="center">
 
@@ -20,10 +19,10 @@
 
 - **Integration**: link CP and Discord accounts;
 - **Commands**: Use a slash-commands for:
- - Transfer coins;
- - View penguin profile;
- - View players online;
- - And more.
+  - Transfer coins;
+  - View penguin profile;
+  - View players online;
+  - And more.
 - **Liked roles**: Create you own linked roles with Puffle Bot.
 
 ## Screenshots
