@@ -1,4 +1,6 @@
+import asyncio
 from disnake import ApplicationCommandInteraction
+from loguru import logger
 
 from bot.data.clubpenguin.moderator import Logs
 from bot.data.pufflebot.user import User
@@ -116,4 +118,24 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
                       text=f"Перевёл игроку {receiver.username} {int(amount)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
 
+    await send_xt("cdu", [sender.id, amount])
+
     return {"code": 200, "message": f"Вы успешно передали `{amount}` монет игроку `{receiver.safe_name()}`!"}
+
+
+async def send_xt(name: str, data: list) -> None:
+    reader, writer = await asyncio.open_connection('0.0.0.0', 9880)
+    logger.info("Server ('0.0.0.0', 9880) connected")
+
+    data = ''.join([f'{item}%' for item in data])
+    data = f"%xt%s%pb#{name}%-1%{data}"
+    if not writer.is_closing():
+        logger.debug(f'Outgoing data: {data}')
+        writer.write(data.encode('utf-8') + b'\x00')
+    await writer.drain()
+
+    response = await reader.read(100)
+    print(response.decode())
+
+    writer.close()
+    await writer.wait_closed()
