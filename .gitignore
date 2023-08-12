@@ -33,3 +33,4 @@ pip-delete-this-directory.txt
 .idea/
 
 logs/
+/reboot.sh

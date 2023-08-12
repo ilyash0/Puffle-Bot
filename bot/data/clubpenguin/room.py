@@ -1,6 +1,6 @@
 import random
 
-from bot.data import AbstractDataCollection, db
+from bot.data import AbstractDataCollection, db_cp
 
 
 def stealth_mod_filter(stealth_mod_id):
@@ -104,20 +104,20 @@ class PenguinBackyardRoom(RoomMixin):
             await self.penguin.send_xt(*data)
 
 
-class Room(db.Model, RoomMixin):
+class Room(db_cp.Model, RoomMixin):
     __tablename__ = 'room'
 
-    id = db.Column(db.Integer, primary_key=True)
-    internal_id = db.Column(db.Integer, nullable=False, unique=True,
-                            server_default=db.text("nextval('\"room_internal_id_seq\"'::regclass)"))
-    name = db.Column(db.String(50), nullable=False)
-    member = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
-    max_users = db.Column(db.SmallInteger, nullable=False, server_default=db.text("80"))
-    required_item = db.Column(db.ForeignKey('item.id', ondelete='CASCADE', onupdate='CASCADE'))
-    game = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
-    blackhole = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
-    spawn = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
-    stamp_group = db.Column(db.ForeignKey('stamp_group.id', ondelete='CASCADE', onupdate='CASCADE'))
+    id = db_cp.Column(db_cp.Integer, primary_key=True)
+    internal_id = db_cp.Column(db_cp.Integer, nullable=False, unique=True,
+                               server_default=db_cp.text("nextval('\"room_internal_id_seq\"'::regclass)"))
+    name = db_cp.Column(db_cp.String(50), nullable=False)
+    member = db_cp.Column(db_cp.Boolean, nullable=False, server_default=db_cp.text("false"))
+    max_users = db_cp.Column(db_cp.SmallInteger, nullable=False, server_default=db_cp.text("80"))
+    required_item = db_cp.Column(db_cp.ForeignKey('item.id', ondelete='CASCADE', onupdate='CASCADE'))
+    game = db_cp.Column(db_cp.Boolean, nullable=False, server_default=db_cp.text("false"))
+    blackhole = db_cp.Column(db_cp.Boolean, nullable=False, server_default=db_cp.text("false"))
+    spawn = db_cp.Column(db_cp.Boolean, nullable=False, server_default=db_cp.text("false"))
+    stamp_group = db_cp.Column(db_cp.ForeignKey('stamp_group.id', ondelete='CASCADE', onupdate='CASCADE'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -151,18 +151,18 @@ class Room(db.Model, RoomMixin):
             p.room = self.blackhole_penguins.pop(p.id)
 
 
-class PenguinIglooRoom(db.Model, RoomMixin):
+class PenguinIglooRoom(db_cp.Model, RoomMixin):
     __tablename__ = 'penguin_igloo_room'
 
-    id = db.Column(db.Integer, primary_key=True,
-                   server_default=db.text("nextval('\"penguin_igloo_room_id_seq\"'::regclass)"))
-    penguin_id = db.Column(db.ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    type = db.Column(db.ForeignKey('igloo.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    flooring = db.Column(db.ForeignKey('flooring.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    music = db.Column(db.SmallInteger, nullable=False, server_default=db.text("0"))
-    location = db.Column(db.ForeignKey('location.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    locked = db.Column(db.Boolean, nullable=False, server_default=db.text("true"))
-    competition = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
+    id = db_cp.Column(db_cp.Integer, primary_key=True,
+                      server_default=db_cp.text("nextval('\"penguin_igloo_room_id_seq\"'::regclass)"))
+    penguin_id = db_cp.Column(db_cp.ForeignKey('penguin.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    type = db_cp.Column(db_cp.ForeignKey('igloo.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    flooring = db_cp.Column(db_cp.ForeignKey('flooring.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    music = db_cp.Column(db_cp.SmallInteger, nullable=False, server_default=db_cp.text("0"))
+    location = db_cp.Column(db_cp.ForeignKey('location.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    locked = db_cp.Column(db_cp.Boolean, nullable=False, server_default=db_cp.text("true"))
+    competition = db_cp.Column(db_cp.Boolean, nullable=False, server_default=db_cp.text("false"))
 
     internal_id = 2000
     name = 'Igloo'
@@ -201,13 +201,13 @@ class PenguinIglooRoom(db.Model, RoomMixin):
             del p.server.igloos_by_penguin_id[self.penguin_id]
 
 
-class RoomTable(db.Model):
+class RoomTable(db_cp.Model):
     __tablename__ = 'room_table'
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
-    room_id = db.Column(db.ForeignKey('room.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
-                        nullable=False)
-    game = db.Column(db.String(20), nullable=False)
+    id = db_cp.Column(db_cp.Integer, primary_key=True, nullable=False)
+    room_id = db_cp.Column(db_cp.ForeignKey('room.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                           nullable=False)
+    game = db_cp.Column(db_cp.String(20), nullable=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -267,14 +267,14 @@ class RoomTable(db.Model):
             await penguin.send_xt(*data)
 
 
-class RoomWaddle(db.Model):
+class RoomWaddle(db_cp.Model):
     __tablename__ = 'room_waddle'
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
-    room_id = db.Column(db.ForeignKey('room.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
-                        nullable=False)
-    seats = db.Column(db.SmallInteger, nullable=False, server_default=db.text("2"))
-    game = db.Column(db.String(20), nullable=False)
+    id = db_cp.Column(db_cp.Integer, primary_key=True, nullable=False)
+    room_id = db_cp.Column(db_cp.ForeignKey('room.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True,
+                           nullable=False)
+    seats = db_cp.Column(db_cp.SmallInteger, nullable=False, server_default=db_cp.text("2"))
+    game = db_cp.Column(db_cp.String(20), nullable=False)
 
     def __init__(self, *args, **kwargs):
         self.temporary = kwargs.pop('temporary', False)

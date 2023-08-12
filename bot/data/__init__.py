@@ -2,7 +2,8 @@ from collections.abc import Mapping
 
 from gino import Gino
 
-db = Gino()
+db_cp = Gino()
+db_pb = Gino()
 
 
 class AbstractDataCollection(Mapping):
@@ -48,7 +49,7 @@ class AbstractDataCollection(Mapping):
         filter_column = getattr(self.__model, self.__filterby)
         query = self.__model.query.where(filter_column == self.__filter_lookup)
 
-        async with db.transaction():
+        async with db_cp.transaction():
             collected = query.gino.iterate()
             async for model_instance in collected:
                 collection_index = getattr(model_instance, self.__indexby)

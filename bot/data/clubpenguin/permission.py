@@ -1,19 +1,19 @@
-from bot.data import AbstractDataCollection, db
+from bot.data import AbstractDataCollection, db_cp
 
 
-class Permission(db.Model):
+class Permission(db_cp.Model):
     __tablename__ = 'permission'
 
-    name = db.Column(db.String(50), nullable=False, primary_key=True)
-    enabled = db.Column(db.Boolean, nullable=False, server_default=db.text("true"))
+    name = db_cp.Column(db_cp.String(50), nullable=False, primary_key=True)
+    enabled = db_cp.Column(db_cp.Boolean, nullable=False, server_default=db_cp.text("true"))
 
 
-class PenguinPermission(db.Model):
+class PenguinPermission(db_cp.Model):
     __tablename__ = 'penguin_permission'
 
-    penguin_id = db.Column(db.ForeignKey(u'penguin.id', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True)
-    permission_name = db.Column(db.ForeignKey(u'permission.name', ondelete=u'CASCADE', onupdate=u'CASCADE'),
-                                nullable=False, primary_key=True)
+    penguin_id = db_cp.Column(db_cp.ForeignKey(u'penguin.id', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True)
+    permission_name = db_cp.Column(db_cp.ForeignKey(u'permission.name', ondelete=u'CASCADE', onupdate=u'CASCADE'),
+                                   nullable=False, primary_key=True)
 
 
 class PermissionCollection(AbstractDataCollection):
