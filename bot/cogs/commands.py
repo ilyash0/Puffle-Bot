@@ -149,28 +149,6 @@ class UserCommands(Cog):
 
         await inter.send(embed=embed, view=view)
 
-    @slash_command(name="top-event", description="Топ игроков в реалити-шоу «Коллекционер»")
-    async def topEvent(self, inter: ApplicationCommandInteraction):
-        await inter.response.defer()
-        embed = disnake.Embed(title=f"{emojiStamp} Реалити-шоу «Коллекционер»", color=0x035BD1,
-                              description="## Пингвин — марки\n")
-        penguins_ids_list = await PenguinStamp.select('penguin_id') \
-            .group_by(PenguinStamp.penguin_id) \
-            .order_by(db_pb.func.count(PenguinStamp.stamp_id).desc()) \
-            .where((PenguinStamp.penguin_id == 22279) | (PenguinStamp.penguin_id == 22280) | (
-                    PenguinStamp.penguin_id == 22281) | (PenguinStamp.penguin_id == 22282) | (
-                               PenguinStamp.penguin_id == 22283) | (PenguinStamp.penguin_id == 22283) | (
-                               PenguinStamp.penguin_id == 22284) | (PenguinStamp.penguin_id == 22285) | (
-                               PenguinStamp.penguin_id == 22286)).gino.all()
-        result = []
-        for penguin_id in penguins_ids_list:
-            p = await getPenguinFromPenguinId(int(penguin_id[0]))
-            result.append({"nickname": p.nickname, "stamps": len(p.stamps) + p.count_epf_awards()})
-        result.sort(key=lambda x: x["stamps"], reverse=True)
-        for i, p in enumerate(result):
-            embed.description += f"{i + 1}. {p['nickname']} — {p['stamps']}\n"
-        await inter.send(embed=embed)
-
 
 class TopOnlineButton(disnake.ui.View):
     def __init__(self):
