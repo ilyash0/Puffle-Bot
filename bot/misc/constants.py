@@ -102,31 +102,49 @@ embedLinks.description = f"""
 > **{emojiGameFavicon} • GAME – https://cpps.app/**
 
 > **{emojiWikiFavicon} • WIKI – https://wiki.cpps.app/**
+
+> **CARD-JITSU (PRE-ALPHA) – https://cpps.app/games/cj/**
 """
 embedLinks.set_image(url=placeholderImageLink)
 
 # Roles embeds
 embedRolesRu = Embed(color=0x2B2D31)
 embedRolesRu.description = """
-```Роли-достижения (ACHIEVEMENTS):```
+```Роли-достижения```
 <@&860176034834153543> — Победитель конкурса «Рейтинг активности».
 
 <@&792899688608038913> — [Nitro бустеры](https://support.discord.com/hc/ru/articles/360028038352) сервера.
-
-<@&860125656427003905> — Пингвины, владеющие популярным бизнесом.
-
-<@&1124784263754158090> — Игроки, получившие *шляпу экскурсовода* в игре.
 """
 embedRolesRu.set_image(url=placeholderImageLink)
+embedRoles2Ru = Embed(color=0x2B2D31)
+embedRoles2Ru.description = """
+```Роли персонажей```
+<@&860125656427003905> — Владельцы популярного бизнеса в Клубе Пингвинов.
+
+<@&1124784263754158090> — Игроки, которые прошли *тест экскурсовода* в игре.
+
+<@&1139243562798698496> — Пингвины, овладевшие искусством ниндзя и *одолевшие сенсея*.
+
+<@&1135929982544252979> — Члены *тайной организации* по защите острова.
+"""
+embedRoles2Ru.set_image(url=placeholderImageLink)
 embedRolesEn = Embed(color=0x2B2D31)
 embedRolesEn.description = """
-```Achievements roles:```
+```Achievements roles```
 <@&860176034834153543> — The winner of the «Activity Rating» contest.
 
 <@&792899688608038913> — [Nitro boosters](https://support.discord.com/hc/en-us/articles/360028038352).
-
-<@&860125656427003905> — Penguins who own a popular business.
-
-<@&1124784263754158090> — Players who have received a *tour guide hat* in the game.
 """
 embedRolesEn.set_image(url=placeholderImageLink)
+embedRoles2En = Embed(color=0x2B2D31)
+embedRoles2En.description = """
+```Character roles```
+<@&860125656427003905> - Owners of a popular business in Club Penguin.
+
+<@&1124784263754158090> - Players who have passed the *guide test* in the game.
+
+<@&1139243562798698496> - Penguins who have mastered the art of the ninja and *defeated the sensei*.
+
+<@&1135929982544252979> - Members of a *secret organization* to save the island.
+"""
+embedRoles2En.set_image(url=placeholderImageLink)

@@ -2,7 +2,7 @@ from disnake import MessageInteraction, SelectOption, AllowedMentions
 from disnake.ui import Select
 
 from bot.handlers.buttons import RulesEphemeral, Roles
-from bot.misc.constants import embedLinks, embedRuleImageRu, embedRuleRu, embedRolesRu
+from bot.misc.constants import embedLinks, embedRuleImageRu, embedRuleRu, embedRolesRu, embedRoles2Ru
 from bot.misc.penguin import Penguin
 
 
@@ -41,7 +41,7 @@ class About(Select):
                              allowed_mentions=AllowedMentions(roles=False, users=False))
             await inter.edit_original_response(view=RulesEphemeral(inter))
         elif inter.values[0] == "Roles":
-            await inter.send(ephemeral=True, embeds=[embedRolesRu],
+            await inter.send(ephemeral=True, embeds=[embedRolesRu, embedRoles2Ru],
                              allowed_mentions=AllowedMentions(roles=False, users=False))
             await inter.edit_original_response(view=Roles(inter))
 
