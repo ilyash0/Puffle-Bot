@@ -62,7 +62,7 @@ class PrivateCommands(Cog):
     async def online(self, inter: ApplicationCommandInteraction,
                      start_date: str = Param(description='Дата отсчёта, формата ДД.ММ.ГГГГ'),
                      end_date: str = Param(default=None, description='Дата окончания, формата ДД.ММ.ГГГГ'),
-                     detail: str = Param(default="No", choices=["Yes", "No"])):
+                     detail: str = Param(default="No", choices=["Yes", "No"], description='Показать доп. информацию?')):
         await inter.response.defer()
         try:
             start_date_obj = datetime.strptime(start_date, "%d.%m.%Y").date()
