@@ -118,7 +118,7 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
                       text=f"Перевёл игроку {receiver.username} {int(amount)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
 
-    await send_xt("cdu", [sender.id, amount])
+    # await send_xt("cdu", [sender.id, amount])
 
     return {"code": 200, "message": f"Вы успешно передали `{amount}` монет игроку `{receiver.safe_name()}`!"}
 
