@@ -88,7 +88,7 @@ class UserCommands(Cog):
             return await inter.send(statusDict["message"], ephemeral=True)
 
         await inter.send(statusDict["message"])
-        await notifyCoinsReceive(p, r, amount, message)
+        await notifyCoinsReceive(p, r, amount, message, "pay2")
 
     @slash_command(name="online", description="Показывает количество игроков которые сейчас онлайн")
     async def online(self, inter: ApplicationCommandInteraction):

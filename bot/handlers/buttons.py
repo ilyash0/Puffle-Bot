@@ -57,7 +57,7 @@ class FundraisingButtons(disnake.ui.View):
 
         await self.message.edit(embed=embed)
         await self.fundraising.update(raised=self.raised).apply()
-        await notifyCoinsReceive(p, self.receiver, int(coins))
+        await notifyCoinsReceive(p, self.receiver, int(coins), command="fundraising")
 
     @disnake.ui.button(label="100", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
                        custom_id="100")
