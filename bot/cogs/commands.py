@@ -59,6 +59,7 @@ class UserCommands(Cog):
                   receiver: str = Param(description='Получатель (его ник в игре)'),
                   amount: int = Param(description='Количество монет'),
                   message: str = Param(default=None, description='Сообщение получателю')):
+        await inter.response.defer()
         p: Penguin = await getPenguinFromInter(inter)
         receiverId = await Penguin.select('id').where(Penguin.username == receiver.lower()).gino.first()
 
@@ -78,6 +79,7 @@ class UserCommands(Cog):
                    receiver: disnake.User = Param(description='Получатель'),
                    amount: int = Param(description='Количество монет'),
                    message: str = Param(default=None, description='Сообщение получателю')):
+        await inter.response.defer()
         p: Penguin = await getPenguinFromInter(inter)
         r: Penguin = await getPenguinOrNoneFromUserId(receiver.id)
         if r is None:

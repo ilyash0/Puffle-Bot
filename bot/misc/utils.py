@@ -125,12 +125,12 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
 
 
 async def send_xml(name: str, penguinId: int = None, data=None) -> None:
-    reader, writer = await asyncio.open_connection('localhost', 9880)
-    logger.info("Server ('0.0.0.0', 9880) connected")
+    reader, writer = await asyncio.open_connection('localhost', 9879)
+    logger.info("Server ('0.0.0.0', 9879) connected")
 
     if penguinId is None:
         ...
-    data = f"<msg t='sys'><body action='pb-{name}' r='1'><penguin p='{penguinId}' /><amount {type(data)}='{data}' /></body></msg>"
+    data = f"<msg t='sys'><body action='pb-{name}' r='0'><penguin p='{penguinId}' /><amount {type(data).__name__}='{data}' /></body></msg>"
     if not writer.is_closing():
         logger.debug(f'Outgoing data: {data}')
         writer.write(data.encode('utf-8') + b'\x00')
@@ -141,4 +141,4 @@ async def send_xml(name: str, penguinId: int = None, data=None) -> None:
 
     writer.close()
     await writer.wait_closed()
-    logger.info("Server ('0.0.0.0', 9880) disconnected")
+    logger.info("Server ('0.0.0.0', 9879) disconnected")
