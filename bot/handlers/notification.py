@@ -32,7 +32,7 @@ async def check_membership():
                 continue
 
 
-async def notifyCoinsReceive(senderPenguin: Penguin, receiverPenguin: Penguin, coins, message=None):
+async def notifyCoinsReceive(senderPenguin: Penguin, receiverPenguin: Penguin, coins, message=None, command=None):
     receiverId = await PenguinIntegrations.select("discord_id").where(
         PenguinIntegrations.penguin_id == receiverPenguin.id).gino.first()
     receiver = await bot.fetch_user(int(receiverId[0]))
@@ -43,12 +43,18 @@ async def notifyCoinsReceive(senderPenguin: Penguin, receiverPenguin: Penguin, c
         return
 
     embed = Embed(color=0xB7F360, title=f"Пингвин под ником «{senderPenguin.safe_name()}» перевел(а) Вам {coins}м")
+    embed.set_thumbnail(f"https://play.cpps.app/avatar/{receiverPenguin.id}/cp?size=600")
     if message:
         embed.add_field("Сообщение", message, inline=False)
+    if command == "fundraising":
+        embed.add_field("Команда", "</fundraising:1133131135539494962>", inline=False)
+    if command == "pay2":
+        embed.add_field("Команда", "</pay2:1129711949576409188>", inline=False)
+    else:
+        embed.add_field("Команда", "</pay:1099629339110289445>", inline=False)
     embed.add_field("Баланс", f"{receiverPenguin.coins} {emojiCoin}", inline=False)
     embed.add_field("Пользователь", f"{sender.mention}", inline=False)
-    embed.set_footer(text=f"Ваш аккаунт: {receiverPenguin.safe_name()}",
-                     icon_url=f"https://play.cpps.app/avatar/{receiverPenguin.id}/cp?size=600")
+    embed.set_footer(text=f"Ваш аккаунт: {receiverPenguin.safe_name()}")
     await sendNotify(receiver, embed)
 
 

@@ -50,7 +50,7 @@ class Server:
         command_sync_flags = CommandSyncFlags.default()
         command_sync_flags.sync_commands = True
 
-        self.bot = PuffleBot(intents=intents, command_sync_flags=command_sync_flags,
+        self.bot = PuffleBot(defer=self.config.defer, intents=intents, command_sync_flags=command_sync_flags,
                              owner_id=527140180696629248)  # test_guilds=[755445822920982548],
         self.bot.load_cogs()
 

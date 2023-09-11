@@ -15,6 +15,7 @@ if __name__ == '__main__':
     # parser.add_argument('-l', '--lang', action='store', default='en', help='Discord bot language',
     #                     choices=['en', 'fr', 'pt', 'es', 'de', 'ru'])
     parser.add_argument('-t', '--token', action='store', help='Token for Discord bot')
+    parser.add_argument('-d', '--defer', action='store_true', help='Enable defer response')
 
     database_group = parser.add_argument_group('database')
     database_group.add_argument('-da', '--database-address', action='store',

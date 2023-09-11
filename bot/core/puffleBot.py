@@ -1,8 +1,9 @@
 import os
+import traceback
 
 import disnake
-from disnake import Webhook, Game
-from disnake.ext.commands import InteractionBot
+from disnake import Webhook, Game, ApplicationCommandInteraction
+from disnake.ext.commands import InteractionBot, CommandError
 from loguru import logger
 import bot.cogs
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
@@ -13,8 +14,9 @@ from bot.misc.penguin import Penguin
 
 
 class PuffleBot(InteractionBot):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, defer, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.defer = defer
 
     def load_cogs(self):
         for file in os.listdir(bot.cogs.__path__[0]):
@@ -25,6 +27,11 @@ class PuffleBot(InteractionBot):
         await self.change_presence(activity=Game(name="CPPS.APP"))
 
         logger.info(f"Bot {self.user} ready")
+
+    async def on_slash_command(self, inter: ApplicationCommandInteraction):
+        logger.debug(f"Used slash command /{inter.data.name} in #{inter.channel}")
+        if self.defer:
+            await inter.response.defer()
 
     async def on_connect(self):
         logger.info(f'Bot connected')
@@ -49,3 +56,12 @@ class PuffleBot(InteractionBot):
                 self.add_view(FundraisingButtons(fundraising, message, p, backers), message_id=message.id)
             except disnake.NotFound:
                 await fundraising.delete()
+
+    async def on_slash_command_error(self, inter: ApplicationCommandInteraction, exception: CommandError):
+        logger.error(exception)
+        traceback.print_exception(type(exception), exception, exception.__traceback__)
+
+    async def on_error(self, event_method: str, *args, **kwargs):
+        # logger.error(f"ERROR: {event_method}")
+        logger.error(f"Ignoring exception in {event_method}")
+        traceback.print_exc()

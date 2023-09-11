@@ -5,7 +5,7 @@ from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.handlers.modals import FundraisingModal
 from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedRuleImageEn, embedRuleEn, embedRolesRu, \
-    embedRolesEn, enFullRulesLink, ruFullRulesLink
+    embedRolesEn, enFullRulesLink, ruFullRulesLink, embedRoles2Ru, embedRoles2En
 from bot.misc.penguin import Penguin
 from bot.misc.utils import getPenguinFromInter, transferCoinsAndReturnStatus
 
@@ -57,7 +57,7 @@ class FundraisingButtons(disnake.ui.View):
 
         await self.message.edit(embed=embed)
         await self.fundraising.update(raised=self.raised).apply()
-        await notifyCoinsReceive(p, self.receiver, int(coins))
+        await notifyCoinsReceive(p, self.receiver, int(coins), command="fundraising")
 
     @disnake.ui.button(label="100", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
                        custom_id="100")
@@ -155,10 +155,10 @@ class Roles(disnake.ui.View):
             self.language = "Ru"
             button.label = "Translate"
             button.emoji = "🇺🇸"
-            await self.inter.edit_original_response(embeds=[embedRolesRu], view=self)
+            await self.inter.edit_original_response(embeds=[embedRolesRu, embedRoles2Ru], view=self)
         elif self.language == "Ru":
             self.language = "En"
             button.label = "Перевести"
             button.emoji = "🇷🇺"
-            await self.inter.edit_original_response(embeds=[embedRolesEn], view=self)
+            await self.inter.edit_original_response(embeds=[embedRolesEn, embedRoles2En], view=self)
         await inter.response.defer()
