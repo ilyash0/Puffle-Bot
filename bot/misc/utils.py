@@ -111,31 +111,34 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
 
     await sender.update(coins=sender.coins - amount).apply()
     await receiver.update(coins=receiver.coins + amount).apply()
-    await Logs.create(penguin_id=int(receiver.id), type=4,
-                      text=f"Получил от {sender.username} {int(amount)} монет. Через Discord бота", room_id=0,
-                      server_id=8000)
     await Logs.create(penguin_id=int(sender.id), type=4,
                       text=f"Перевёл игроку {receiver.username} {int(amount)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
+    await Logs.create(penguin_id=int(receiver.id), type=4,
+                      text=f"Получил от {sender.username} {int(amount)} монет. Через Discord бота", room_id=0,
+                      server_id=8000)
 
-    # await send_xt("cdu", [sender.id, amount])
+    await send_xml("cdu", sender.id, -amount)
+    await send_xml("cdu", receiver.id, amount)
 
     return {"code": 200, "message": f"Вы успешно передали `{amount}` монет игроку `{receiver.safe_name()}`!"}
 
 
-async def send_xt(name: str, data: list) -> None:
-    reader, writer = await asyncio.open_connection('0.0.0.0', 9880)
+async def send_xml(name: str, penguinId: int = None, data=None) -> None:
+    reader, writer = await asyncio.open_connection('localhost', 9880)
     logger.info("Server ('0.0.0.0', 9880) connected")
 
-    data = ''.join([f'{item}%' for item in data])
-    data = f"%xt%s%pb#{name}%-1%{data}"
+    if penguinId is None:
+        ...
+    data = f"<msg t='sys'><body action='pb-{name}' r='1'><penguin p='{penguinId}' /><amount {type(data)}='{data}' /></body></msg>"
     if not writer.is_closing():
         logger.debug(f'Outgoing data: {data}')
         writer.write(data.encode('utf-8') + b'\x00')
     await writer.drain()
 
     response = await reader.read(100)
-    print(response.decode())
+    logger.debug(f'Received data: {response.decode()}')
 
     writer.close()
     await writer.wait_closed()
+    logger.info("Server ('0.0.0.0', 9880) disconnected")
