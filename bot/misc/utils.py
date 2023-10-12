@@ -10,7 +10,7 @@ from bot.misc.penguin import Penguin
 penguins_by_id = {}
 
 
-async def getPenguinFromInter(inter: ApplicationCommandInteraction, *, cache=True) -> Penguin:
+async def getPenguinFromInter(inter: ApplicationCommandInteraction) -> Penguin:
     """
     Retrieves a penguin object from the database based on the discord user ID.
     **If the penguin is not found, the function sends a response to the interaction**
@@ -19,8 +19,6 @@ async def getPenguinFromInter(inter: ApplicationCommandInteraction, *, cache=Tru
     ----------
     inter: ApplicationCommandInteraction
         The interaction object representing the user's command.
-    cache : bool, optional
-        Whether to cache the penguin object, by default True
 
     Returns
     ----------
@@ -32,10 +30,10 @@ async def getPenguinFromInter(inter: ApplicationCommandInteraction, *, cache=Tru
         return await inter.send(
             f"Мы не нашли вашего пингвина. Пожалуйста воспользуйтесь командой {loginCommand}",
             ephemeral=True)
-    return await getPenguinFromPenguinId(user.penguin_id, cache=cache)
+    return await getPenguinFromPenguinId(user.penguin_id)
 
 
-async def getPenguinOrNoneFromUserId(user_id: int, *, cache=True) -> Penguin:
+async def getPenguinOrNoneFromUserId(user_id: int) -> Penguin:
     """
     Get a penguin object from a user ID.
 
@@ -43,8 +41,6 @@ async def getPenguinOrNoneFromUserId(user_id: int, *, cache=True) -> Penguin:
     ----------
     user_id: int
         The ID of the discord user to get the penguin object for.
-    cache : bool, optional
-        Whether to cache the penguin object, by default True
 
     Returns
     -------
@@ -54,10 +50,10 @@ async def getPenguinOrNoneFromUserId(user_id: int, *, cache=True) -> Penguin:
     user = await User.get(user_id)
     if user is None:
         return None
-    return await getPenguinFromPenguinId(user.penguin_id, cache=cache)
+    return await getPenguinFromPenguinId(user.penguin_id)
 
 
-async def getPenguinFromPenguinId(penguin_id: int, *, cache=True) -> Penguin:
+async def getPenguinFromPenguinId(penguin_id: int) -> Penguin:
     """
     Get a penguin object from a penguin ID.
 
@@ -65,8 +61,6 @@ async def getPenguinFromPenguinId(penguin_id: int, *, cache=True) -> Penguin:
     ----------
     penguin_id: int
         The ID of the discord user to get the penguin object for.
-    cache : bool, optional
-        Whether to cache the penguin object, by default True
 
     Returns
     -------
@@ -130,7 +124,8 @@ async def send_xml(name: str, penguinId: int = None, data=None) -> None:
 
     if penguinId is None:
         ...
-    data = f"<msg t='sys'><body action='pb-{name}' r='0'><penguin p='{penguinId}' /><amount {type(data).__name__}='{data}' /></body></msg>"
+    data = f"<msg t='sys'><body action='pb-{name}' r='0'><penguin p='{penguinId}' />" \
+           f"<amount {type(data).__name__}='{data}' /></body></msg>"
     if not writer.is_closing():
         logger.debug(f'Outgoing data: {data}')
         writer.write(data.encode('utf-8') + b'\x00')
