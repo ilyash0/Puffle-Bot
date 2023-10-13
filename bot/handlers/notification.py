@@ -46,11 +46,12 @@ async def notifyCoinsReceive(senderPenguin: Penguin, receiverPenguin: Penguin, c
     embed.set_thumbnail(f"https://play.cpps.app/avatar/{receiverPenguin.id}/cp?size=600")
     if message:
         embed.add_field("Сообщение", message, inline=False)
+
     if command == "fundraising":
         embed.add_field("Команда", "</fundraising:1133131135539494962>", inline=False)
-    if command == "pay2":
+    elif command == "pay2":
         embed.add_field("Команда", "</pay2:1129711949576409188>", inline=False)
-    else:
+    elif command == "pay":
         embed.add_field("Команда", "</pay:1099629339110289445>", inline=False)
     embed.add_field("Баланс", f"{receiverPenguin.coins} {emojiCoin}", inline=False)
     embed.add_field("Пользователь", f"{sender.mention}", inline=False)

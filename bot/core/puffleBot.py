@@ -31,7 +31,10 @@ class PuffleBot(InteractionBot):
     async def on_slash_command(self, inter: ApplicationCommandInteraction):
         logger.debug(f"Used slash command /{inter.data.name} in #{inter.channel}")
         if self.defer:
-            await inter.response.defer()
+            try:
+                await inter.response.defer()
+            except disnake.errors.HTTPException:
+                logger.debug("Defer is not required")
 
     async def on_connect(self):
         logger.info(f'Bot connected')

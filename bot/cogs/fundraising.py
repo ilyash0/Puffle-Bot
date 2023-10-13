@@ -34,11 +34,11 @@ class FundraisingCommands(Cog):
             try:
                 channel = await self.bot.fetch_channel(currentFundraising.channel_id)
                 message = await channel.fetch_message(currentFundraising.message_id)
-                return await inter.send(
-                    f"Вы уже начали сбор пожертвований: {message.jump_url}",
-                    ephemeral=True)
+                return await inter.send(f"Вы уже начали сбор пожертвований: {message.jump_url}", ephemeral=True)
             except disnake.errors.NotFound:
                 await currentFundraising.delete()
+            except disnake.errors.Forbidden:
+                return await inter.send(f"Вы уже начали сбор пожертвований.", ephemeral=True)
 
         embed = Embed(color=0x2B2D31, title=title)
         embed.set_author(name=inter.author.name, icon_url=inter.author.avatar.url)
@@ -65,6 +65,8 @@ class FundraisingCommands(Cog):
             await message.edit("Закрыт", view=None)
         except disnake.NotFound:
             pass
+        except disnake.errors.Forbidden:
+            return await inter.send(f"У бота недостаточно прав для этого", ephemeral=True)
         await inter.send("Успешно", ephemeral=True)
 
 

@@ -119,7 +119,11 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
 
 
 async def send_xml(name: str, penguinId: int = None, data=None) -> None:
-    reader, writer = await asyncio.open_connection('localhost', 9879)
+    try:
+        reader, writer = await asyncio.open_connection('localhost', 9879)
+    except ConnectionRefusedError:
+        logger.error("The remote computer refused the network connection")
+        return
     logger.info("Server ('0.0.0.0', 9879) connected")
 
     if penguinId is None:
