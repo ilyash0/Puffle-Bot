@@ -8,7 +8,7 @@ from loguru import logger
 
 from bot.data.clubpenguin.penguin import Login, Penguin
 from bot.data.clubpenguin.transactions import Transactions
-from bot.handlers.buttons import Rules
+from bot.handlers.button import Rules
 from bot.misc.constants import (
     embedRuleImageRu,
     embedRuleRu,

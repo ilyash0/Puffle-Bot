@@ -2,7 +2,7 @@ import disnake
 from disnake import Embed
 
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
-from bot.handlers.modals import FundraisingModal
+from bot.handlers.modal import FundraisingModal
 from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedRuleImageEn, embedRuleEn, embedRolesRu, \
     embedRolesEn, enFullRulesLink, ruFullRulesLink, embedRoles2Ru, embedRoles2En

@@ -1,7 +1,7 @@
 from disnake import MessageInteraction, SelectOption, AllowedMentions
 from disnake.ui import Select
 
-from bot.handlers.buttons import RulesEphemeral, Roles
+from bot.handlers.button import RulesEphemeral, Roles
 from bot.misc.constants import embedLinks, embedRuleImageRu, embedRuleRu, embedRolesRu, embedRoles2Ru
 from bot.misc.penguin import Penguin
 

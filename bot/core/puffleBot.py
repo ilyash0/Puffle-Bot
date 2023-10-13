@@ -7,7 +7,7 @@ from disnake.ext.commands import InteractionBot, CommandError
 from loguru import logger
 import bot.cogs
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
-from bot.handlers.buttons import Rules, FundraisingButtons
+from bot.handlers.button import Rules, FundraisingButtons
 from bot.misc.constants import rules_message_id, about_message_id, rules_webhook_id
 from bot.handlers.select import About
 from bot.misc.penguin import Penguin

@@ -4,7 +4,7 @@ from disnake.ext.commands import Cog, slash_command
 from loguru import logger
 
 from bot.data.pufflebot.fundraising import Fundraising
-from bot.handlers.buttons import FundraisingButtons
+from bot.handlers.button import FundraisingButtons
 from bot.handlers.censure import is_message_valid
 from bot.misc.penguin import Penguin
 from bot.misc.utils import getPenguinFromInter

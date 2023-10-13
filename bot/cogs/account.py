@@ -7,7 +7,7 @@ from bot.data import db_pb
 from bot.misc.constants import loginCommand, switchCommand
 from bot.misc.penguin import Penguin
 from bot.data.pufflebot.user import User, PenguinIntegrations
-from bot.handlers.buttons import Buttons
+from bot.handlers.button import Buttons
 from bot.handlers.select import SelectPenguins
 from bot.misc.utils import getPenguinFromInter, getPenguinOrNoneFromUserId
 
