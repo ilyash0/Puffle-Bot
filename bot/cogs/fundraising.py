@@ -6,7 +6,6 @@ from loguru import logger
 from bot.data.pufflebot.fundraising import Fundraising
 from bot.handlers.buttons import FundraisingButtons
 from bot.handlers.censure import is_message_valid
-from bot.misc.constants import guild_ids
 from bot.misc.penguin import Penguin
 from bot.misc.utils import getPenguinFromInter
 
@@ -21,8 +20,19 @@ class FundraisingCommands(Cog):
     async def fundraising(self, inter: ApplicationCommandInteraction):
         ...
 
-    @fundraising.sub_command(name="open", description="Начать сбор пожертвований")
+    @fundraising.sub_command(name="open")
     async def fundraising_open(self, inter: ApplicationCommandInteraction, title: str, goal: int = None):
+        """
+        Start a fundraising {{FR_OPEN}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        title: str
+            Title for fundraising {{TITLE}}
+        goal: int
+            Number of coins {{COINS}}
+        """
         # TODO: notifications about the collection of goal amount.
         # TODO: show a beautiful picture.
         if not is_message_valid(title):
@@ -51,8 +61,15 @@ class FundraisingCommands(Cog):
         await message.edit(view=FundraisingButtons(fundraising, message, p, 0))
         await inter.send("Сбор пожертвований начат.", ephemeral=True)
 
-    @fundraising.sub_command(name="close", description="Закончить сбор пожертвований")
+    @fundraising.sub_command(name="close")
     async def fundraising_close(self, inter: ApplicationCommandInteraction):
+        """
+        Stop a fundraising {{FR_CLOSE}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        """
         p: Penguin = await getPenguinFromInter(inter)
         fundraising = await Fundraising.query.where(Fundraising.penguin_id == p.id).gino.first()
         try:

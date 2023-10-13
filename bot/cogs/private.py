@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 from statistics import mean
 
 import disnake
-from disnake import ApplicationCommandInteraction, AllowedMentions, Webhook, Embed
+from disnake import ApplicationCommandInteraction, AllowedMentions, Webhook, Embed, Localized
 from disnake.ext.commands import Cog, slash_command, Param
 from loguru import logger
 
@@ -25,12 +25,20 @@ class PrivateCommands(Cog):
 
         logger.info(f"Loaded {len(self.get_application_commands())} private app commands")
 
-    @slash_command(name="transfer", description="Transfer images from the current channel to the forum",
-                   guild_ids=guild_ids)
-    async def transfer(self, inter: ApplicationCommandInteraction, channel_id: str):
+    @slash_command(guild_ids=guild_ids)
+    async def transfer(self, inter: ApplicationCommandInteraction, forum_id: str):
+        """
+        Transfer images from the current channel to the forum {{TRANSFER}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        forum_id: str
+            ID of the target forum chanel {{FORUM}}
+        """
         await inter.response.defer()
         source_channel = inter.channel
-        destination_channel = disnake.utils.get(inter.guild.channels, id=int(channel_id))
+        destination_channel = disnake.utils.get(inter.guild.channels, id=int(forum_id))
 
         async for message in source_channel.history(limit=None):
             if message.attachments:
@@ -41,17 +49,31 @@ class PrivateCommands(Cog):
                                                                message.attachments],
                                                         allowed_mentions=AllowedMentions(users=False)
                                                         )
-        await inter.edit_original_response(f"Успешно перенесено в <#{channel_id}>!")
+        await inter.edit_original_response(f"Успешно перенесено в <#{forum_id}>!")
 
-    @slash_command(name="rules", description="Send rules embed", guild_ids=guild_ids)
+    @slash_command(guild_ids=guild_ids)
     async def rules(self, inter: ApplicationCommandInteraction):
+        """
+        Send rules embed {{RULES}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        """
         webhook: Webhook = await inter.channel.create_webhook(name="CPPS.APP", avatar=avatarImageBytearray)
         message = await webhook.send(embeds=[embedRuleImageRu, embedRuleRu], wait=True)
         await message.edit(view=Rules(message))
         await inter.send("Success", ephemeral=True)
 
-    @slash_command(name="about", description="Send about embed", guild_ids=guild_ids)
+    @slash_command(guild_ids=guild_ids)
     async def about(self, inter: ApplicationCommandInteraction):
+        """
+        Send about embed {{ABOUT}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        """
         view = disnake.ui.View(timeout=None)
         view.add_item(About())
         webhook = await inter.channel.create_webhook(name="CPPS.APP", avatar=avatarImageBytearray)
@@ -59,10 +81,23 @@ class PrivateCommands(Cog):
         await inter.send("Success", ephemeral=True)
 
     @slash_command(name="statistics", description="Показывает игровую статистику", guild_ids=guild_ids)
-    async def online(self, inter: ApplicationCommandInteraction,
-                     start_date: str = Param(description='Дата отсчёта, формата ДД.ММ.ГГГГ'),
-                     end_date: str = Param(default=None, description='Дата окончания, формата ДД.ММ.ГГГГ'),
-                     detail: str = Param(default="No", choices=["Yes", "No"], description='Показать доп. информацию')):
+    async def statistics(self, inter: ApplicationCommandInteraction,
+                         start_date: str, end_date: str = None,
+                         detail: str = Param(default="No",
+                                             choices=[Localized("Yes", key="YES"), Localized("No", key="NO")])):
+        """
+        Shows game statistics {{STATISTIC}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        start_date: str
+            Start date, format DD.MM.YYYY {{START_DATE}}
+        end_date: str
+            End date, format DD.MM.YYYY {{END_DATE}}
+        detail: str
+            Show additional information {{DETAIL}}
+        """
         await inter.response.defer()
         try:
             start_date_obj = datetime.strptime(start_date, "%d.%m.%Y").date()

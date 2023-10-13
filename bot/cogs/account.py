@@ -18,12 +18,26 @@ class AccountManagementCommands(Cog):
 
         logger.info(f"Loaded {len(self.get_application_commands())} account management app commands")
 
-    @slash_command(name="login", description="Привязать свой Discord аккаунт к пингвину")
+    @slash_command()
     async def login(self, inter: ApplicationCommandInteraction):
+        """
+        Log in to your current penguin {{LOGIN}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        """
         return await inter.send(f"Перейдите на сайт и пройдите авторизацию", view=Login())
 
-    @slash_command(name="logout", description="Отвязать свой Discord аккаунт от своего пингвина")
+    @slash_command()
     async def logout(self, inter: ApplicationCommandInteraction):
+        """
+        Log out from your current penguin {{LOGOUT}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        """
         p: Penguin = await getPenguinFromInter(inter)
         user: User = await User.get(inter.user.id)
         penguin_ids = await db_pb.select([PenguinIntegrations.penguin_id]).where(
@@ -32,8 +46,15 @@ class AccountManagementCommands(Cog):
         await inter.send(f"Вы уверены, что хотите выйти с аккаунта `{p.safe_name()}`?",
                          view=Logout(inter, p, user, penguin_ids), ephemeral=True)
 
-    @slash_command(name="switch", description="Сменить текущий аккаунт")
+    @slash_command()
     async def switch(self, inter: ApplicationCommandInteraction):
+        """
+        Switch the current penguin {{SWITCH}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        """
         p: Penguin = await getPenguinOrNoneFromUserId(inter.user.id)
         user: User = await User.get(inter.user.id)
         penguin_ids = await db_pb.select([PenguinIntegrations.penguin_id]).where(
@@ -63,8 +84,15 @@ class AccountManagementCommands(Cog):
             f"Ваш текущий аккаунт: `{p.safe_name()}`. Какой аккаунт вы хотите сделать текущим?",
             view=view, ephemeral=True)
 
-    @slash_command(name="settings", description="Настройки пользователя бота")
+    @slash_command()
     async def settings(self, inter: ApplicationCommandInteraction):
+        """
+        Your personal settings {{SETTINGS}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        """
         p: Penguin = await getPenguinFromInter(inter)
         user: User = await User.get(inter.user.id)
 

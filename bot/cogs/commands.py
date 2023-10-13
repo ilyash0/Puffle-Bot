@@ -23,22 +23,38 @@ class UserCommands(Cog):
 
         logger.info(f"Loaded {len(self.get_application_commands())} public users app commands")
 
-    @slash_command(name="ilyash", description=":D")
+    @slash_command()
     async def ilyash(self, inter: ApplicationCommandInteraction):
+        """
+        Best command in the world! {{ILYASH}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        """
         await inter.send(f"Теперь вы пешка иляша!")
 
-    @slash_command(name="card", description="Показывает полезную информацию о твоём аккаунте")
+    @slash_command()
     async def card(self, inter: ApplicationCommandInteraction,
-                   user: disnake.User = Param(default=None, description='Пользователь, чью карточку нужно показать')):
+                   user: disnake.User = None):
+        """
+        Show info about your Penguin in the game {{CARD}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        user: disnake.User
+            The Discord user {{USER}}
+        """
         if user:
             p = await getPenguinOrNoneFromUserId(user.id)
             if p is None:
-                return await inter.send(f"Мы не нашли пингвина у указанного вами+ пользователя.", ephemeral=True)
+                return await inter.send(f"Мы не нашли пингвина у указанного вами пользователя.", ephemeral=True)
         else:
             p: Penguin = await getPenguinFromInter(inter)
 
         if p.get_custom_attribute("mood") and p.get_custom_attribute("mood") != " ":
-            mood = f'*{p.get_custom_attribute("mood")}*'.replace("\n", " ")
+            mood = f'`{p.get_custom_attribute("mood")}`'
         else:
             mood = None
 
@@ -54,34 +70,55 @@ class UserCommands(Cog):
         embed.add_field(name="Сотрудник", value="Да" if p.moderator else "Нет")
         await inter.send(embed=embed)
 
-    @slash_command(name="pay", description="Перевести свои монеты другому игроку")
+    @slash_command()
     async def pay(self, inter: ApplicationCommandInteraction,
-                  receiver: str = Param(description='Получатель (его ник в игре)'),
-                  amount: int = Param(description='Количество монет'),
-                  message: str = Param(default=None, description='Сообщение получателю')):
+                  nickname: str, coins: int, message: str = None):
+        """
+        Transfer your coins to another player {{PAY}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        nickname: disnake.User
+            Penguin's nickname in game {{PLAYER}}
+        coins: int
+            Number of coins {{COINS}}
+        message: str
+            Message to recipient {{MESSAGE}}
+        """
         await inter.response.defer()
         p: Penguin = await getPenguinFromInter(inter)
-        receiverId = await Penguin.select('id').where(Penguin.username == receiver.lower()).gino.first()
+        receiverId = await Penguin.select('id').where(Penguin.username == nickname.lower()).gino.first()
 
         if receiverId is None:
             return await inter.send(f"Мы не нашли указанного пингвина", ephemeral=True)
 
         r: Penguin = await Penguin.get(int(receiverId[0]))
-        statusDict = await transferCoinsAndReturnStatus(p, r, amount)
+        statusDict = await transferCoinsAndReturnStatus(p, r, coins)
         if statusDict["code"] == 400:
             return await inter.send(statusDict["message"], ephemeral=True)
 
-        await inter.send(statusDict["message"])
-        await notifyCoinsReceive(p, r, amount, message)
+        await notifyCoinsReceive(p, r, coins, message, inter.data.name)
 
-    @slash_command(name="pay2", description="Перевести свои монеты другому пользователю")
+    @slash_command()
     async def pay2(self, inter: ApplicationCommandInteraction,
-                   receiver: disnake.User = Param(description='Получатель'),
-                   amount: int = Param(description='Количество монет'),
-                   message: str = Param(default=None, description='Сообщение получателю')):
+                   user: disnake.User, amount: int, message: str = None):
+        """
+        Transfer your coins to another Discord user {{PAY2}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        user: disnake.User
+            The Discord user {{USER}}
+        amount: int
+            Number of coins {{COINS}}
+        message: str
+            Message to recipient {{MESSAGE}}
+        """
         await inter.response.defer()
         p: Penguin = await getPenguinFromInter(inter)
-        r: Penguin = await getPenguinOrNoneFromUserId(receiver.id)
+        r: Penguin = await getPenguinOrNoneFromUserId(user.id)
         if r is None:
             return await inter.send(f"Мы не нашли пингвина у указанного вами пользователя.", ephemeral=True)
 
@@ -90,10 +127,17 @@ class UserCommands(Cog):
             return await inter.send(statusDict["message"], ephemeral=True)
 
         await inter.send(statusDict["message"])
-        await notifyCoinsReceive(p, r, amount, message, "pay2")
+        await notifyCoinsReceive(p, r, amount, message, inter.data.name)
 
-    @slash_command(name="online", description="Показывает количество игроков которые сейчас онлайн")
+    @slash_command()
     async def online(self, inter: ApplicationCommandInteraction):
+        """
+        Shows the number of players currently online {{ONLINE}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        """
         with Session() as s:
             s.headers.update(headers)
             response = s.get(online_url)
@@ -106,9 +150,18 @@ class UserCommands(Cog):
             textMessage = f"В нашей игре сейчас `{online}` человек/а онлайн"
         await inter.send(textMessage)
 
-    @slash_command(name="top", description="Топ 10 игроков острова")
+    @slash_command()
     async def top(self, inter: ApplicationCommandInteraction,
-                  category=Param(description="Категория топа", choices=["coins", "online", "stamps"])):
+                  category: str = Param(choices=["coins", "online", "stamps"])):
+        """
+        Displays the top 10 players on the island {{TOP}}
+
+        Parameters
+        ----------
+        inter: ApplicationCommandInteraction
+        category: str
+            Top category {{TOP_CATEGORY}}
+        """
         await inter.response.defer()
         if category == "coins":
             embed = disnake.Embed(title=f"{emojiCoin} Богачи острова", color=0x035BD1,

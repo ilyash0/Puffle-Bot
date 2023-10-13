@@ -16,6 +16,7 @@ from bot.misc.penguin import Penguin
 class PuffleBot(InteractionBot):
     def __init__(self, defer, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.i18n.load("bot/locale/")
         self.defer = defer
         if self.defer:
             logger.info("Defer enabled")
