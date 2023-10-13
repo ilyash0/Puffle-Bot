@@ -17,6 +17,8 @@ class PuffleBot(InteractionBot):
     def __init__(self, defer, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.defer = defer
+        if self.defer:
+            logger.info("Defer enabled")
 
     def load_cogs(self):
         for file in os.listdir(bot.cogs.__path__[0]):
