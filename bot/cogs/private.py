@@ -93,9 +93,9 @@ class PrivateCommands(Cog):
         inter: ApplicationCommandInteraction
         start_date: str
             Start date, format DD.MM.YYYY {{START_DATE}}
-        end_date: str
+        end_date:  Optional[str]
             End date, format DD.MM.YYYY {{END_DATE}}
-        detail: str
+        detail:  Optional[str]
             Show additional information {{DETAIL}}
         """
         await inter.response.defer()

@@ -30,7 +30,7 @@ class FundraisingCommands(Cog):
         inter: ApplicationCommandInteraction
         title: str
             Title for fundraising {{TITLE}}
-        goal: int
+        goal:  Optional[int]
             Number of coins {{COINS}}
         """
         # TODO: notifications about the collection of goal amount.

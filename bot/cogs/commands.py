@@ -43,7 +43,7 @@ class UserCommands(Cog):
         Parameters
         ----------
         inter: ApplicationCommandInteraction
-        user: disnake.User
+        user: Optional[disnake.User]
             The Discord user {{USER}}
         """
         if user:
@@ -91,7 +91,7 @@ class UserCommands(Cog):
             Penguin's nickname in game {{PLAYER}}
         coins: int
             Number of coins {{COINS}}
-        message: str
+        message:  Optional[str]
             Message to recipient {{MESSAGE}}
         """
         await inter.response.defer()
@@ -121,7 +121,7 @@ class UserCommands(Cog):
             The Discord user {{USER}}
         amount: int
             Number of coins {{COINS}}
-        message: str
+        message:  Optional[str]
             Message to recipient {{MESSAGE}}
         """
         await inter.response.defer()
