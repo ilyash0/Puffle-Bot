@@ -32,7 +32,7 @@ class UserCommands(Cog):
         ----------
         inter: ApplicationCommandInteraction
         """
-        await inter.send(f"Теперь вы пешка иляша!")
+        await inter.send(self.bot.i18n.get("ILYASH_RESPONSE")[inter.locale.value])
 
     @slash_command()
     async def card(self, inter: ApplicationCommandInteraction,
@@ -49,7 +49,7 @@ class UserCommands(Cog):
         if user:
             p = await getPenguinOrNoneFromUserId(user.id)
             if p is None:
-                return await inter.send(f"Мы не нашли пингвина у указанного вами пользователя.", ephemeral=True)
+                return await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[inter.locale.value], ephemeral=True)
         else:
             p: Penguin = await getPenguinFromInter(inter)
 
@@ -63,11 +63,19 @@ class UserCommands(Cog):
                               color=disnake.Color(0x035BD1))
         embed.set_thumbnail(url=f"https://play.cpps.app/avatar/{p.id}/cp?size=600")
         embed.add_field(name="ID", value=p.id)
-        embed.add_field(name="Проведено в игре", value=f'{p.minutes_played} минут')
-        embed.add_field(name="Монеты", value=p.coins)
-        embed.add_field(name="Марки", value=len(p.stamps) + p.count_epf_awards())
-        embed.add_field(name="Возраст пингвина", value=f"{(datetime.now() - p.registration_date).days} дней")
-        embed.add_field(name="Сотрудник", value="Да" if p.moderator else "Нет")
+        embed.add_field(name=self.bot.i18n.get("SPENT_IN_GAME")[inter.locale.value],
+                        value=f'{p.minutes_played} {self.bot.i18n.get("MINUTES")[inter.locale.value]}')
+        embed.add_field(name=self.bot.i18n.get("COINS")[inter.locale.value].capitalize(),
+                        value=p.coins)
+        embed.add_field(name=self.bot.i18n.get("STAMPS")[inter.locale.value].capitalize(),
+                        value=len(p.stamps) + p.count_epf_awards())
+        embed.add_field(name=self.bot.i18n.get("PENGUIN_AGE")[inter.locale.value].capitalize(),
+                        value=f"{(datetime.now() - p.registration_date).days} "
+                              f"{self.bot.i18n.get('DAYS')[inter.locale.value]}")
+        embed.add_field(name=self.bot.i18n.get("STAFF")[inter.locale.value].capitalize(),
+                        value=self.bot.i18n.get("YES")[inter.locale.value]
+
+                        if p.moderator else self.bot.i18n.get("NO")[inter.locale.value])
         await inter.send(embed=embed)
 
     @slash_command()
@@ -91,7 +99,7 @@ class UserCommands(Cog):
         receiverId = await Penguin.select('id').where(Penguin.username == nickname.lower()).gino.first()
 
         if receiverId is None:
-            return await inter.send(f"Мы не нашли указанного пингвина", ephemeral=True)
+            return await inter.send(self.bot.i18n.get("PENGUIN_NOT_FOUND")[inter.locale.value], ephemeral=True)
 
         r: Penguin = await Penguin.get(int(receiverId[0]))
         statusDict = await transferCoinsAndReturnStatus(p, r, coins)
@@ -120,7 +128,7 @@ class UserCommands(Cog):
         p: Penguin = await getPenguinFromInter(inter)
         r: Penguin = await getPenguinOrNoneFromUserId(user.id)
         if r is None:
-            return await inter.send(f"Мы не нашли пингвина у указанного вами пользователя.", ephemeral=True)
+            return await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[inter.locale.value], ephemeral=True)
 
         statusDict = await transferCoinsAndReturnStatus(p, r, amount)
         if statusDict["code"] == 400:

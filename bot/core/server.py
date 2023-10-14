@@ -55,6 +55,7 @@ class Server:
 
         await self.dummy_event_listeners.setup(bot.handlers)
         await self.dummy_event_listeners.fire('boot', self)
+        self.bot.load_langs()
         self.bot.load_cogs()
 
         try:

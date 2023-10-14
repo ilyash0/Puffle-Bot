@@ -40,6 +40,15 @@
 
   "ILYASH_RESPONSE": "Now you're a pawn of Ilyash!",
   "USER_PENGUIN_NOT_FOUND": "We didn't find a penguin on the user you specified",
+  "PENGUIN_NOT_FOUND": "We didn't find said penguin",
+  "YOUR_PENGUIN_NOT_FOUND": "We haven't found your penguin. Please use command %c",
   "YES": "Yes",
-  "NO": "No"
+  "NO": "No",
+  "SPENT_IN_GAME": "Spent in the game",
+  "MINUTES": "minutes",
+  "COINS": "coins",
+  "STAMPS": "stamps",
+  "DAYS": "days",
+  "PENGUIN_AGE": "Age of the penguin",
+  "STAFF": "staff"
 }

@@ -5,6 +5,7 @@ import disnake
 from disnake import Webhook, Game, ApplicationCommandInteraction
 from disnake.ext.commands import InteractionBot, CommandError
 from loguru import logger
+import bot.locale
 import bot.cogs
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.handlers.button import Rules, FundraisingButtons
@@ -16,7 +17,6 @@ from bot.misc.penguin import Penguin
 class PuffleBot(InteractionBot):
     def __init__(self, defer, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.i18n.load("bot/locale/")
         self.defer = defer
         if self.defer:
             logger.info("Defer enabled")
@@ -25,6 +25,10 @@ class PuffleBot(InteractionBot):
         for file in os.listdir(bot.cogs.__path__[0]):
             if file.endswith(".py"):
                 self.load_extension(f"bot.cogs.{file[:-3]}")
+
+    def load_langs(self):
+        self.i18n.load(bot.locale.__path__[0])
+        logger.info(f'Loaded {len(os.listdir(bot.locale.__path__[0]))} languages')
 
     async def on_ready(self):
         await self.change_presence(activity=Game(name="CPPS.APP"))
@@ -42,15 +46,18 @@ class PuffleBot(InteractionBot):
     async def on_connect(self):
         logger.info(f'Bot connected')
 
-        if rules_message_id is not None:
-            rules_webhook: Webhook = await self.fetch_webhook(rules_webhook_id)
-            rules_message = await rules_webhook.fetch_message(rules_message_id)
-            self.add_view(Rules(rules_message), message_id=rules_message_id)
+        try:
+            if rules_message_id is not None:
+                rules_webhook: Webhook = await self.fetch_webhook(rules_webhook_id)
+                rules_message = await rules_webhook.fetch_message(rules_message_id)
+                self.add_view(Rules(rules_message), message_id=rules_message_id)
 
-        if about_message_id is not None:
-            view = disnake.ui.View(timeout=None)
-            view.add_item(About())
-            self.add_view(view, message_id=about_message_id)
+            if about_message_id is not None:
+                view = disnake.ui.View(timeout=None)
+                view.add_item(About())
+                self.add_view(view, message_id=about_message_id)
+        except disnake.errors.Forbidden:
+            logger.error("Forbidden: no access to rules or about messages")
 
         for fundraising in await Fundraising.query.gino.all():
             try:
@@ -62,6 +69,8 @@ class PuffleBot(InteractionBot):
                 self.add_view(FundraisingButtons(fundraising, message, p, backers), message_id=message.id)
             except disnake.NotFound:
                 await fundraising.delete()
+            except disnake.errors.Forbidden:
+                pass
 
     async def on_slash_command_error(self, inter: ApplicationCommandInteraction, exception: CommandError):
         logger.error(exception)
