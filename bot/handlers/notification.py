@@ -22,7 +22,7 @@ async def check_membership():
     while True:
         await sleep(86_400)  # 24 hours
         for user in await User.query.gino.all():
-            p = await getPenguinOrNoneFromUserId(user.id, cache=False)
+            p = await getPenguinOrNoneFromUserId(user.id)
 
             if p.membership_days_remain == 0:
                 await notifyMembershipEnded(p)
