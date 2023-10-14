@@ -52,10 +52,10 @@ class Server:
 
         self.bot = PuffleBot(defer=self.config.defer, intents=intents, command_sync_flags=command_sync_flags,
                              owner_id=527140180696629248)  # test_guilds=[755445822920982548],
-        self.bot.load_cogs()
 
         await self.dummy_event_listeners.setup(bot.handlers)
         await self.dummy_event_listeners.fire('boot', self)
+        self.bot.load_cogs()
 
         try:
             await self.bot.start(self.config.token)

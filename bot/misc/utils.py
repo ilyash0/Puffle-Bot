@@ -27,13 +27,14 @@ async def getPenguinFromInter(inter: ApplicationCommandInteraction) -> Penguin:
     """
     user = await User.get(inter.user.id)
     if user is None:
-        return await inter.send(
+        await inter.send(
             f"Мы не нашли вашего пингвина. Пожалуйста воспользуйтесь командой {loginCommand}",
             ephemeral=True)
+        raise KeyError
     return await getPenguinFromPenguinId(user.penguin_id)
 
 
-async def getPenguinOrNoneFromUserId(user_id: int) -> Penguin:
+async def getPenguinOrNoneFromUserId(user_id: int) -> Penguin or None:
     """
     Get a penguin object from a user ID.
 
