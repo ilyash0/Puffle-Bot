@@ -35,10 +35,10 @@ class FundraisingButtons(disnake.ui.View):
 
     async def donate(self, inter: disnake.CommandInteraction, coins: int):
         p: Penguin = await getMyPenguinFromUserId(inter.author.id)
-        statusDict = await transferCoins(p, self.receiver, int(coins))
-        await inter.send(statusDict["message"], ephemeral=True)
-        if statusDict["code"] == 400:
-            return
+        await transferCoins(p, self.receiver, int(coins))
+        await inter.send(
+            inter.bot.i18n.get("COINS_TRANSFERRED")[inter.locale.value].
+            replace("%amount%", str(coins)).replace("%receiver%", self.receiver.safe_name()))
 
         self.raised += int(coins)
         embed = self.message.embeds[0]
