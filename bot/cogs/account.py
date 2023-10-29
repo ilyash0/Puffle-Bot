@@ -27,7 +27,7 @@ class AccountManagementCommands(Cog):
         ----------
         inter: ApplicationCommandInteraction
         """
-        return await inter.send(f"Перейдите на сайт и пройдите авторизацию", view=Login())
+        return await inter.send(self.bot.i18n.get("LOGIN_RESPONSE")[inter.locale.value], view=Login())
 
     @slash_command()
     async def logout(self, inter: ApplicationCommandInteraction):
@@ -43,7 +43,7 @@ class AccountManagementCommands(Cog):
         penguin_ids = await db_pb.select([PenguinIntegrations.penguin_id]).where(
             (PenguinIntegrations.discord_id == inter.user.id)).gino.all()
 
-        await inter.send(f"Вы уверены, что хотите выйти с аккаунта `{p.safe_name()}`?",
+        await inter.send(self.bot.i18n.get("LOGOUT_RESPONSE")[inter.locale.value].replace("%nickname%", p.safe_name()),
                          view=Logout(inter, p, user, penguin_ids), ephemeral=True)
 
     @slash_command()
@@ -61,14 +61,10 @@ class AccountManagementCommands(Cog):
             (PenguinIntegrations.discord_id == inter.user.id)).gino.all()
 
         if len(penguin_ids) == 0:
-            return await inter.send(
-                f"У вас не привязан ни один аккаунт. "
-                f"Это можно исправить с помощью команды {loginCommand}", ephemeral=True)
+            raise KeyError("MY_PENGUIN_NOT_FOUND")
 
         if len(penguin_ids) == 1:
-            return await inter.send(
-                f"У вас привязан только один аккаунт. "
-                f"Вы можете привязать ещё несколько с помощью команды {loginCommand}", ephemeral=True)
+            raise KeyError("ONLY_ONE_PENGUIN_LINKED")
 
         penguinsList = [{"safe_name": (await Penguin.get(penguin_id[0])).safe_name(), "id": penguin_id[0]} for
                         penguin_id in penguin_ids]
@@ -77,11 +73,11 @@ class AccountManagementCommands(Cog):
 
         if p is None:
             return await inter.send(
-                f"Ваш текущий аккаунт не выбран. Какой аккаунт вы хотите сделать текущим?",
+                self.bot.i18n.get("SWITCH_RESPONSE_ALT")[inter.locale.value],
                 view=view, ephemeral=True)
 
         return await inter.send(
-            f"Ваш текущий аккаунт: `{p.safe_name()}`. Какой аккаунт вы хотите сделать текущим?",
+            self.bot.i18n.get("SWITCH_RESPONSE")[inter.locale.value].replace("%nickname%", p.safe_name()),
             view=view, ephemeral=True)
 
     @slash_command()
@@ -96,7 +92,7 @@ class AccountManagementCommands(Cog):
         p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         user: User = await User.get(inter.user.id)
 
-        await inter.send("Можете изменить свои настройки здесь.\n# Уведомления", view=Settings(inter, user),
+        await inter.send(self.bot.i18n.get("SETTINGS_RESPONSE")[inter.locale.value], view=Settings(inter, user),
                          ephemeral=True)
 
 
