@@ -80,7 +80,7 @@ class PrivateCommands(Cog):
         await webhook.send(embeds=[embedAboutImage, embedAbout], view=view)
         await inter.send("Success", ephemeral=True)
 
-    @slash_command(name="statistics", description="Показывает игровую статистику", guild_ids=guild_ids)
+    @slash_command(guild_ids=guild_ids)
     async def statistics(self, inter: ApplicationCommandInteraction,
                          start_date: str, end_date: str = None,
                          detail: str = Param(default="No",
