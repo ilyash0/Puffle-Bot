@@ -2,7 +2,7 @@ import ast
 from datetime import datetime
 
 from bs4 import BeautifulSoup
-from disnake import ApplicationCommandInteraction
+from disnake import ApplicationCommandInteraction, Localized
 from loguru import logger
 import disnake
 from disnake.ext.commands import Cog, Param, slash_command
@@ -13,7 +13,7 @@ from bot.data.clubpenguin.stamp import PenguinStamp
 from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import online_url, headers, emojiCuteSad, emojiCoin, emojiGame, emojiStamp
 from bot.misc.penguin import Penguin
-from bot.misc.utils import getPenguinFromInter, getPenguinOrNoneFromUserId, transferCoinsAndReturnStatus, \
+from bot.misc.utils import getMyPenguinFromUserId, getPenguinOrNoneFromUserId, transferCoins, \
     getPenguinFromPenguinId
 
 
@@ -51,7 +51,7 @@ class UserCommands(Cog):
             if p is None:
                 return await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[inter.locale.value], ephemeral=True)
         else:
-            p: Penguin = await getPenguinFromInter(inter)
+            p = await getMyPenguinFromUserId(inter.author.id)
 
         if p.get_custom_attribute("mood") and p.get_custom_attribute("mood") != " ":
             mood = f'`{p.get_custom_attribute("mood")}`'
@@ -64,7 +64,7 @@ class UserCommands(Cog):
         embed.set_thumbnail(url=f"https://play.cpps.app/avatar/{p.id}/cp?size=600")
         embed.add_field(name="ID", value=p.id)
         embed.add_field(name=self.bot.i18n.get("SPENT_IN_GAME")[inter.locale.value],
-                        value=f'{p.minutes_played} {self.bot.i18n.get("MINUTES")[inter.locale.value]}')
+                        value=f'{p.minutes_played} {self.bot.i18n.get("MINUTES_ABBR")[inter.locale.value]}')
         embed.add_field(name=self.bot.i18n.get("COINS")[inter.locale.value].capitalize(),
                         value=p.coins)
         embed.add_field(name=self.bot.i18n.get("STAMPS")[inter.locale.value].capitalize(),
@@ -73,14 +73,13 @@ class UserCommands(Cog):
                         value=f"{(datetime.now() - p.registration_date).days} "
                               f"{self.bot.i18n.get('DAYS')[inter.locale.value]}")
         embed.add_field(name=self.bot.i18n.get("STAFF")[inter.locale.value].capitalize(),
-                        value=self.bot.i18n.get("YES")[inter.locale.value]
-
-                        if p.moderator else self.bot.i18n.get("NO")[inter.locale.value])
+                        value=self.bot.i18n.get("YES")[inter.locale.value] if p.moderator else self.bot.i18n.get("NO")[
+                            inter.locale.value])
         await inter.send(embed=embed)
 
     @slash_command()
     async def pay(self, inter: ApplicationCommandInteraction,
-                  nickname: str, coins: int, message: str = None):
+                  nickname: str, amount: int, message: str = None):
         """
         Transfer your coins to another player {{PAY}}
 
@@ -89,24 +88,23 @@ class UserCommands(Cog):
         inter: ApplicationCommandInteraction
         nickname: disnake.User
             Penguin's nickname in game {{PLAYER}}
-        coins: int
+        amount: int
             Number of coins {{COINS}}
         message:  Optional[str]
             Message to recipient {{MESSAGE}}
         """
         await inter.response.defer()
-        p: Penguin = await getPenguinFromInter(inter)
+        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         receiverId = await Penguin.select('id').where(Penguin.username == nickname.lower()).gino.first()
-
         if receiverId is None:
             return await inter.send(self.bot.i18n.get("PENGUIN_NOT_FOUND")[inter.locale.value], ephemeral=True)
-
         r: Penguin = await Penguin.get(int(receiverId[0]))
-        statusDict = await transferCoinsAndReturnStatus(p, r, coins)
-        if statusDict["code"] == 400:
-            return await inter.send(statusDict["message"], ephemeral=True)
 
-        await notifyCoinsReceive(p, r, coins, message, inter.data.name)
+        await transferCoins(p, r, amount)
+        await notifyCoinsReceive(p, r, amount, message, inter.data.name)
+        await inter.send(
+            self.bot.i18n.get("COINS_TRANSFERRED")[inter.locale.value].
+            replace("%amount%", str(amount)).replace("%receiver%", r.safe_name()))
 
     @slash_command()
     async def pay2(self, inter: ApplicationCommandInteraction,
@@ -125,17 +123,16 @@ class UserCommands(Cog):
             Message to recipient {{MESSAGE}}
         """
         await inter.response.defer()
-        p: Penguin = await getPenguinFromInter(inter)
+        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         r: Penguin = await getPenguinOrNoneFromUserId(user.id)
         if r is None:
             return await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[inter.locale.value], ephemeral=True)
 
-        statusDict = await transferCoinsAndReturnStatus(p, r, amount)
-        if statusDict["code"] == 400:
-            return await inter.send(statusDict["message"], ephemeral=True)
-
-        await inter.send(statusDict["message"])
+        await transferCoins(p, r, amount)
         await notifyCoinsReceive(p, r, amount, message, inter.data.name)
+        await inter.send(
+            self.bot.i18n.get("COINS_TRANSFERRED")[inter.locale.value].
+            replace("%amount%", str(amount)).replace("%receiver%", r.safe_name()))
 
     @slash_command()
     async def online(self, inter: ApplicationCommandInteraction):
@@ -153,14 +150,15 @@ class UserCommands(Cog):
 
         online = int(ast.literal_eval(soup.text)[0]['3104'])
         if online == 0:
-            textMessage = f"В нашей игре сейчас никого нет {emojiCuteSad}"
+            textMessage = self.bot.i18n.get("NO_ONLINE_RESPONSE")[inter.locale.value].replace("%emote%", emojiCuteSad)
         else:
-            textMessage = f"В нашей игре сейчас `{online}` человек/а онлайн"
+            textMessage = self.bot.i18n.get("ONLINE_RESPONSE")[inter.locale.value].replace("%online%", online)
         await inter.send(textMessage)
 
     @slash_command()
     async def top(self, inter: ApplicationCommandInteraction,
-                  category: str = Param(choices=["coins", "online", "stamps"])):
+                  category: str = Param(choices=[Localized("coins", key="COINS"), Localized("minutes", key="MINUTES"),
+                                                 Localized("stamps", key="STAMPS")])):
         """
         Displays the top 10 players on the island {{TOP}}
 
@@ -172,8 +170,9 @@ class UserCommands(Cog):
         """
         await inter.response.defer()
         if category == "coins":
-            embed = disnake.Embed(title=f"{emojiCoin} Богачи острова", color=0x035BD1,
-                                  description="## Пингвин — монеты\n")
+            embed = disnake.Embed(title=f"{emojiCoin} {self.bot.i18n.get('RICH_ISLANDERS')[inter.locale.value]}",
+                                  color=0x035BD1,
+                                  description=f"## {self.bot.i18n.get('PENGUIN')[inter.locale.value].capitalize()} — {self.bot.i18n.get('COINS')[inter.locale.value]}\n")
             result = await Penguin.query \
                 .where((Penguin.moderator == False) & (Penguin.permaban == False) & (Penguin.character == None)) \
                 .order_by(Penguin.coins.desc()).limit(10).gino.all()
@@ -181,18 +180,20 @@ class UserCommands(Cog):
                 embed.description += f"{i + 1}. {penguin.nickname} — {f'{penguin.coins:,}'.replace(',', ' ')}\n"
             view = TopCoinsButton()
 
-        elif category == "online":
-            embed = disnake.Embed(title=f"{emojiGame} Самые активные на острове", color=0x035BD1,
-                                  description="## Пингвин — минуты\n")
+        elif category == "minutes":
+            embed = disnake.Embed(title=f"{emojiGame} {self.bot.i18n.get('MOST_ACTIVE')[inter.locale.value]}",
+                                  color=0x035BD1,
+                                  description=f"## {self.bot.i18n.get('PENGUIN')[inter.locale.value].capitalize()} — {self.bot.i18n.get('MINUTES')[inter.locale.value]}\n")
             result = await Penguin.query.where((Penguin.permaban == False) & (Penguin.character == None)) \
                 .order_by(Penguin.minutes_played.desc()).limit(10).gino.all()
             for i, penguin in enumerate(result):
                 embed.description += f"{i + 1}. {penguin.nickname} — {f'{penguin.minutes_played:,}'.replace(',', ' ')}\n"
-            view = TopOnlineButton()
+            view = TopMinutesButton()
 
         elif category == "stamps":
-            embed = disnake.Embed(title=f"{emojiStamp} Лучшие сыщики марок", color=0x035BD1,
-                                  description="## Пингвин — марки\n")
+            embed = disnake.Embed(title=f"{emojiStamp} {self.bot.i18n.get('STAMP_DETECTIVES')[inter.locale.value]}s",
+                                  color=0x035BD1,
+                                  description=f"## {self.bot.i18n.get('PENGUIN')[inter.locale.value].capitalize()} — {self.bot.i18n.get('STAMPS')[inter.locale.value]}\n")
             penguins_ids_list = await PenguinStamp.select('penguin_id') \
                 .group_by(PenguinStamp.penguin_id) \
                 .order_by(db_pb.func.count(PenguinStamp.stamp_id).desc()) \
@@ -207,13 +208,13 @@ class UserCommands(Cog):
             view = TopStampsButton()
 
         else:
-            embed = disnake.Embed(title=f"{emojiCuteSad} произошла ошибка", color=0x035BD1)
+            embed = disnake.Embed(title=f"{emojiCuteSad} error occurred", color=0x035BD1)
             view = None
 
         await inter.send(embed=embed, view=view)
 
 
-class TopOnlineButton(disnake.ui.View):
+class TopMinutesButton(disnake.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 

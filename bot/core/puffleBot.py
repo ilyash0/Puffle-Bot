@@ -75,6 +75,7 @@ class PuffleBot(InteractionBot):
     async def on_slash_command_error(self, inter: ApplicationCommandInteraction, exception: CommandError):
         logger.error(exception)
         traceback.print_exception(type(exception), exception, exception.__traceback__)
+        await inter.send(f"{self.i18n.get(exception.original.args[0])[inter.locale.value]}", ephemeral=True)
 
     async def on_error(self, event_method: str, *args, **kwargs):
         # logger.error(f"ERROR: {event_method}")

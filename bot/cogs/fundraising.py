@@ -7,7 +7,7 @@ from bot.data.pufflebot.fundraising import Fundraising
 from bot.handlers.button import FundraisingButtons
 from bot.handlers.censure import is_message_valid
 from bot.misc.penguin import Penguin
-from bot.misc.utils import getPenguinFromInter
+from bot.misc.utils import getMyPenguinFromUserId
 
 
 class FundraisingCommands(Cog):
@@ -38,7 +38,7 @@ class FundraisingCommands(Cog):
         if not is_message_valid(title):
             return await inter.send("Соблюдайте правила!", ephemeral=True)
 
-        p: Penguin = await getPenguinFromInter(inter)
+        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         currentFundraising = await Fundraising.query.where(Fundraising.penguin_id == p.id).gino.first()
         if currentFundraising:
             try:
@@ -70,7 +70,7 @@ class FundraisingCommands(Cog):
         ----------
         inter: ApplicationCommandInteraction
         """
-        p: Penguin = await getPenguinFromInter(inter)
+        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         fundraising = await Fundraising.query.where(Fundraising.penguin_id == p.id).gino.first()
         try:
             if not fundraising:

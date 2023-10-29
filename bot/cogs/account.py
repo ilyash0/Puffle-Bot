@@ -9,7 +9,7 @@ from bot.misc.penguin import Penguin
 from bot.data.pufflebot.user import User, PenguinIntegrations
 from bot.handlers.button import Buttons
 from bot.handlers.select import SelectPenguins
-from bot.misc.utils import getPenguinFromInter, getPenguinOrNoneFromUserId
+from bot.misc.utils import getMyPenguinFromUserId, getPenguinOrNoneFromUserId
 
 
 class AccountManagementCommands(Cog):
@@ -38,7 +38,7 @@ class AccountManagementCommands(Cog):
         ----------
         inter: ApplicationCommandInteraction
         """
-        p: Penguin = await getPenguinFromInter(inter)
+        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         user: User = await User.get(inter.user.id)
         penguin_ids = await db_pb.select([PenguinIntegrations.penguin_id]).where(
             (PenguinIntegrations.discord_id == inter.user.id)).gino.all()
@@ -93,7 +93,7 @@ class AccountManagementCommands(Cog):
         ----------
         inter: ApplicationCommandInteraction
         """
-        p: Penguin = await getPenguinFromInter(inter)
+        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         user: User = await User.get(inter.user.id)
 
         await inter.send("Можете изменить свои настройки здесь.\n# Уведомления", view=Settings(inter, user),

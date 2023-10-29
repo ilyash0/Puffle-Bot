@@ -1,5 +1,4 @@
 import disnake
-from disnake import Embed
 
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.handlers.modal import FundraisingModal
@@ -7,7 +6,7 @@ from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedRuleImageEn, embedRuleEn, embedRolesRu, \
     embedRolesEn, enFullRulesLink, ruFullRulesLink, embedRoles2Ru, embedRoles2En
 from bot.misc.penguin import Penguin
-from bot.misc.utils import getPenguinFromInter, transferCoinsAndReturnStatus
+from bot.misc.utils import getMyPenguinFromUserId, transferCoins
 
 
 class Buttons(disnake.ui.View):
@@ -35,8 +34,8 @@ class FundraisingButtons(disnake.ui.View):
         self.backers = backers
 
     async def donate(self, inter: disnake.CommandInteraction, coins: int):
-        p: Penguin = await getPenguinFromInter(inter)
-        statusDict = await transferCoinsAndReturnStatus(p, self.receiver, int(coins))
+        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
+        statusDict = await transferCoins(p, self.receiver, int(coins))
         await inter.send(statusDict["message"], ephemeral=True)
         if statusDict["code"] == 400:
             return
