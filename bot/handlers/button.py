@@ -1,6 +1,12 @@
+import sys
+import traceback
+
 import disnake
+from disnake import MessageInteraction
+from disnake.ui import Item
 
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
+from bot.data.pufflebot.user import User, PenguinIntegrations
 from bot.handlers.modal import FundraisingModal
 from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedRuleImageEn, embedRuleEn, embedRolesRu, \
@@ -10,11 +16,13 @@ from bot.misc.utils import getMyPenguinFromUserId, transferCoins
 
 
 class Buttons(disnake.ui.View):
-    def __init__(self, original_inter, timeout=900):
+    def __init__(self, original_inter=None, timeout=None):
         super().__init__(timeout=timeout)
         self.original_inter = original_inter
 
     async def disableAllItems(self):
+        if self.original_inter is None:
+            return
         for item in self.children:
             item.disabled = True
         await self.original_inter.edit_original_response(view=self)
@@ -22,8 +30,13 @@ class Buttons(disnake.ui.View):
     async def on_timeout(self):
         await self.disableAllItems()
 
+    async def on_error(self, error: Exception, item: Item, inter: MessageInteraction):
+        print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)
+        traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
+        await inter.send(f"{inter.bot.i18n.get(error.args[0])[inter.locale.value]}", ephemeral=True)
 
-class FundraisingButtons(disnake.ui.View):
+
+class FundraisingButtons(Buttons):
     def __init__(self, fundraising: Fundraising, message: disnake.Message, receiver: Penguin, backers: int):
         super().__init__(timeout=None)
         self.fundraising = fundraising
@@ -34,6 +47,7 @@ class FundraisingButtons(disnake.ui.View):
         self.backers = backers
 
     async def donate(self, inter: disnake.CommandInteraction, coins: int):
+        await inter.response.defer()
         p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         await transferCoins(p, self.receiver, int(coins))
         await inter.send(
@@ -80,9 +94,9 @@ class FundraisingButtons(disnake.ui.View):
             modal=FundraisingModal(self.donate, f"Сбор монет для {self.receiver.safe_name()}"))
 
 
-class Rules(disnake.ui.View):
+class Rules(Buttons):
     def __init__(self, massage):
-        super().__init__(timeout=None)
+        super().__init__()
         self.massage = massage
         self.language = "Ru"
 
@@ -111,10 +125,10 @@ class Rules(disnake.ui.View):
         ...
 
 
-class RulesEphemeral(disnake.ui.View):
+class RulesEphemeral(Buttons):
     def __init__(self, inter):
-        super().__init__(timeout=None)
-        self.inter = inter
+        super().__init__()
+        self.original_inter = inter
         self.language = "Ru"
 
     @disnake.ui.button(label="Translate", style=disnake.ButtonStyle.primary, emoji="🇺🇸", custom_id="translate")
@@ -125,7 +139,7 @@ class RulesEphemeral(disnake.ui.View):
             button.emoji = "🇺🇸"
             self.children[1].label = "Полные правила"
             self.children[1].url = ruFullRulesLink
-            await self.inter.edit_original_response(embeds=[embedRuleImageRu, embedRuleRu], view=self)
+            await self.original_inter.edit_original_response(embeds=[embedRuleImageRu, embedRuleRu], view=self)
         elif self.language == "Ru":
             self.language = "En"
             button.label = "Перевести"
@@ -133,7 +147,7 @@ class RulesEphemeral(disnake.ui.View):
             self.children[1].label = "Full rules"
 
             self.children[1].url = enFullRulesLink
-            await self.inter.edit_original_response(embeds=[embedRuleImageEn, embedRuleEn], view=self)
+            await self.original_inter.edit_original_response(embeds=[embedRuleImageEn, embedRuleEn], view=self)
         await inter.response.defer()
 
     @disnake.ui.button(label="Полные правила", style=disnake.ButtonStyle.link,
@@ -142,10 +156,10 @@ class RulesEphemeral(disnake.ui.View):
         ...
 
 
-class Roles(disnake.ui.View):
+class Roles(Buttons):
     def __init__(self, inter):
-        super().__init__(timeout=None)
-        self.inter = inter
+        super().__init__()
+        self.original_inter = inter
         self.language = "Ru"
 
     @disnake.ui.button(label="Translate", style=disnake.ButtonStyle.primary, emoji="🇺🇸", custom_id="translate")
@@ -154,10 +168,127 @@ class Roles(disnake.ui.View):
             self.language = "Ru"
             button.label = "Translate"
             button.emoji = "🇺🇸"
-            await self.inter.edit_original_response(embeds=[embedRolesRu, embedRoles2Ru], view=self)
+            await self.original_inter.edit_original_response(embeds=[embedRolesRu, embedRoles2Ru], view=self)
         elif self.language == "Ru":
             self.language = "En"
             button.label = "Перевести"
             button.emoji = "🇷🇺"
-            await self.inter.edit_original_response(embeds=[embedRolesEn, embedRoles2En], view=self)
+            await self.original_inter.edit_original_response(embeds=[embedRolesEn, embedRoles2En], view=self)
         await inter.response.defer()
+
+
+class Login(Buttons):
+    def __init__(self):
+        super().__init__()
+
+    @disnake.ui.button(label="Войти", url="https://cpps.app/discord/login")
+    async def loginButton(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        ...
+
+
+class Logout(Buttons):
+    def __init__(self, p, user, penguin_ids):
+        super().__init__()
+        self.p = p
+        self.user = user
+        self.penguin_ids = penguin_ids
+
+    @disnake.ui.button(label="Отмена", style=disnake.ButtonStyle.gray, custom_id="cancel")
+    async def cancelButton(self, _, inter: disnake.CommandInteraction):
+        await self.disableAllItems()
+        await inter.send(inter.bot.i18n.get("CANCELLED")[inter.locale.value], ephemeral=True)
+
+    @disnake.ui.button(label="Выйти", style=disnake.ButtonStyle.red, custom_id="logout")
+    async def logoutButton(self, _, inter: disnake.CommandInteraction):
+        await self.disableAllItems()
+        await PenguinIntegrations.delete.where(PenguinIntegrations.penguin_id == self.p.id).gino.status()
+        if len(self.penguin_ids) == 1:
+            await self.user.update(penguin_id=None).apply()
+            return await inter.send(
+                inter.bot.i18n.get("LOGOUT_SUCCESS")[inter.locale.value].replace("%nickname%", self.p.safe_name()),
+                ephemeral=True)
+
+        if len(self.penguin_ids) == 2:
+            newCurrentPenguin: Penguin = await Penguin.get(self.penguin_ids[0][0])
+            await self.user.update(penguin_id=self.penguin_ids[0][0]).apply()
+            message = inter.bot.i18n.get("LOGOUT_SUCCESS_ALT")[inter.locale.value]
+            message.replace("%nickname%", self.p.safe_name())
+            message.replace("%new_nickname%", newCurrentPenguin.safe_name())
+            return await inter.send(message, ephemeral=True)
+
+        return await inter.send(
+            inter.bot.i18n.get("LOGOUT_SUCCESS_ALT2")[inter.locale.value].replace("%nickname%", self.p.safe_name()),
+            ephemeral=True)
+
+
+class Settings(Buttons):
+    def __init__(self, original_inter, user):
+        super().__init__()
+        self.original_inter = original_inter
+        self.user: User = user
+
+    @disnake.ui.button(label="Все", style=disnake.ButtonStyle.green, custom_id="allNotify")
+    async def allNotify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        await inter.response.defer()
+        if self.user.enabled_notify:
+            button.style = disnake.ButtonStyle.gray
+            self.children[1].disabled = True
+            self.children[2].disabled = True
+        else:
+            button.style = disnake.ButtonStyle.green
+            self.children[1].disabled = False
+            self.children[2].disabled = False
+        self.user.enabled_notify = not self.user.enabled_notify
+        await self.original_inter.edit_original_response(view=self)
+
+    @disnake.ui.button(label="О пополнении баланса", style=disnake.ButtonStyle.green,
+                       custom_id="coinsNotify")
+    async def coinsNotify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        await inter.response.defer()
+        if self.user.enabled_coins_notify:
+            button.style = disnake.ButtonStyle.gray
+        else:
+            button.style = disnake.ButtonStyle.green
+        self.user.enabled_coins_notify = not self.user.enabled_coins_notify
+        await self.original_inter.edit_original_response(view=self)
+
+    @disnake.ui.button(label="Об окончании подписки", style=disnake.ButtonStyle.green,
+                       custom_id="membershipNotify")
+    async def membershipNotify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        await inter.response.defer()
+        if self.user.enabled_membership_notify:
+            button.style = disnake.ButtonStyle.gray
+        else:
+            button.style = disnake.ButtonStyle.green
+        self.user.enabled_membership_notify = not self.user.enabled_membership_notify
+        await self.original_inter.edit_original_response(view=self)
+
+
+class TopMinutesButton(Buttons):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
+                       url="https://play.cpps.app/ru/top/?top=online")
+    async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        ...
+
+
+class TopCoinsButton(Buttons):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
+                       url="https://play.cpps.app/ru/top/?top=coins")
+    async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        ...
+
+
+class TopStampsButton(Buttons):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
+                       url="https://play.cpps.app/ru/top/?top=stamp")
+    async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
+        ...

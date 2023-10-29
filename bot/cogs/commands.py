@@ -10,6 +10,7 @@ from requests import Session
 
 from bot.data import db_pb
 from bot.data.clubpenguin.stamp import PenguinStamp
+from bot.handlers.button import TopMinutesButton, TopCoinsButton, TopStampsButton
 from bot.handlers.notification import notifyCoinsReceive
 from bot.misc.constants import online_url, headers, emojiCuteSad, emojiCoin, emojiGame, emojiStamp
 from bot.misc.penguin import Penguin
@@ -212,36 +213,6 @@ class UserCommands(Cog):
             view = None
 
         await inter.send(embed=embed, view=view)
-
-
-class TopMinutesButton(disnake.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
-                       url="https://play.cpps.app/ru/top/?top=online")
-    async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
-        ...
-
-
-class TopCoinsButton(disnake.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
-                       url="https://play.cpps.app/ru/top/?top=coins")
-    async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
-        ...
-
-
-class TopStampsButton(disnake.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
-                       url="https://play.cpps.app/ru/top/?top=stamp")
-    async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
-        ...
 
 
 def setup(bot):
