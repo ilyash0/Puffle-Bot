@@ -95,7 +95,7 @@ embedAboutImage.set_image(url="https://cpps.app/CPPS.APP.png")
 embedLinks = Embed(color=0x2B2D31)
 embedLinks.description = f"""
 ```Links to social networks and other```
-> **{emojiVk} • VK – https://vk.com/cpps_official/**
+> **{emojiVk} • VK – https://vk.com/cppsapp/**
 
 > **{emojiYt} • YOUTUBE – https://www.youtube.com/@cppsapp/**
 
