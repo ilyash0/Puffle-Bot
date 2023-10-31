@@ -36,7 +36,7 @@ class PuffleBot(InteractionBot):
         logger.info(f"Bot {self.user} ready")
 
     async def on_slash_command(self, inter: ApplicationCommandInteraction):
-        logger.debug(f"Used slash command /{inter.data.name} in #{inter.channel}")
+        logger.debug(f"{inter.author} use slash command /{inter.data.name} in #{inter.channel}")
         if self.defer:
             try:
                 await inter.response.defer()
