@@ -26,7 +26,7 @@ class AccountManagementCommands(Cog):
         ----------
         inter: ApplicationCommandInteraction
         """
-        return await inter.send(self.bot.i18n.get("LOGIN_RESPONSE")[inter.locale.value], view=Login())
+        return await inter.send(self.bot.i18n.get("LOGIN_RESPONSE")[inter.locale.value], view=Login(inter))
 
     @slash_command()
     async def logout(self, inter: ApplicationCommandInteraction):
@@ -43,7 +43,7 @@ class AccountManagementCommands(Cog):
             (PenguinIntegrations.discord_id == inter.user.id)).gino.all()
 
         await inter.send(self.bot.i18n.get("LOGOUT_RESPONSE")[inter.locale.value].replace("%nickname%", p.safe_name()),
-                         view=Logout(p, user, penguin_ids), ephemeral=True)
+                         view=Logout(p, user, penguin_ids, inter), ephemeral=True)
 
     @slash_command()
     async def switch(self, inter: ApplicationCommandInteraction):

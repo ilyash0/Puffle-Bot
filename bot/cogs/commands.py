@@ -179,7 +179,7 @@ class UserCommands(Cog):
                 .order_by(Penguin.coins.desc()).limit(10).gino.all()
             for i, penguin in enumerate(result):
                 embed.description += f"{i + 1}. {penguin.nickname} — {f'{penguin.coins:,}'.replace(',', ' ')}\n"
-            view = TopCoinsButton()
+            view = TopCoinsButton(inter)
 
         elif category == "minutes":
             embed = disnake.Embed(title=f"{emojiGame} {self.bot.i18n.get('MOST_ACTIVE')[inter.locale.value]}",
@@ -189,7 +189,7 @@ class UserCommands(Cog):
                 .order_by(Penguin.minutes_played.desc()).limit(10).gino.all()
             for i, penguin in enumerate(result):
                 embed.description += f"{i + 1}. {penguin.nickname} — {f'{penguin.minutes_played:,}'.replace(',', ' ')}\n"
-            view = TopMinutesButton()
+            view = TopMinutesButton(inter)
 
         elif category == "stamps":
             embed = disnake.Embed(title=f"{emojiStamp} {self.bot.i18n.get('STAMP_DETECTIVES')[inter.locale.value]}s",
@@ -206,7 +206,7 @@ class UserCommands(Cog):
             result.sort(key=lambda x: x["stamps"], reverse=True)
             for i, p in enumerate(result):
                 embed.description += f"{i + 1}. {p['nickname']} — {p['stamps']}\n"
-            view = TopStampsButton()
+            view = TopStampsButton(inter)
 
         else:
             embed = disnake.Embed(title=f"{emojiCuteSad} error occurred", color=0x035BD1)

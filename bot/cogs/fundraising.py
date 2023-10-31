@@ -58,7 +58,7 @@ class FundraisingCommands(Cog):
 
         fundraising = await Fundraising.create(server_id=inter.guild_id, channel_id=inter.channel_id,
                                                message_id=message.id, penguin_id=p.id, goal=goal)
-        await message.edit(view=FundraisingButtons(fundraising, message, p, 0))
+        await message.edit(view=FundraisingButtons(fundraising, message, p, 0, inter))
         await inter.send("Сбор пожертвований начат.", ephemeral=True)
 
     @fundraising.sub_command(name="close")

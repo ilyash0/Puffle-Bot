@@ -2,7 +2,7 @@ import sys
 import traceback
 
 import disnake
-from disnake import MessageInteraction
+from disnake import MessageInteraction, ApplicationCommandInteraction
 from disnake.ui import Item
 
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
@@ -18,7 +18,15 @@ from bot.misc.utils import getMyPenguinFromUserId, transferCoins
 class Buttons(disnake.ui.View):
     def __init__(self, original_inter=None, timeout=None):
         super().__init__(timeout=timeout)
-        self.original_inter = original_inter
+        self.original_inter: ApplicationCommandInteraction or None = original_inter
+        if self.original_inter is None:
+            return
+
+        for item in self.children:
+            try:
+                item.label = self.original_inter.bot.i18n.get(item.label)[self.original_inter.locale.value]
+            except KeyError and TypeError:
+                pass
 
     async def disableAllItems(self):
         if self.original_inter is None:
@@ -37,8 +45,9 @@ class Buttons(disnake.ui.View):
 
 
 class FundraisingButtons(Buttons):
-    def __init__(self, fundraising: Fundraising, message: disnake.Message, receiver: Penguin, backers: int):
-        super().__init__(timeout=None)
+    def __init__(self, fundraising: Fundraising, message: disnake.Message, receiver: Penguin, backers: int,
+                 original_inter=None):
+        super().__init__(original_inter)
         self.fundraising = fundraising
         self.message = message
         self.receiver = receiver
@@ -87,7 +96,7 @@ class FundraisingButtons(Buttons):
     async def coins1000Button(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         await self.donate(inter, int(button.label))
 
-    @disnake.ui.button(label="Другая сумма", style=disnake.ButtonStyle.gray,
+    @disnake.ui.button(label="OTHER_AMOUNT", style=disnake.ButtonStyle.gray,
                        custom_id="other")
     async def otherSumButton(self, _, inter: disnake.CommandInteraction):
         await inter.response.send_modal(
@@ -157,9 +166,9 @@ class RulesEphemeral(Buttons):
 
 
 class Roles(Buttons):
-    def __init__(self, inter):
+    def __init__(self, original_inter):
         super().__init__()
-        self.original_inter = inter
+        self.original_inter = original_inter
         self.language = "Ru"
 
     @disnake.ui.button(label="Translate", style=disnake.ButtonStyle.primary, emoji="🇺🇸", custom_id="translate")
@@ -178,27 +187,27 @@ class Roles(Buttons):
 
 
 class Login(Buttons):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, original_inter):
+        super().__init__(original_inter=original_inter)
 
-    @disnake.ui.button(label="Войти", url="https://cpps.app/discord/login")
+    @disnake.ui.button(label="LOGIN", url="https://cpps.app/discord/login")
     async def loginButton(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         ...
 
 
 class Logout(Buttons):
-    def __init__(self, p, user, penguin_ids):
-        super().__init__()
+    def __init__(self, p, user, penguin_ids, original_inter):
+        super().__init__(original_inter)
         self.p = p
         self.user = user
         self.penguin_ids = penguin_ids
 
-    @disnake.ui.button(label="Отмена", style=disnake.ButtonStyle.gray, custom_id="cancel")
+    @disnake.ui.button(label="CANCEL", style=disnake.ButtonStyle.gray, custom_id="cancel")
     async def cancelButton(self, _, inter: disnake.CommandInteraction):
         await self.disableAllItems()
         await inter.send(inter.bot.i18n.get("CANCELLED")[inter.locale.value], ephemeral=True)
 
-    @disnake.ui.button(label="Выйти", style=disnake.ButtonStyle.red, custom_id="logout")
+    @disnake.ui.button(label="LOGOUT", style=disnake.ButtonStyle.red, custom_id="logout")
     async def logoutButton(self, _, inter: disnake.CommandInteraction):
         await self.disableAllItems()
         await PenguinIntegrations.delete.where(PenguinIntegrations.penguin_id == self.p.id).gino.status()
@@ -223,11 +232,10 @@ class Logout(Buttons):
 
 class Settings(Buttons):
     def __init__(self, original_inter, user):
-        super().__init__()
-        self.original_inter = original_inter
+        super().__init__(original_inter)
         self.user: User = user
 
-    @disnake.ui.button(label="Все", style=disnake.ButtonStyle.green, custom_id="allNotify")
+    @disnake.ui.button(label="ALL", style=disnake.ButtonStyle.green, custom_id="allNotify")
     async def allNotify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         await inter.response.defer()
         if self.user.enabled_notify:
@@ -241,7 +249,7 @@ class Settings(Buttons):
         self.user.enabled_notify = not self.user.enabled_notify
         await self.original_inter.edit_original_response(view=self)
 
-    @disnake.ui.button(label="О пополнении баланса", style=disnake.ButtonStyle.green,
+    @disnake.ui.button(label="TOP-UP", style=disnake.ButtonStyle.green,
                        custom_id="coinsNotify")
     async def coinsNotify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         await inter.response.defer()
@@ -252,7 +260,7 @@ class Settings(Buttons):
         self.user.enabled_coins_notify = not self.user.enabled_coins_notify
         await self.original_inter.edit_original_response(view=self)
 
-    @disnake.ui.button(label="Об окончании подписки", style=disnake.ButtonStyle.green,
+    @disnake.ui.button(label="END_MEMBERSHIP", style=disnake.ButtonStyle.green,
                        custom_id="membershipNotify")
     async def membershipNotify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         await inter.response.defer()
@@ -265,30 +273,30 @@ class Settings(Buttons):
 
 
 class TopMinutesButton(Buttons):
-    def __init__(self):
-        super().__init__(timeout=None)
+    def __init__(self, original_inter):
+        super().__init__(original_inter)
 
-    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
+    @disnake.ui.button(label="TOP_50", style=disnake.ButtonStyle.link,
                        url="https://play.cpps.app/ru/top/?top=online")
     async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         ...
 
 
 class TopCoinsButton(Buttons):
-    def __init__(self):
-        super().__init__(timeout=None)
+    def __init__(self, original_inter):
+        super().__init__(original_inter)
 
-    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
+    @disnake.ui.button(label="TOP_50", style=disnake.ButtonStyle.link,
                        url="https://play.cpps.app/ru/top/?top=coins")
     async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         ...
 
 
 class TopStampsButton(Buttons):
-    def __init__(self):
-        super().__init__(timeout=None)
+    def __init__(self, original_inter):
+        super().__init__(original_inter)
 
-    @disnake.ui.button(label="Топ 50", style=disnake.ButtonStyle.link,
+    @disnake.ui.button(label="TOP_50", style=disnake.ButtonStyle.link,
                        url="https://play.cpps.app/ru/top/?top=stamp")
     async def top(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         ...

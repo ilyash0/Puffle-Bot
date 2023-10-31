@@ -70,6 +70,13 @@
   "PENGUIN_AGE": "Age of the penguin",
   "STAFF": "staff",
   "PENGUIN": "penguin",
-  "TOP50": "Top 50",
-  "CANCELLED": "Cancelled"
+  "TOP_50": "Top 50",
+  "CANCELLED": "Cancelled",
+  "LOGIN": "Login",
+  "CANCEL": "Cancel",
+  "LOGOUT": "Logout",
+  "TOP-UP": "Top-up",
+  "END_MEMBERSHIP": "End of membership",
+  "OTHER_AMOUNT": "Other amount",
+  "ALL": "All"
 }
