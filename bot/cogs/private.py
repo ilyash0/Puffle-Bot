@@ -16,7 +16,7 @@ from bot.misc.constants import (
     embedAbout,
     guild_ids,
     avatarImageBytearray, placeholderImageLink)
-from bot.handlers.select import About
+from bot.handlers.select import AboutSelect
 
 
 class PrivateCommands(Cog):
@@ -75,7 +75,7 @@ class PrivateCommands(Cog):
         inter: ApplicationCommandInteraction
         """
         view = disnake.ui.View(timeout=None)
-        view.add_item(About())
+        view.add_item(AboutSelect())
         webhook = await inter.channel.create_webhook(name="CPPS.APP", avatar=avatarImageBytearray)
         await webhook.send(embeds=[embedAboutImage, embedAbout], view=view)
         await inter.send("Success", ephemeral=True)

@@ -7,7 +7,7 @@ from bot.data import db_pb
 from bot.misc.penguin import Penguin
 from bot.data.pufflebot.user import User, PenguinIntegrations
 from bot.handlers.button import Settings, Logout, Login
-from bot.handlers.select import SelectPenguins
+from bot.handlers.select import ChoosePenguin
 from bot.misc.utils import getMyPenguinFromUserId, getPenguinOrNoneFromUserId
 
 
@@ -68,7 +68,7 @@ class AccountManagementCommands(Cog):
         penguinsList = [{"safe_name": (await Penguin.get(penguin_id[0])).safe_name(), "id": penguin_id[0]} for
                         penguin_id in penguin_ids]
         view = disnake.ui.View()
-        view.add_item(SelectPenguins(penguinsList, user))
+        view.add_item(ChoosePenguin(penguinsList, user, inter))
 
         if p is None:
             return await inter.send(

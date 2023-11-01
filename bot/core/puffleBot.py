@@ -10,7 +10,7 @@ import bot.cogs
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.handlers.button import Rules, FundraisingButtons
 from bot.misc.constants import rules_message_id, about_message_id, rules_webhook_id
-from bot.handlers.select import About
+from bot.handlers.select import AboutSelect
 from bot.misc.penguin import Penguin
 
 
@@ -54,7 +54,7 @@ class PuffleBot(InteractionBot):
 
             if about_message_id is not None:
                 view = disnake.ui.View(timeout=None)
-                view.add_item(About())
+                view.add_item(AboutSelect())
                 self.add_view(view, message_id=about_message_id)
         except disnake.errors.Forbidden:
             logger.error("Forbidden: no access to rules or about messages")

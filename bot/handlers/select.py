@@ -6,15 +6,16 @@ from bot.misc.constants import embedLinks, embedRuleImageRu, embedRuleRu, embedR
 from bot.misc.penguin import Penguin
 
 
-class SelectPenguins(Select):
-    def __init__(self, penguinsList, user):
+class ChoosePenguin(Select):
+    def __init__(self, penguinsList, user, inter):
         self.disabled = False
         self.user = user
 
         options = []
         for penguin in penguinsList:
             options.append(SelectOption(label=penguin["safe_name"], value=penguin["id"]))
-        super().__init__(placeholder="Выберите пингвина", options=options, custom_id="penguins")
+        super().__init__(placeholder=inter.bot.i18n.get("CHOOSE_PENGUIN")[inter.locale.value], options=options,
+                         custom_id="penguins")
 
     async def callback(self, inter: MessageInteraction):
         penguin_id = int(inter.values[0])
@@ -22,10 +23,13 @@ class SelectPenguins(Select):
 
         await self.user.update(penguin_id=penguin_id).apply()
 
-        await inter.send(f"Успешно. Теперь ваш текущий аккаунт `{newCurrentPenguin.safe_name()}`", ephemeral=True)
+        await inter.send(
+            inter.bot.i18n.get("PENGUIN_CHOSEN")[inter.locale.value].replace("%nickname%",
+                                                                             newCurrentPenguin.safe_name()),
+            ephemeral=True)
 
 
-class About(Select):
+class AboutSelect(Select):
     def __init__(self):
         options = [SelectOption(label="Links", value="Links"),
                    SelectOption(label="Rules", value="Rules"),

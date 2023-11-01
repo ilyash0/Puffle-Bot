@@ -4,6 +4,7 @@ import traceback
 import disnake
 from disnake import MessageInteraction, ApplicationCommandInteraction
 from disnake.ui import Item
+from loguru import logger
 
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.data.pufflebot.user import User, PenguinIntegrations
@@ -39,7 +40,7 @@ class Buttons(disnake.ui.View):
         await self.disableAllItems()
 
     async def on_error(self, error: Exception, item: Item, inter: MessageInteraction):
-        print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)
+        logger.error(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
         await inter.send(f"{inter.bot.i18n.get(error.args[0])[inter.locale.value]}", ephemeral=True)
 
@@ -66,16 +67,15 @@ class FundraisingButtons(Buttons):
         self.raised += int(coins)
         embed = self.message.embeds[0]
         embed.add_field(embed.fields[0].name,
-                        f"{self.raised:,}{f' из {self.goal:,}' if self.goal else ''}".replace(',', ' '))
+                        f"{self.raised:,}{f' / {self.goal:,}' if self.goal else ''}".replace(',', ' '))
         embed.remove_field(0)
-        embed.set_footer(text=f"Спонсоры: {self.backers + 1}")
 
         if not await FundraisingBackers.get([self.message.id, p.id]):
             self.backers += 1
             await FundraisingBackers.create(message_id=self.message.id, receiver_penguin_id=self.receiver.id,
                                             backer_penguin_id=p.id)
 
-        embed.set_footer(text=f"Спонсоры: {self.backers}")
+        embed.set_footer(text=f"{embed.footer.text.split()[0]} {self.backers}")
 
         await self.message.edit(embed=embed)
         await self.fundraising.update(raised=self.raised).apply()
@@ -100,7 +100,10 @@ class FundraisingButtons(Buttons):
                        custom_id="other")
     async def otherSumButton(self, _, inter: disnake.CommandInteraction):
         await inter.response.send_modal(
-            modal=FundraisingModal(self.donate, f"Сбор монет для {self.receiver.safe_name()}"))
+            modal=FundraisingModal(self.donate,
+                                   inter.bot.i18n.get("FR_MODAL_TITLE")[inter.locale.value].replace("%nickname%",
+                                                                                                    self.receiver.safe_name()),
+                                   inter))
 
 
 class Rules(Buttons):
