@@ -45,7 +45,7 @@
   "INCORRECT_COINS_AMOUNT": "Please enter the correct amount of coins",
   "INCORRECT_RECEIVER": "You can't transfer the coins to yourself",
   "NOT_ENOUGH_COINS": "You don't have enough coins to transfer",
-  "COINS_TRANSFERRED": "You have successfully transferred `%amount%` coins to player `%receiver%`!",
+  "COINS_TRANSFERRED": "You have successfully transferred `%coins%` coins to player `%receiver%`!",
   "NO_ONLINE_RESPONSE": "There's no one in our game right now %emote%",
   "RICH_ISLANDERS": "Rich islanders",
   "MOST_ACTIVE": "The most active on the island",

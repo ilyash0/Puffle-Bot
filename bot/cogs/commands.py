@@ -80,7 +80,7 @@ class UserCommands(Cog):
 
     @slash_command()
     async def pay(self, inter: ApplicationCommandInteraction,
-                  nickname: str, amount: int, message: str = None):
+                  nickname: str, coins: int, message: str = None):
         """
         Transfer your coins to another player {{PAY}}
 
@@ -89,7 +89,7 @@ class UserCommands(Cog):
         inter: ApplicationCommandInteraction
         nickname: disnake.User
             Penguin's nickname in game {{PLAYER}}
-        amount: int
+        coins: int
             Number of coins {{COINS}}
         message:  Optional[str]
             Message to recipient {{MESSAGE}}
@@ -101,15 +101,15 @@ class UserCommands(Cog):
             return await inter.send(self.bot.i18n.get("PENGUIN_NOT_FOUND")[inter.locale.value], ephemeral=True)
         r: Penguin = await Penguin.get(int(receiverId[0]))
 
-        await transferCoins(p, r, amount)
-        await notifyCoinsReceive(p, r, amount, message, inter.data.name)
+        await transferCoins(p, r, coins)
+        await notifyCoinsReceive(p, r, coins, message, inter.data.name)
         await inter.send(
             self.bot.i18n.get("COINS_TRANSFERRED")[inter.locale.value].
-            replace("%amount%", str(amount)).replace("%receiver%", r.safe_name()))
+            replace("%coins%", str(coins)).replace("%receiver%", r.safe_name()))
 
     @slash_command()
     async def pay2(self, inter: ApplicationCommandInteraction,
-                   user: disnake.User, amount: int, message: str = None):
+                   user: disnake.User, coins: int, message: str = None):
         """
         Transfer your coins to another Discord user {{PAY2}}
 
@@ -118,7 +118,7 @@ class UserCommands(Cog):
         inter: ApplicationCommandInteraction
         user: disnake.User
             The Discord user {{USER}}
-        amount: int
+        coins: int
             Number of coins {{COINS}}
         message:  Optional[str]
             Message to recipient {{MESSAGE}}
@@ -129,11 +129,11 @@ class UserCommands(Cog):
         if r is None:
             return await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[inter.locale.value], ephemeral=True)
 
-        await transferCoins(p, r, amount)
-        await notifyCoinsReceive(p, r, amount, message, inter.data.name)
+        await transferCoins(p, r, coins)
+        await notifyCoinsReceive(p, r, coins, message, inter.data.name)
         await inter.send(
             self.bot.i18n.get("COINS_TRANSFERRED")[inter.locale.value].
-            replace("%amount%", str(amount)).replace("%receiver%", r.safe_name()))
+            replace("%coins%", str(coins)).replace("%receiver%", r.safe_name()))
 
     @slash_command()
     async def online(self, inter: ApplicationCommandInteraction):

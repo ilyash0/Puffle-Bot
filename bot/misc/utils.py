@@ -3,6 +3,7 @@ from loguru import logger
 
 from bot.data.clubpenguin.moderator import Logs
 from bot.data.pufflebot.user import User
+from bot.handlers import DummyEventListenerManager
 from bot.misc.penguin import Penguin
 
 penguins_by_id = {}
@@ -76,7 +77,7 @@ async def getPenguinFromPenguinId(penguin_id: int) -> Penguin:
     return p
 
 
-async def transferCoins(sender: Penguin, receiver: Penguin, amount: int):
+async def transferCoins(sender: Penguin, receiver: Penguin, coins: int):
     """
     Transfer coins from one penguin to another and return a status dictionary.
 
@@ -86,13 +87,13 @@ async def transferCoins(sender: Penguin, receiver: Penguin, amount: int):
         The penguin object representing the sender of the coins.
     receiver: Penguin
         The penguin object representing the receiver of the coins.
-    amount: int
+    coins: int
         The number of coins to be transferred. It must be a positive integer.
 
     Raises
     ------
     ValueError
-        - If the provided `amount` is not a positive integer (amount <= 0).
+        - If the provided `coins` is not a positive integer (coins <= 0).
         - If the `sender` and `receiver` penguins have the same ID, indicating an incorrect receiver.
         - If the `sender` does not have enough coins to complete the transfer.
 
@@ -100,26 +101,26 @@ async def transferCoins(sender: Penguin, receiver: Penguin, amount: int):
     ------
     None
     """
-    if amount <= 0:
+    if coins <= 0:
         raise ValueError("INCORRECT_COINS_AMOUNT")
 
     if sender.id == receiver.id:
         raise ValueError("INCORRECT_RECEIVER")
 
-    if sender.coins < amount:
+    if sender.coins < coins:
         raise ValueError("NOT_ENOUGH_COINS")
 
-    await sender.update(coins=sender.coins - amount).apply()
-    await receiver.update(coins=receiver.coins + amount).apply()
+    await sender.update(coins=sender.coins - coins).apply()
+    await receiver.update(coins=receiver.coins + coins).apply()
     await Logs.create(penguin_id=int(sender.id), type=4,
-                      text=f"Перевёл игроку {receiver.username} {int(amount)} монет. Через Discord бота", room_id=0,
+                      text=f"Перевёл игроку {receiver.username} {int(coins)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
     await Logs.create(penguin_id=int(receiver.id), type=4,
-                      text=f"Получил от {sender.username} {int(amount)} монет. Через Discord бота", room_id=0,
+                      text=f"Получил от {sender.username} {int(coins)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
 
-    await send_xml("cdu", sender.id, -amount)
-    await send_xml("cdu", receiver.id, amount)
+    await send_xml("cdu", sender.id, -coins)
+    await send_xml("cdu", receiver.id, coins)
     return
 
 

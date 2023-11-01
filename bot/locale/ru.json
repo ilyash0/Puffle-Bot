@@ -45,7 +45,7 @@
   "INCORRECT_COINS_AMOUNT": "Пожалуйста введите правильное число монет",
   "INCORRECT_RECEIVER": "Вы не можете передать монеты самому себе",
   "NOT_ENOUGH_COINS": "У вас недостаточно монет для перевода",
-  "COINS_TRANSFERRED": "Вы успешно передали `%amount%` монет игроку `%receiver%`!",
+  "COINS_TRANSFERRED": "Вы успешно передали `%coins%` монет игроку `%receiver%`!",
   "NO_ONLINE_RESPONSE": "В нашей игре сейчас никого нет %emote%",
   "ONLINE_RESPONSE": "В нашей игре сейчас `%online%` человек/а онлайн",
   "RICH_ISLANDERS": "Богачи острова",
