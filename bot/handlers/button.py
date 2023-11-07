@@ -55,11 +55,13 @@ class FundraisingButtons(Buttons):
         self.raised = fundraising.raised
         self.goal = fundraising.goal
         self.backers = backers
+        self.command = "fundraising"
 
     async def donate(self, inter: disnake.CommandInteraction, coins: int):
         await inter.response.defer()
         p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         await transferCoins(p, self.receiver, int(coins))
+        await notifyCoinsReceive(p, self.receiver, coins, None, self.command)
         await inter.send(
             inter.bot.i18n.get("COINS_TRANSFERRED")[inter.locale.value].
             replace("%coins%", str(coins)).replace("%receiver%", self.receiver.safe_name()))

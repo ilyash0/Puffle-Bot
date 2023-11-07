@@ -14,7 +14,10 @@ class Modal(disnake.ui.Modal):
     async def on_error(self, error: Exception, inter: ModalInteraction) -> None:
         logger.error(f"Ignoring exception in view {self.title}:", file=sys.stderr)
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
-        await inter.send(f"{inter.bot.i18n.get(error.args[0])[inter.locale.value]}", ephemeral=True)
+        try:
+            await inter.send(f"{inter.bot.i18n.get(error.args[0])[inter.locale.value]}", ephemeral=True)
+        except KeyError and TypeError:
+            await inter.send(f"Unknown error", ephemeral=True)
 
 
 class FundraisingModal(Modal):

@@ -3,7 +3,6 @@ from loguru import logger
 
 from bot.data.clubpenguin.moderator import Logs
 from bot.data.pufflebot.user import User
-from bot.handlers import DummyEventListenerManager
 from bot.misc.penguin import Penguin
 
 penguins_by_id = {}
