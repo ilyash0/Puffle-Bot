@@ -6,7 +6,7 @@ class User(db_pb.Model):
 
     id = db_pb.Column(db_pb.BigInteger, primary_key=True, nullable=False)
     penguin_id = db_pb.Column(db_pb.BigInteger, nullable=False)
-    language = db_pb.Column(db_pb.String(2), nullable=False, server_default=db_pb.text("ru"))
+    language = db_pb.Column(db_pb.String(5), nullable=False, server_default=db_pb.text("en-GB"))
     enabled_notify = db_pb.Column(db_pb.Boolean, nullable=False, server_default=db_pb.text("true"))
     enabled_coins_notify = db_pb.Column(db_pb.Boolean, nullable=False, server_default=db_pb.text("true"))
     enabled_membership_notify = db_pb.Column(db_pb.Boolean, nullable=False, server_default=db_pb.text("true"))
