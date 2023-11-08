@@ -4,17 +4,14 @@ import traceback
 import disnake
 from disnake import Webhook, Game, ApplicationCommandInteraction
 from disnake.ext.commands import InteractionBot, CommandError
-import disnake.user
 from loguru import logger
 import bot.locale
 import bot.cogs
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
-from bot.data.pufflebot.user import User
 from bot.handlers.button import Rules, FundraisingButtons
 from bot.misc.constants import rules_message_id, about_message_id, rules_webhook_id
 from bot.handlers.select import AboutSelect
 from bot.misc.penguin import Penguin
-from bot.misc.utils import getPenguinOrNoneFromUserId
 
 
 class PuffleBot(InteractionBot):
@@ -33,31 +30,6 @@ class PuffleBot(InteractionBot):
         self.i18n.load(bot.locale.__path__[0])
         logger.info(f'Loaded {len(os.listdir(bot.locale.__path__[0]))} languages')
 
-    @staticmethod
-    async def overrideUsersClass(userClass):
-        async def setup(self) -> None:
-            userClass.user_db = await User.get(self.id)
-            userClass.penguin = await getPenguinOrNoneFromUserId(self.id)
-            userClass.lang = self.user_db.language
-
-        async def setLang(_, new_lang: str) -> None:
-            if new_lang not in ["ru", "en-GB", "en-US"]:
-                new_lang = "en-GB"
-            userClass.lang = new_lang
-            await userClass.user_db.update(language=new_lang).apply()
-
-        userClass.penguin = None
-        userClass.lang = None
-        userClass.user_db = None
-        userClass.setup = setup
-        userClass.setLang = setLang
-
-    async def fetch_user(self, user_id: int, /) -> User:
-        data = await self.http.get_user(user_id)
-        user = User(state=self._connection, data=data)
-        await user.setup()
-        return user
-
     async def on_ready(self):
         await self.change_presence(activity=Game(name="CPPS.APP"))
 
@@ -70,10 +42,6 @@ class PuffleBot(InteractionBot):
                 await inter.response.defer()
             except disnake.errors.HTTPException:
                 logger.debug("Defer is not required")
-        await inter.user.setup()
-        await inter.user.setLang(inter.locale.value)
-        if inter.data.name not in ["ilyash", "online", "login", "top"] and inter.user.penguin is None:
-            raise KeyError("MY_PENGUIN_NOT_FOUND")
 
     async def on_connect(self):
         logger.info(f'Bot connected')

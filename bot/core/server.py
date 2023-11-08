@@ -57,8 +57,6 @@ class Server:
         await self.dummy_event_listeners.fire('boot', self)
         self.bot.load_langs()
         self.bot.load_cogs()
-        await self.bot.overrideUsersClass(disnake.member.Member)
-        await self.bot.overrideUsersClass(disnake.user.User)
 
         try:
             await self.bot.start(self.config.token)
