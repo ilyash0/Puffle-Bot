@@ -251,7 +251,7 @@ class Settings(Buttons):
             button.style = disnake.ButtonStyle.green
             self.children[1].disabled = False
             self.children[2].disabled = False
-        self.user.enabled_notify = not self.user.enabled_notify
+        self.user.update(enabled_notify=not self.user.enabled_notify).apply()
         await self.original_inter.edit_original_response(view=self)
 
     @disnake.ui.button(label="TOP-UP", style=disnake.ButtonStyle.green,
@@ -262,7 +262,7 @@ class Settings(Buttons):
             button.style = disnake.ButtonStyle.gray
         else:
             button.style = disnake.ButtonStyle.green
-        self.user.enabled_coins_notify = not self.user.enabled_coins_notify
+        self.user.update(enabled_coins_notify=not self.user.enabled_coins_notify).apply()
         await self.original_inter.edit_original_response(view=self)
 
     @disnake.ui.button(label="END_MEMBERSHIP", style=disnake.ButtonStyle.green,
@@ -273,7 +273,7 @@ class Settings(Buttons):
             button.style = disnake.ButtonStyle.gray
         else:
             button.style = disnake.ButtonStyle.green
-        self.user.enabled_membership_notify = not self.user.enabled_membership_notify
+        self.user.update(enabled_membership_notify=not self.user.enabled_membership_notify).apply()
         await self.original_inter.edit_original_response(view=self)
 
 
