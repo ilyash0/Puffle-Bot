@@ -153,7 +153,7 @@ class UserCommands(Cog):
         if online == 0:
             textMessage = self.bot.i18n.get("NO_ONLINE_RESPONSE")[inter.locale.value].replace("%emote%", emojiCuteSad)
         else:
-            textMessage = self.bot.i18n.get("ONLINE_RESPONSE")[inter.locale.value].replace("%online%", online)
+            textMessage = self.bot.i18n.get("ONLINE_RESPONSE")[inter.locale.value].replace("%online%", str(online))
         await inter.send(textMessage)
 
     @slash_command()

@@ -47,6 +47,7 @@
   "NOT_ENOUGH_COINS": "You don't have enough coins to transfer",
   "COINS_TRANSFERRED": "You have successfully transferred `%coins%` coins to player `%receiver%`!",
   "NO_ONLINE_RESPONSE": "There's no one in our game right now %emote%",
+  "ONLINE_RESPONSE": "In our game `%online%` penguins are online right now",
   "RICH_ISLANDERS": "Rich islanders",
   "MOST_ACTIVE": "The most active on the island",
   "STAMP_DETECTIVES": "Best stamp detectives",
