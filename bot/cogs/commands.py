@@ -54,8 +54,8 @@ class UserCommands(Cog):
         else:
             p = await getMyPenguinFromUserId(inter.author.id)
 
-        if p.get_custom_attribute("mood") and p.get_custom_attribute("mood") != " ":
-            mood = f'`{p.get_custom_attribute("mood")}`'
+        if p.get_custom_attribute("mood").replace(" ", ""):
+            mood = f'_{p.get_custom_attribute("mood")}_'
         else:
             mood = None
 
