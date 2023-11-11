@@ -7,6 +7,7 @@ from disnake.ext.commands import InteractionBot, CommandError
 from loguru import logger
 import bot.locale
 import bot.cogs
+from bot.core.disnaleOverride import NewUser, NewMember
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.handlers.button import Rules, FundraisingButtons
 from bot.misc.constants import rules_message_id, about_message_id, rules_webhook_id
@@ -20,6 +21,15 @@ class PuffleBot(InteractionBot):
         self.defer = defer
         if self.defer:
             logger.info("Defer enabled")
+
+    @staticmethod
+    def override_disnake_classes():
+        disnake.User.penguin = NewUser.penguin
+        disnake.User.db = NewUser.db
+        disnake.User.lang = NewUser.lang
+        disnake.Member.penguin = NewMember.penguin
+        disnake.Member.db = NewMember.db
+        disnake.Member.lang = NewMember.lang
 
     def load_cogs(self):
         for file in os.listdir(bot.cogs.__path__[0]):
@@ -42,6 +52,13 @@ class PuffleBot(InteractionBot):
                 await inter.response.defer()
             except disnake.errors.HTTPException:
                 logger.debug("Defer is not required")
+        if await inter.user.lang != inter.locale.value:
+            new_lang = inter.locale.value
+            if new_lang not in ["ru", "en-GB", "en-US"]:
+                new_lang = "en-GB"
+            await inter.user.db.update(language=new_lang).apply()
+        if inter.data.name not in ["ilyash", "online", "login", "top"] and (await inter.user.penguin) is None:
+            raise KeyError("MY_PENGUIN_NOT_FOUND")
 
     async def on_connect(self):
         logger.info(f'Bot connected')
@@ -73,11 +90,12 @@ class PuffleBot(InteractionBot):
                 pass
 
     async def on_slash_command_error(self, inter: ApplicationCommandInteraction, exception: CommandError):
-        logger.error(exception)
-        traceback.print_exception(type(exception), exception, exception.__traceback__)
         try:
+            logger.error(f"User error: {exception.original.args[0]}")
             await inter.send(f"{self.i18n.get(exception.original.args[0])[inter.locale.value]}", ephemeral=True)
-        except KeyError and TypeError:
+        except KeyError and TypeError and AttributeError:
+            logger.error(exception)
+            traceback.print_exception(type(exception), exception, exception.__traceback__)
             await inter.send(f"Unknown error", ephemeral=True)
 
     async def on_error(self, event_method: str, *args, **kwargs):
