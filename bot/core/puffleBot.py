@@ -9,6 +9,7 @@ import bot.locale
 import bot.cogs
 from bot.core.disnaleOverride import NewUser, NewMember
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
+from bot.data.pufflebot.user import User
 from bot.handlers.button import Rules, FundraisingButtons
 from bot.misc.constants import rules_message_id, about_message_id, rules_webhook_id, non_deferred_commands, \
     commands_without_penguin_requirement
@@ -57,6 +58,9 @@ class PuffleBot(InteractionBot):
 
         if command_requires_penguin and user_penguin is None:
             raise KeyError("MY_PENGUIN_NOT_FOUND")
+
+        if not user_db:
+            await User.create(id=inter.user.id)
 
         if user_db.language != str(inter.locale):
             await user_db.update(language=str(inter.locale)).apply()
