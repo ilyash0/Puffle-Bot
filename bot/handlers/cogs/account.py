@@ -1,7 +1,7 @@
 from disnake import AppCommandInter
 from loguru import logger
 import disnake
-from disnake.ext.commands import Cog, slash_command
+from disnake.ext.commands import Cog, slash_command, CommandError
 
 from bot.data import db_pb
 from bot.misc.penguin import Penguin
@@ -60,10 +60,10 @@ class AccountManagementCommands(Cog):
             (PenguinIntegrations.discord_id == inter.user.id)).gino.all()
 
         if len(penguin_ids) == 0:
-            raise KeyError("MY_PENGUIN_NOT_FOUND")
+            raise CommandError("MY_PENGUIN_NOT_FOUND")
 
         if len(penguin_ids) == 1:
-            raise KeyError("ONLY_ONE_PENGUIN_LINKED")
+            raise CommandError("ONLY_ONE_PENGUIN_LINKED")
 
         penguins_list = [{"safe_name": (await Penguin.get(penguin_id[0])).safe_name(), "id": penguin_id[0]} for
                          penguin_id in penguin_ids]
