@@ -1,4 +1,4 @@
-from disnake import ApplicationCommandInteraction
+from disnake import AppCommandInter
 from loguru import logger
 import disnake
 from disnake.ext.commands import Cog, slash_command
@@ -8,7 +8,6 @@ from bot.misc.penguin import Penguin
 from bot.data.pufflebot.user import User, PenguinIntegrations
 from bot.handlers.button import Settings, Logout, Login
 from bot.handlers.select import ChoosePenguin
-from bot.misc.utils import getMyPenguinFromUserId, getPenguinOrNoneFromUserId
 
 
 class AccountManagementCommands(Cog):
@@ -18,44 +17,45 @@ class AccountManagementCommands(Cog):
         logger.info(f"Loaded {len(self.get_application_commands())} account management app commands")
 
     @slash_command()
-    async def login(self, inter: ApplicationCommandInteraction):
+    async def login(self, inter: AppCommandInter):
         """
         Log in to your current penguin {{LOGIN}}
 
         Parameters
         ----------
-        inter: ApplicationCommandInteraction
+        inter: AppCommandInter
         """
-        return await inter.send(self.bot.i18n.get("LOGIN_RESPONSE")[inter.locale.value], view=Login(inter))
+        await inter.send(self.bot.i18n.get("LOGIN_RESPONSE")[str(inter.locale)],
+                         view=Login(inter))
 
     @slash_command()
-    async def logout(self, inter: ApplicationCommandInteraction):
+    async def logout(self, inter: AppCommandInter):
         """
         Log out from your current penguin {{LOGOUT}}
 
         Parameters
         ----------
-        inter: ApplicationCommandInteraction
+        inter: AppCommandInter
         """
-        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
-        user: User = await User.get(inter.user.id)
+        p: Penguin = await inter.user.penguin
+        user: User = await inter.user.db
         penguin_ids = await db_pb.select([PenguinIntegrations.penguin_id]).where(
             (PenguinIntegrations.discord_id == inter.user.id)).gino.all()
 
-        await inter.send(self.bot.i18n.get("LOGOUT_RESPONSE")[inter.locale.value].replace("%nickname%", p.safe_name()),
+        await inter.send(self.bot.i18n.get("LOGOUT_RESPONSE")[str(inter.locale)].replace("%nickname%", p.safe_name()),
                          view=Logout(p, user, penguin_ids, inter), ephemeral=True)
 
     @slash_command()
-    async def switch(self, inter: ApplicationCommandInteraction):
+    async def switch(self, inter: AppCommandInter):
         """
         Switch the current penguin {{SWITCH}}
 
         Parameters
         ----------
-        inter: ApplicationCommandInteraction
+        inter: AppCommandInter
         """
-        p: Penguin = await getPenguinOrNoneFromUserId(inter.user.id)
-        user: User = await User.get(inter.user.id)
+        p: Penguin = await inter.user.penguin
+        user: User = await inter.user.db
         penguin_ids = await db_pb.select([PenguinIntegrations.penguin_id]).where(
             (PenguinIntegrations.discord_id == inter.user.id)).gino.all()
 
@@ -65,33 +65,33 @@ class AccountManagementCommands(Cog):
         if len(penguin_ids) == 1:
             raise KeyError("ONLY_ONE_PENGUIN_LINKED")
 
-        penguinsList = [{"safe_name": (await Penguin.get(penguin_id[0])).safe_name(), "id": penguin_id[0]} for
-                        penguin_id in penguin_ids]
+        penguins_list = [{"safe_name": (await Penguin.get(penguin_id[0])).safe_name(), "id": penguin_id[0]} for
+                         penguin_id in penguin_ids]
         view = disnake.ui.View()
-        view.add_item(ChoosePenguin(penguinsList, user, inter))
+        view.add_item(ChoosePenguin(penguins_list, user, inter))
 
         if p is None:
             return await inter.send(
-                self.bot.i18n.get("SWITCH_RESPONSE_ALT")[inter.locale.value],
+                self.bot.i18n.get("SWITCH_RESPONSE_ALT")[str(inter.locale)],
                 view=view, ephemeral=True)
 
         return await inter.send(
-            self.bot.i18n.get("SWITCH_RESPONSE")[inter.locale.value].replace("%nickname%", p.safe_name()),
+            self.bot.i18n.get("SWITCH_RESPONSE")[str(inter.locale)].replace("%nickname%", p.safe_name()),
             view=view, ephemeral=True)
 
     @slash_command()
-    async def settings(self, inter: ApplicationCommandInteraction):
+    async def settings(self, inter: AppCommandInter):
         """
         Your personal settings {{SETTINGS}}
 
         Parameters
         ----------
-        inter: ApplicationCommandInteraction
+        inter: AppCommandInter
         """
-        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
-        user: User = await User.get(inter.user.id)
-
-        await inter.send(self.bot.i18n.get("SETTINGS_RESPONSE")[inter.locale.value], view=Settings(inter, user),
+        user: User = await inter.user.db
+        if user is None:
+            user: User = await User.create(inter.user.id)
+        await inter.send(self.bot.i18n.get("SETTINGS_RESPONSE")[str(inter.locale)], view=Settings(inter, user),
                          ephemeral=True)
 
 

@@ -23,6 +23,8 @@ headers = {
 
 # Arrays
 guild_ids = [cppsapp_server_id, test_server_id]
+non_deferred_commands = ["settings"]
+commands_without_penguin_requirement = ["ilyash", "online", "login", "top", "settings"]
 
 # Bytearrays
 avatarImageBytearray = BytesIO(get(avatarImageLink).content).getvalue()

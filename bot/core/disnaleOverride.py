@@ -6,6 +6,9 @@ from bot.misc.utils import getPenguinOrNoneFromUserId
 
 
 class NewUser(disnake.User):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     @property
     async def penguin(self) -> Penguin or None:
         return await getPenguinOrNoneFromUserId(self.id)
@@ -13,15 +16,11 @@ class NewUser(disnake.User):
     @property
     async def db(self) -> bot.data.pufflebot.user.User:
         return await bot.data.pufflebot.user.User.get(self.id)
-
-    @property
-    async def lang(self) -> str:
-        return (await self.db).language
 
 
 class NewMember(disnake.Member):
-    def __init__(self, *, data, guild, state, user_data=None):
-        super().__init__(data=data, guild=guild, state=state, user_data=user_data)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @property
     async def penguin(self) -> Penguin or None:
@@ -30,7 +29,3 @@ class NewMember(disnake.Member):
     @property
     async def db(self) -> bot.data.pufflebot.user.User:
         return await bot.data.pufflebot.user.User.get(self.id)
-
-    @property
-    async def lang(self) -> str:
-        return (await self.db).language

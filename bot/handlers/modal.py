@@ -12,11 +12,13 @@ class Modal(disnake.ui.Modal):
         ...
 
     async def on_error(self, error: Exception, inter: ModalInteraction) -> None:
-        logger.error(f"Ignoring exception in view {self.title}:", file=sys.stderr)
-        traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
         try:
-            await inter.send(f"{inter.bot.i18n.get(error.args[0])[inter.locale.value]}", ephemeral=True)
-        except KeyError and TypeError:
+            logger.error(f"User error: {error.args[0]}")
+            await inter.send(f"{inter.bot.i18n.get(error.args[0])[str(inter.locale)]}", ephemeral=True)
+            return
+        except (KeyError, TypeError, AttributeError):
+            logger.error(f"Ignoring exception in modal {self.title}", file=sys.stderr)
+            traceback.print_exception(type(error), error, error.__traceback__)
             await inter.send(f"Unknown error", ephemeral=True)
 
 
@@ -26,8 +28,8 @@ class FundraisingModal(Modal):
         self.title = title
 
         components = [
-            disnake.ui.TextInput(label=inter.bot.i18n.get("TRANSFER_COINS")[inter.locale.value],
-                                 placeholder=inter.bot.i18n.get("ENTER_AMOUNT")[inter.locale.value],
+            disnake.ui.TextInput(label=inter.bot.i18n.get("TRANSFER_COINS")[str(inter.locale)],
+                                 placeholder=inter.bot.i18n.get("ENTER_AMOUNT")[str(inter.locale)],
                                  custom_id="payInput", required=True)]
 
         super().__init__(title=self.title, components=components, custom_id="fundraising")
@@ -37,6 +39,6 @@ class FundraisingModal(Modal):
         try:
             coins = int(coins)
         except ValueError:
-            return await inter.send(inter.bot.i18n.get("INCORRECT_COINS_AMOUNT")[inter.locale.value], ephemeral=True)
+            return await inter.send(inter.bot.i18n.get("INCORRECT_COINS_AMOUNT")[str(inter.locale)], ephemeral=True)
 
         await self.function(inter, int(coins))

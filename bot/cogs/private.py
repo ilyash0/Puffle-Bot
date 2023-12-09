@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 from statistics import mean
 
 import disnake
-from disnake import ApplicationCommandInteraction, AllowedMentions, Webhook, Embed, Localized
+from disnake import AppCommandInter, AllowedMentions, Webhook, Embed, Localized
 from disnake.ext.commands import Cog, slash_command, Param
 from loguru import logger
 
@@ -26,15 +26,16 @@ class PrivateCommands(Cog):
         logger.info(f"Loaded {len(self.get_application_commands())} private app commands")
 
     @slash_command(guild_ids=guild_ids)
-    async def transfer(self, inter: ApplicationCommandInteraction, forum_id: str):
+    async def transfer(self, inter: AppCommandInter, forum_id: str):
         """
         Transfer images from the current channel to the forum {{TRANSFER}}
 
         Parameters
         ----------
-        inter: ApplicationCommandInteraction
+        inter: AppCommandInter
         forum_id: str
-            ID of the target forum chanel {{FORUM}}
+            ID of the target forum chanel {{FORUM_ID}}
+
         """
         await inter.response.defer()
         source_channel = inter.channel
@@ -42,23 +43,23 @@ class PrivateCommands(Cog):
 
         async for message in source_channel.history(limit=None):
             if message.attachments:
-                content = f", комментарий: {message.content}" if message.content else ''
+                content = f", comment: {message.content}" if message.content else ''
                 await destination_channel.create_thread(name=f"{message.author.display_name}",
-                                                        content=f'Автор: {message.author.mention}{content}',
+                                                        content=f'Author: {message.author.mention}{content}',
                                                         files=[await attachment.to_file() for attachment in
                                                                message.attachments],
                                                         allowed_mentions=AllowedMentions(users=False)
                                                         )
-        await inter.edit_original_response(f"Успешно перенесено в <#{forum_id}>!")
+        await inter.edit_original_response(f"Success transferred in <#{forum_id}>!")
 
     @slash_command(guild_ids=guild_ids)
-    async def rules(self, inter: ApplicationCommandInteraction):
+    async def rules(self, inter: AppCommandInter):
         """
         Send rules embed {{RULES}}
 
         Parameters
         ----------
-        inter: ApplicationCommandInteraction
+        inter: AppCommandInter
         """
         webhook: Webhook = await inter.channel.create_webhook(name="CPPS.APP", avatar=avatarImageBytearray)
         message = await webhook.send(embeds=[embedRuleImageRu, embedRuleRu], wait=True)
@@ -66,13 +67,13 @@ class PrivateCommands(Cog):
         await inter.send("Success", ephemeral=True)
 
     @slash_command(guild_ids=guild_ids)
-    async def about(self, inter: ApplicationCommandInteraction):
+    async def about(self, inter: AppCommandInter):
         """
         Send about embed {{ABOUT}}
 
         Parameters
         ----------
-        inter: ApplicationCommandInteraction
+        inter: AppCommandInter
         """
         view = disnake.ui.View(timeout=None)
         view.add_item(AboutSelect())
@@ -81,7 +82,7 @@ class PrivateCommands(Cog):
         await inter.send("Success", ephemeral=True)
 
     @slash_command(guild_ids=guild_ids)
-    async def statistics(self, inter: ApplicationCommandInteraction,
+    async def statistics(self, inter: AppCommandInter,
                          start_date: str, end_date: str = None,
                          detail: str = Param(default="No",
                                              choices=[Localized("Yes", key="YES"), Localized("No", key="NO")])):
@@ -90,7 +91,7 @@ class PrivateCommands(Cog):
 
         Parameters
         ----------
-        inter: ApplicationCommandInteraction
+        inter: AppCommandInter
         start_date: str
             Start date, format DD.MM.YYYY {{START_DATE}}
         end_date:  Optional[str]
@@ -125,7 +126,8 @@ class PrivateCommands(Cog):
         active_players = set()
         total_time_played = 0
         for login in logins_list:
-            if login.minutes_played == 0: continue
+            if login.minutes_played == 0:
+                continue
 
             active_players.add(login.penguin_id)
             total_time_played += login.minutes_played

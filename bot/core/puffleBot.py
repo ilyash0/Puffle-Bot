@@ -2,7 +2,7 @@ import os
 import traceback
 
 import disnake
-from disnake import Webhook, Game, ApplicationCommandInteraction
+from disnake import Webhook, Game, AppCommandInter
 from disnake.ext.commands import InteractionBot, CommandError
 from loguru import logger
 import bot.locale
@@ -10,7 +10,8 @@ import bot.cogs
 from bot.core.disnaleOverride import NewUser, NewMember
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.handlers.button import Rules, FundraisingButtons
-from bot.misc.constants import rules_message_id, about_message_id, rules_webhook_id
+from bot.misc.constants import rules_message_id, about_message_id, rules_webhook_id, non_deferred_commands, \
+    commands_without_penguin_requirement
 from bot.handlers.select import AboutSelect
 from bot.misc.penguin import Penguin
 
@@ -26,10 +27,8 @@ class PuffleBot(InteractionBot):
     def override_disnake_classes():
         disnake.User.penguin = NewUser.penguin
         disnake.User.db = NewUser.db
-        disnake.User.lang = NewUser.lang
         disnake.Member.penguin = NewMember.penguin
         disnake.Member.db = NewMember.db
-        disnake.Member.lang = NewMember.lang
 
     def load_cogs(self):
         for file in os.listdir(bot.cogs.__path__[0]):
@@ -42,23 +41,25 @@ class PuffleBot(InteractionBot):
 
     async def on_ready(self):
         await self.change_presence(activity=Game(name="CPPS.APP"))
-
         logger.info(f"Bot {self.user} ready")
 
-    async def on_slash_command(self, inter: ApplicationCommandInteraction):
+    async def on_slash_command(self, inter: AppCommandInter):
         logger.debug(f"{inter.author} use slash command /{inter.data.name} in #{inter.channel}")
-        if self.defer:
+        if self.defer and inter.data.name not in non_deferred_commands:
             try:
                 await inter.response.defer()
             except disnake.errors.HTTPException:
                 logger.debug("Defer is not required")
-        if await inter.user.lang != inter.locale.value:
-            new_lang = inter.locale.value
-            if new_lang not in ["ru", "en-GB", "en-US"]:
-                new_lang = "en-GB"
-            await inter.user.db.update(language=new_lang).apply()
-        if inter.data.name not in ["ilyash", "online", "login", "top"] and (await inter.user.penguin) is None:
+
+        user_penguin = await inter.user.penguin
+        user_db = await inter.user.db
+        command_requires_penguin = inter.data.name not in commands_without_penguin_requirement
+
+        if command_requires_penguin and user_penguin is None:
             raise KeyError("MY_PENGUIN_NOT_FOUND")
+
+        if user_db.language != str(inter.locale):
+            await user_db.update(language=str(inter.locale)).apply()
 
     async def on_connect(self):
         logger.info(f'Bot connected')
@@ -88,17 +89,18 @@ class PuffleBot(InteractionBot):
                 await fundraising.delete()
             except disnake.errors.Forbidden:
                 pass
+            # except asyncpg.exceptions.UndefinedTableError:
+            #     pass
 
-    async def on_slash_command_error(self, inter: ApplicationCommandInteraction, exception: CommandError):
+    async def on_slash_command_error(self, inter: AppCommandInter, exception: CommandError):
         try:
             logger.error(f"User error: {exception.original.args[0]}")
-            await inter.send(f"{self.i18n.get(exception.original.args[0])[inter.locale.value]}", ephemeral=True)
-        except KeyError and TypeError and AttributeError:
+            await inter.send(f"{self.i18n.get(exception.original.args[0])[str(inter.locale)]}", ephemeral=True)
+        except (KeyError, TypeError, AttributeError):
             logger.error(exception)
             traceback.print_exception(type(exception), exception, exception.__traceback__)
             await inter.send(f"Unknown error", ephemeral=True)
 
     async def on_error(self, event_method: str, *args, **kwargs):
-        # logger.error(f"ERROR: {event_method}")
         logger.error(f"Ignoring exception in {event_method}")
         traceback.print_exc()

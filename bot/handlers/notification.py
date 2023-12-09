@@ -14,7 +14,7 @@ from bot.misc.utils import getPenguinOrNoneFromUserId
 async def setup(server):
     global bot
     bot = server.bot
-    create_task(check_membership())
+    await create_task(check_membership())
     logger.info(f'Loaded notification system')
 
 
@@ -25,77 +25,80 @@ async def check_membership():
             p = await getPenguinOrNoneFromUserId(user.id)
 
             if p.membership_days_remain == 0:
-                await notifyMembershipEnded(p)
+                await notify_membership_ended(user.id)
                 continue
             if 0 < p.membership_days_remain < 6 and not p.membership_expires_aware:
-                await notifyMembershipSoonEnded(p)
+                await notify_membership_soon_ended(user.id)
                 continue
 
 
-async def notifyCoinsReceive(senderPenguin: Penguin, receiverPenguin: Penguin, coins, message=None, command=None):
-    receiverId = await PenguinIntegrations.select("discord_id").where(
-        PenguinIntegrations.penguin_id == receiverPenguin.id).gino.first()
-    receiver = await bot.fetch_user(int(receiverId[0]))
-    senderId = await User.select("id").where(User.penguin_id == senderPenguin.id).gino.first()
-    sender = await bot.fetch_user(int(senderId[0]))
-    user = await User.get(receiver.id)
-    if not user.enabled_coins_notify:
+async def notifyCoinsReceive(sender_penguin: Penguin, receiver_penguin: Penguin, coins: int, message: str = None,
+                             command: str = None):
+    receiver_id, = await PenguinIntegrations.select("discord_id").where(
+        PenguinIntegrations.penguin_id == receiver_penguin.id).gino.first()
+    receiver = await bot.get_or_fetch_user(int(receiver_id))
+    sender_id, = await User.select("id").where(User.penguin_id == sender_penguin.id).gino.first()
+    lang = (await receiver.db).language
+    if not (await receiver.db).enabled_coins_notify:
         return
 
-    embed = Embed(color=0xB7F360, title=f"Пингвин под ником «{senderPenguin.safe_name()}» перевел(а) Вам {coins}м")
-    embed.set_thumbnail(f"https://play.cpps.app/avatar/{receiverPenguin.id}/cp?size=600")
+    embed = Embed(color=0xB7F360,
+                  title=bot.i18n.get("NOTIFY_COINS_RECEIVE")[lang].
+                  replace("%nickname%", sender_penguin.safe_name()).replace("%coins%", str(coins)))
+    embed.set_thumbnail(f"https://play.cpps.app/avatar/{receiver_penguin.id}/cp?size=600")
     if message:
-        embed.add_field("Сообщение", message, inline=False)
+        embed.add_field(bot.i18n.get("MESSAGE")[lang], message, inline=False)
 
     if command == "fundraising":
-        embed.add_field("Команда", "</fundraising:1133131135539494962>", inline=False)
+        command_value = "</fundraising:1133131135539494962>"
     elif command == "pay2":
-        embed.add_field("Команда", "</pay2:1129711949576409188>", inline=False)
+        command_value = "</pay2:1129711949576409188>"
     elif command == "pay":
-        embed.add_field("Команда", "</pay:1099629339110289445>", inline=False)
-    embed.add_field("Баланс", f"{receiverPenguin.coins} {emojiCoin}", inline=False)
-    embed.add_field("Пользователь", f"{sender.mention}", inline=False)
-    embed.set_footer(text=f"Ваш аккаунт: {receiverPenguin.safe_name()}")
-    await sendNotify(receiver, embed)
+        command_value = "</pay:1099629339110289445>"
+    else:
+        command_value = "undefined"
+
+    embed.add_field(bot.i18n.get("COMMAND")[lang], command_value, inline=False)
+    embed.add_field(bot.i18n.get("BALANCE")[lang], f"{receiver_penguin.coins} {emojiCoin}", inline=False)
+    embed.add_field(bot.i18n.get("USER")[lang], f"<@{sender_id}>", inline=False)
+    embed.set_footer(text=bot.i18n.get("YOUR_PENGUIN")[lang].replace("%nickname%", receiver_penguin.safe_name()))
+    await send_notify(receiver, embed)
 
 
-async def notifyMembershipEnded(p: Penguin):
-    user = await User.query.where(User.penguin_id == p.id).gino.first()
-    if not user.enabled_membership_notify:
+async def notify_membership_ended(user_id: int):
+    from bot.handlers.button import MembershipButton
+    user = await bot.get_or_fetch_user(int(user_id))
+    p = await user.penguin
+    lang = (await user.db).language
+    if not (await user.db).enabled_membership_notify:
         return
 
-    embed = Embed(color=0xFFD947, title=f"Подписка закончилась")
-    embed.set_footer(text=f"Аккаунт: {p.safe_name()}",
-                     icon_url=f"https://play.cpps.app/avatar/{p.id}/cp?size=600")
+    embed = Embed(color=0xFFD947, title=bot.i18n.get("MEMBERSHIP_ENDED_TITLE")[lang])
+    embed.set_thumbnail(f"https://play.cpps.app/avatar/{p.id}/cp?size=600")
+    embed.set_footer(text=bot.i18n.get("YOUR_PENGUIN")[lang].replace("%nickname%", p.safe_name()))
     embed.set_image(url="https://cpps.app/NO%20MEMBERSHIP.png")
 
-    await sendNotify(await bot.fetch_user(user.id), embed, view=MembershipButton())
+    await send_notify(user, embed, view=MembershipButton(lang))
 
 
-async def notifyMembershipSoonEnded(p: Penguin):
-    user = await User.query.where(User.penguin_id == p.id).gino.first()
-    if not user.enabled_membership_notify:
+async def notify_membership_soon_ended(user_id: int):
+    from bot.handlers.button import MembershipButton
+    user = await bot.get_or_fetch_user(int(user_id))
+    p = await user.penguin
+    lang = (await user.db).language
+    if not (await user.db).enabled_membership_notify:
         return
 
-    embed = Embed(color=0xFFD947, title=f"Подписка скоро закончится",
-                  description="Войдите в игру, что бы больше не получать напоминания")
-    embed.add_field("До конца подписки", f"{p.membership_days_remain} дней", inline=False)
-    embed.set_footer(text=f"Аккаунт: {p.safe_name()}",
-                     icon_url=f"https://play.cpps.app/avatar/{p.id}/cp?size=600")
+    embed = Embed(color=0xFFD947, title=bot.i18n.get("MEMBERSHIP_SOON_ENDED_TITLE")[lang],
+                  description=bot.i18n.get("MEMBERSHIP_SOON_ENDED_DESCRIPTION")[lang])
+    embed.set_thumbnail(f"https://play.cpps.app/avatar/{p.id}/cp?size=600")
+    embed.add_field(bot.i18n.get("UNTIL_END_OF_MEMBERSHIP")[lang],
+                    f"{p.membership_days_remain} {bot.i18n.get('DAYS')[lang]}", inline=False)
+    embed.set_footer(text=bot.i18n.get("YOUR_PENGUIN")[lang].replace("%nickname%", p.safe_name()))
 
-    await sendNotify(await bot.fetch_user(user.id), embed, view=MembershipButton())
+    await send_notify(user, embed, view=MembershipButton(lang))
 
 
-async def sendNotify(user: disnake.User, embed, *, view=None):
-    if (await User.get(user.id)).enabled_notify:
+async def send_notify(user: disnake.User, embed, *, view=None):
+    if (await user.db).enabled_notify:
         await user.send(embed=embed, view=view)
-
-
-class MembershipButton(disnake.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @disnake.ui.button(label="Приобрести подписку", style=disnake.ButtonStyle.link,
-                       url="https://cpps.app/membership")
-    async def buyMembership(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
-        ...
