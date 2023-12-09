@@ -40,6 +40,7 @@ emojiModerator = "<:moderator:789476531915325510>"
 emojiGame = "<:game:788396232456011796>"
 emojiVk = "<:VK:1121760227994382459>"
 emojiYt = "<:yt:1121764618239496263>"
+emojiTg = "<:tg:1183095180816031804>"
 emojiGameFavicon = "<:newFavicon:1150030271471689748>"
 emojiWikiFavicon = "<:wiki:1121764147307237447>"
 emojiCuteSad = "<:cuteSad:794874872835735553>"
@@ -97,7 +98,9 @@ embedAboutImage.set_image(url="https://cpps.app/CPPS.APP.png")
 embedLinks = Embed(color=0x2B2D31)
 embedLinks.description = f"""
 ```Links to social networks and other```
-> **{emojiVk} • VK – https://vk.com/cpps_official/**
+> **{emojiVk} • VK – https://vk.com/cppsapp/**
+
+> **{emojiTg} • TELEGRAM – https://t.me/cpps_app/**
 
 > **{emojiYt} • YOUTUBE – https://www.youtube.com/@cppsapp/**
 
