@@ -14,7 +14,7 @@ from bot.misc.utils import getPenguinOrNoneFromUserId
 async def setup(server):
     global bot
     bot = server.bot
-    await create_task(check_membership())
+    create_task(check_membership())
     logger.info(f'Loaded notification system')
 
 
