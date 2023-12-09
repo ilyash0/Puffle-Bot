@@ -26,20 +26,19 @@ class PrivateCommands(Cog):
         logger.info(f"Loaded {len(self.get_application_commands())} private app commands")
 
     @slash_command(guild_ids=guild_ids)
-    async def transfer(self, inter: AppCommandInter, forum_id: str):
+    async def transfer(self, inter: AppCommandInter, forum: disnake.ForumChannel):
         """
         Transfer images from the current channel to the forum {{TRANSFER}}
 
         Parameters
         ----------
         inter: AppCommandInter
-        forum_id: str
-            ID of the target forum chanel {{FORUM_ID}}
-
+        forum: disnake.ForumChannel
+            Target forum channel on the current server {{FORUM}}
         """
         await inter.response.defer()
         source_channel = inter.channel
-        destination_channel = disnake.utils.get(inter.guild.channels, id=int(forum_id))
+        destination_channel = disnake.utils.get(inter.guild.channels, id=forum.id)
 
         async for message in source_channel.history(limit=None):
             if message.attachments:
@@ -50,7 +49,7 @@ class PrivateCommands(Cog):
                                                                message.attachments],
                                                         allowed_mentions=AllowedMentions(users=False)
                                                         )
-        await inter.edit_original_response(f"Success transferred in <#{forum_id}>!")
+        await inter.edit_original_response(f"Success transferred in {forum.mention}!")
 
     @slash_command(guild_ids=guild_ids)
     async def rules(self, inter: AppCommandInter):
