@@ -1,4 +1,6 @@
 import asyncio
+
+from disnake.ext.commands import CommandError
 from loguru import logger
 
 from bot.data.clubpenguin.moderator import Logs
@@ -101,13 +103,13 @@ async def transferCoins(sender: Penguin, receiver: Penguin, coins: int):
     None
     """
     if coins <= 0:
-        raise ValueError("INCORRECT_COINS_AMOUNT")
+        raise CommandError("INCORRECT_COINS_AMOUNT")
 
     if sender.id == receiver.id:
-        raise ValueError("INCORRECT_RECEIVER")
+        raise CommandError("INCORRECT_RECEIVER")
 
     if sender.coins < coins:
-        raise ValueError("NOT_ENOUGH_COINS")
+        raise CommandError("NOT_ENOUGH_COINS")
 
     await sender.update(coins=sender.coins - coins).apply()
     await receiver.update(coins=receiver.coins + coins).apply()
