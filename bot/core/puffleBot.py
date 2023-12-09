@@ -6,7 +6,7 @@ from disnake import Webhook, Game, AppCommandInter
 from disnake.ext.commands import InteractionBot, CommandError
 from loguru import logger
 import bot.locale
-import bot.cogs
+import bot.handlers.cogs
 from bot.core.disnaleOverride import NewUser, NewMember
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.data.pufflebot.user import User
@@ -32,9 +32,9 @@ class PuffleBot(InteractionBot):
         disnake.Member.db = NewMember.db
 
     def load_cogs(self):
-        for file in os.listdir(bot.cogs.__path__[0]):
+        for file in os.listdir(bot.handlers.cogs.__path__[0]):
             if file.endswith(".py"):
-                self.load_extension(f"bot.cogs.{file[:-3]}")
+                self.load_extension(f"bot.handlers.cogs.{file[:-3]}")
 
     def load_langs(self):
         self.i18n.load(bot.locale.__path__[0])
