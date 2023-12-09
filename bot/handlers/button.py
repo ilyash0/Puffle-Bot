@@ -2,16 +2,16 @@ import sys
 import traceback
 
 import disnake
-from disnake import MessageInteraction, AppCommandInter, Embed
+from disnake import MessageInteraction, AppCommandInter, Message
 from disnake.ui import Item
 from loguru import logger
 
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.data.pufflebot.user import User, PenguinIntegrations
 from bot.handlers.modal import FundraisingModal
-from bot.handlers.notification import notifyCoinsReceive
+from bot.handlers.notification import notify_gift_coins, notify_coins_receive
 from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedRuleImageEn, embedRuleEn, embedRolesRu, \
-    embedRolesEn, enFullRulesLink, ruFullRulesLink, embedRoles2Ru, embedRoles2En, emojiCoin
+    embedRolesEn, enFullRulesLink, ruFullRulesLink, embedRoles2Ru, embedRoles2En
 from bot.misc.penguin import Penguin
 from bot.misc.utils import getMyPenguinFromUserId, transferCoins
 
@@ -65,7 +65,7 @@ class FundraisingButtons(Buttons):
         await inter.response.defer()
         p: Penguin = await getMyPenguinFromUserId(inter.author.id)
         await transferCoins(p, self.receiver, int(coins))
-        await notifyCoinsReceive(p, self.receiver, coins, None, self.command)
+        await notify_coins_receive(p, self.receiver, coins, None, self.command)
         await inter.send(
             inter.bot.i18n.get("COINS_TRANSFERRED")[str(inter.locale)].
             replace("%coins%", str(coins)).replace("%receiver%", self.receiver.safe_name()))
@@ -243,6 +243,13 @@ class Settings(Buttons):
         super().__init__(original_inter=original_inter)
         self.user: User = user
 
+    async def toggle_button_color(self, button, param):
+        if param:
+            button.style = disnake.ButtonStyle.gray
+        else:
+            button.style = disnake.ButtonStyle.green
+        await self.original_inter.edit_original_response(view=self)
+
     @disnake.ui.button(label="ALL", style=disnake.ButtonStyle.green, custom_id="allNotify")
     async def all_notify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         await inter.response.defer()
@@ -261,23 +268,15 @@ class Settings(Buttons):
                        custom_id="coinsNotify")
     async def coins_notify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         await inter.response.defer()
-        if self.user.enabled_coins_notify:
-            button.style = disnake.ButtonStyle.gray
-        else:
-            button.style = disnake.ButtonStyle.green
+        await self.toggle_button_color(button, self.user.enabled_coins_notify)
         await self.user.update(enabled_coins_notify=not self.user.enabled_coins_notify).apply()
-        await self.original_inter.edit_original_response(view=self)
 
     @disnake.ui.button(label="END_MEMBERSHIP", style=disnake.ButtonStyle.green,
                        custom_id="membershipNotify")
     async def membership_notify(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         await inter.response.defer()
-        if self.user.enabled_membership_notify:
-            button.style = disnake.ButtonStyle.gray
-        else:
-            button.style = disnake.ButtonStyle.green
+        await self.toggle_button_color(button, self.user.enabled_membership_notify)
         await self.user.update(enabled_membership_notify=not self.user.enabled_membership_notify).apply()
-        await self.original_inter.edit_original_response(view=self)
 
 
 class TopMinutesButton(Buttons):
@@ -318,3 +317,28 @@ class MembershipButton(Buttons):
                        url="https://cpps.app/membership")
     async def buy_membership(self, button: disnake.ui.Button, inter: disnake.CommandInteraction):
         ...
+
+
+class Gift(Buttons):
+    def __init__(self, original_inter: AppCommandInter, message: Message, coins: int, giver_penguin: Penguin):
+        super().__init__(original_inter=original_inter)
+        self.message = message
+        self.coins = coins
+        self.giver_penguin: Penguin = giver_penguin
+
+    @disnake.ui.button(label="GIFT", style=disnake.ButtonStyle.blurple, custom_id="gift", emoji="🎁")
+    async def gift(self, button, inter: disnake.CommandInteraction):
+        button.disabled = True
+        await self.message.edit(view=self)
+        p = await getMyPenguinFromUserId(inter.user.id)
+        if p.moderator or p.id == self.giver_penguin.id:
+            await inter.send(inter.bot.i18n.get("NOT_FOR_YOU")[str(inter.locale)], ephemeral=True)
+            button.disabled = False
+            await self.message.edit(view=self)
+            return
+        
+        button.disabled = True
+        await self.message.edit(view=self)
+        await transferCoins(self.giver_penguin, p, self.coins)
+        await inter.send(f"Подарок в виде {self.coins} монет забирает {p.safe_name()}")
+        await notify_gift_coins(inter.user, p, self.coins)

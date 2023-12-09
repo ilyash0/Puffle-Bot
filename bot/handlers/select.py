@@ -25,7 +25,7 @@ class ChoosePenguin(Select):
 
         await inter.send(
             inter.bot.i18n.get("PENGUIN_CHOSEN")[str(inter.locale)].replace("%nickname%",
-                                                                             newCurrentPenguin.safe_name()),
+                                                                            newCurrentPenguin.safe_name()),
             ephemeral=True)
 
 

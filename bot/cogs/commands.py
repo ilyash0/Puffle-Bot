@@ -1,17 +1,21 @@
 import ast
 from datetime import datetime
 
+from asyncio import sleep
+from random import randrange
+
 from bs4 import BeautifulSoup
 from disnake import AppCommandInter, Localized
 from loguru import logger
 import disnake
-from disnake.ext.commands import Cog, Param, slash_command
+from disnake.ext.commands import Cog, Param, slash_command, CommandError
 from requests import Session
 
 from bot.data import db_pb
 from bot.data.clubpenguin.stamp import PenguinStamp
-from bot.handlers.button import TopMinutesButton, TopCoinsButton, TopStampsButton
-from bot.handlers.notification import notifyCoinsReceive
+from bot.handlers.button import TopMinutesButton, TopCoinsButton, TopStampsButton, Gift
+from bot.handlers.censure import is_message_valid
+from bot.handlers.notification import notify_coins_receive
 from bot.misc.constants import online_url, headers, emojiCuteSad, emojiCoin, emojiGame, emojiStamp
 from bot.misc.penguin import Penguin
 from bot.misc.utils import transferCoins, getPenguinFromPenguinId
@@ -102,7 +106,7 @@ class UserCommands(Cog):
         r: Penguin = await Penguin.get(int(receiver_id))
 
         await transferCoins(p, r, coins)
-        await notifyCoinsReceive(p, r, coins, message, inter.data.name)
+        await notify_coins_receive(p, r, coins, message, inter.data.name)
         await inter.send(
             self.bot.i18n.get("COINS_TRANSFERRED")[str(inter.locale)].
             replace("%coins%", str(coins)).replace("%receiver%", r.safe_name()))
@@ -130,7 +134,7 @@ class UserCommands(Cog):
             return await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[str(inter.locale)], ephemeral=True)
 
         await transferCoins(p, r, coins)
-        await notifyCoinsReceive(p, r, coins, message, inter.data.name)
+        await notify_coins_receive(p, r, coins, message, inter.data.name)
         await inter.send(
             self.bot.i18n.get("COINS_TRANSFERRED")[str(inter.locale)].
             replace("%coins%", str(coins)).replace("%receiver%", r.safe_name()))
@@ -220,6 +224,39 @@ class UserCommands(Cog):
             view = None
 
         await inter.send(embed=embed, view=view)
+
+    @slash_command()
+    async def gift(self, inter: AppCommandInter, channel: disnake.TextChannel, coins: int, message: str = None):
+        """
+        Gift coins to users in a specific channel {{GIFT}}
+
+        Parameters
+        ----------
+        inter: AppCommandInter
+        channel: disnake.TextChannel
+            Target text channel on the current server {{CHANNEL}}
+        coins: int
+            Number of coins {{COINS}}
+        message: Optional[str]
+            A message to send with the gift {{GIFT_MESSAGE}}
+        """
+        lang = str(inter.locale)
+        p = await inter.user.penguin
+        if message is None:
+            message = self.bot.i18n.get("GIFT_DEFAULT_RESPONSE")[lang]
+        elif not is_message_valid(message):
+            return await inter.send(self.bot.i18n.get("KEEP_RULES")[lang], ephemeral=True)
+
+        if coins <= 0:
+            raise CommandError("INCORRECT_COINS_AMOUNT")
+
+        if p.coins < coins:
+            raise CommandError("NOT_ENOUGH_COINS")
+
+        await inter.send(self.bot.i18n.get("SUCCESS")[lang], ephemeral=True)
+        message_object = await channel.send(f"{message} {self.bot.i18n.get('WAIT_A_FEW_SECONDS')[lang]}")
+        await sleep(randrange(3, 15))
+        await message_object.edit(message, view=Gift(inter, message_object, coins, p))
 
 
 def setup(bot):

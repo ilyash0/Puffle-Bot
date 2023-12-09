@@ -15,6 +15,7 @@
   "RULES_NAME": "rules",
   "ABOUT_NAME": "about",
   "STATISTIC_NAME": "statistic",
+  "GIFT_NAME": "gift",
 
   "ILYASH_DESCRIPTION": "Лучшая команда в мире!",
   "CARD_DESCRIPTION": "Показывает информацию о твоём пингвине в игре",
@@ -32,6 +33,7 @@
   "RULES_DESCRIPTION": "Отправить embed-сообщение с правилами",
   "ABOUT_DESCRIPTION": "Отправить embed-сообщение с описанием сервера",
   "STATISTIC_DESCRIPTION": "Показывает игровую статистику",
+  "GIFT_DESCRIPTION": "Подарить монеты пользователям в определенном канале",
 
   "USER_NAME": "пользователь",
   "COINS_NAME": "монеты",
@@ -39,10 +41,12 @@
   "PLAYER_NAME": "никнейм",
   "TOP_CATEGORY_NAME": "категория",
   "TITLE_NAME": "заголовок",
-  "FORUM_ID_NAME": "id_форума",
+  "FORUM_NAME": "форум",
   "START_DATE_NAME": "дата_отсчёта",
   "END_DATE_NAME": "дата_окончания",
   "DETAIL_NAME": "детально",
+  "CHANNEL_NAME": "канал",
+  "GIFT_MESSAGE_NAME": "сообщение",
 
   "USER_DESCRIPTION": "Пользователь Discord",
   "COINS_DESCRIPTION": "Количество монет",
@@ -50,10 +54,12 @@
   "PLAYER_DESCRIPTION": "Никнейм пингвина в игре",
   "TOP_CATEGORY_DESCRIPTION": "Категория топа",
   "TITLE_DESCRIPTION": "Заголовок сбора монет",
-  "FORUM_ID_DESCRIPTION": "ID целевого форума",
+  "FORUM_DESCRIPTION": "Целевой форум на текущем сервере",
   "START_DATE_DESCRIPTION": "Дата отсчёта, формата ДД.ММ.ГГГГ",
   "END_DATE_DESCRIPTION": "Дата окончания, формата ДД.ММ.ГГГГ",
   "DETAIL_DESCRIPTION": "Показать доп. информацию",
+  "CHANNEL_DESCRIPTION": "Целевой текстовый канал на текущем сервере",
+  "GIFT_MESSAGE_DESCRIPTION": "Сообщение, которое следует отправить с подарком",
 
   "ILYASH_RESPONSE": "Теперь вы пешка иляша!",
   "USER_PENGUIN_NOT_FOUND": "Мы не нашли пингвина у указанного пользователя",
@@ -123,6 +129,10 @@
   "MEMBERSHIP_SOON_ENDED_TITLE": "Подписка скоро закончилась",
   "MEMBERSHIP_SOON_ENDED_DESCRIPTION": "Войдите в игру, что бы больше не получать напоминания",
   "UNTIL_END_OF_MEMBERSHIP": "До конца подписки",
-  "PURCHASE_MEMBERSHIP": "Приобрести подписку"
-
+  "PURCHASE_MEMBERSHIP": "Приобрести подписку",
+  "GIFT_DEFAULT_RESPONSE": "Кому-кому только одному!",
+  "WAIT_A_FEW_SECONDS": "(ждём несколько секунд)",
+  "GIFT": "Подарок",
+  "NOT_FOR_YOU": "Это не для вас",
+  "NOTIFY_GIFT_COINS": "Вы получили подарок в размере %coins%м"
 }
