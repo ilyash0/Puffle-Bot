@@ -93,7 +93,7 @@ async def transferCoins(sender: Penguin, receiver: Penguin, coins: int):
 
     Raises
     ------
-    ValueError
+    CommandError
         - If the provided `coins` is not a positive integer (coins <= 0).
         - If the `sender` and `receiver` penguins have the same ID, indicating an incorrect receiver.
         - If the `sender` does not have enough coins to complete the transfer.
