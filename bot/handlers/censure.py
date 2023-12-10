@@ -3,7 +3,7 @@ from functools import lru_cache
 
 from loguru import logger
 from bot.data.clubpenguin.moderator import ChatFilterRuleCollection
-from bot.handlers import boot
+from bot.events import event
 
 TRANS_TAB = dict((ord(a), b) for a, b in zip(
     'a6bgreё3ukmho0npctyx4w',
@@ -12,7 +12,7 @@ TRANS_TAB = dict((ord(a), b) for a, b in zip(
 chat_filter_words: ChatFilterRuleCollection
 
 
-@boot
+@event.on("boot")
 async def filter_load(server):
     global chat_filter_words
     chat_filter_words = await ChatFilterRuleCollection.get_collection()

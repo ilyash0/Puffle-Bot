@@ -4,13 +4,13 @@ from disnake import Embed
 from loguru import logger
 
 from bot.data.pufflebot.user import User, PenguinIntegrations
-from bot.handlers import boot
+from bot.events import event
 from bot.misc.constants import emojiCoin
 from bot.misc.penguin import Penguin
 from bot.misc.utils import getPenguinOrNoneFromUserId
 
 
-@boot
+@event.on("boot")
 async def setup(server):
     global bot
     bot = server.bot

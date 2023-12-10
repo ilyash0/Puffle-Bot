@@ -6,3 +6,6 @@ requests~=2.31.0
 
 bs4~=0.0.1
 beautifulsoup4~=4.12.2
+hachiko~=0.4.0
+awebus==1.0a6
+typeguard~=4.1.5
