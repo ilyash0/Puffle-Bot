@@ -5,9 +5,13 @@ from loguru import logger
 
 from bot.data.clubpenguin.moderator import Logs
 from bot.data.pufflebot.user import User
+from bot.events import event
 from bot.misc.penguin import Penguin
 
-penguins_by_id = {}
+@event.on("boot")
+async def setup(server):
+    global client
+    client = server.client_object
 
 
 async def getMyPenguinFromUserId(user_id: int) -> Penguin:
@@ -69,12 +73,8 @@ async def getPenguinFromPenguinId(penguin_id: int) -> Penguin:
     Optional[Penguin]
         The penguin object, or `None` if the user is not found.
     """
-    # if cache and penguin_id in penguins_by_id:
-    #     return penguins_by_id[penguin_id]
-
     p = await Penguin.get(penguin_id)
     await p.setup()
-    penguins_by_id[penguin_id] = p
     return p
 
 
@@ -120,31 +120,6 @@ async def transferCoins(sender: Penguin, receiver: Penguin, coins: int):
                       text=f"Получил от {sender.username} {int(coins)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
 
-    await send_xml("cdu", sender.id, -coins)
-    await send_xml("cdu", receiver.id, coins)
+    await client.send_xml({'body': {'action': 'pb-cdu', 'r': '0'}, 'penguin': {'p': str(sender.id)}})
+    await client.send_xml({'body': {'action': 'pb-cdu', 'r': '0'}, 'penguin': {'p': str(receiver.id)}})
     return
-
-
-async def send_xml(name: str, penguinId: int = None, data=None) -> None:
-    try:
-        reader, writer = await asyncio.open_connection('localhost', 9879)
-    except ConnectionRefusedError:
-        logger.error("The remote computer refused the network connection")
-        return
-    logger.info("Server ('0.0.0.0', 9879) connected")
-
-    if penguinId is None:
-        ...
-    data = f"<msg t='sys'><body action='pb-{name}' r='0'><penguin p='{penguinId}' />" \
-           f"<amount {type(data).__name__}='{data}' /></body></msg>"
-    if not writer.is_closing():
-        logger.debug(f'Outgoing data: {data}')
-        writer.write(data.encode('utf-8') + b'\x00')
-    await writer.drain()
-
-    response = await reader.read(100)
-    logger.debug(f'Received data: {response.decode()}')
-
-    writer.close()
-    await writer.wait_closed()
-    logger.info("Server ('0.0.0.0', 9879) disconnected")

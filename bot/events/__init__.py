@@ -44,6 +44,10 @@ class FrameworkPacket(_Packet):
     pass
 
 
+class XMLPacket(_Packet):
+    pass
+
+
 class SmartEvent(awebus.EventMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -14,6 +14,9 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--port', action='store', help='Discord bot server port', default=8000, type=int)
     # parser.add_argument('-l', '--lang', action='store', default='en', help='Discord bot language',
     #                     choices=['en', 'fr', 'pt', 'es', 'de', 'ru'])
+    parser.add_argument('-ha', '--houdini_address', action='store', default='0.0.0.0',
+                        help='Houdini server address')
+    parser.add_argument('-hp', '--houdini_port', action='store', help='Houdini server port', default=None, type=int)
     parser.add_argument('-t', '--token', action='store', help='Token for Discord bot')
     parser.add_argument('-d', '--defer', action='store_true', help='Enable defer response')
 

@@ -2,6 +2,8 @@ import asyncio
 import disnake
 from disnake.ext.commands import CommandSyncFlags
 from loguru import logger
+
+from bot.core.client import Client
 from bot.data import db_cp, db_pb
 from bot.core.puffleBot import PuffleBot
 from bot.events import event
@@ -16,6 +18,9 @@ class Server:
         self.config = config
         self.db_cp = db_cp
         self.db_pb = db_pb
+
+        self.client_class = Client
+        self.client_object = None
 
     async def start(self):
         logger.add("logs/log.log")
@@ -44,6 +49,9 @@ class Server:
         )
 
         logger.info("Booting discord bot")
+
+        await self.connect_to_houdini()
+
         intents = disnake.Intents.default()
         intents.message_content = True
         command_sync_flags = CommandSyncFlags.default()
@@ -66,3 +74,12 @@ class Server:
 
     async def client_connected(self, reader, writer):
         ...
+
+    async def connect_to_houdini(self):
+        try:
+            reader, writer = await asyncio.open_connection(self.config.houdini_address, self.config.houdini_port)
+        except ConnectionRefusedError:
+            logger.error("The remote computer refused the network connection")
+            return
+        logger.info(f"Server ('{self.config.houdini_address}', {self.config.houdini_port}) connected")
+        self.client_object = self.client_class(self, reader, writer)
