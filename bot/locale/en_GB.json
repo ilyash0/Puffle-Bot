@@ -57,7 +57,7 @@
   "FORUM_DESCRIPTION": "Target forum channel on the current server",
   "START_DATE_DESCRIPTION": "Start date, format DD.MM.YYYY",
   "END_DATE_DESCRIPTION": "End date, format DD.MM.YYYY",
-  "DETAIL_DESCRIPTION": "Show additional information  ",
+  "DETAIL_DESCRIPTION": "Show additional information",
   "CHANNEL_DESCRIPTION": "Target text channel on the current server",
   "GIFT_MESSAGE_DESCRIPTION": "A message to send with the gift",
 
