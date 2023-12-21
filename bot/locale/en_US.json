@@ -1,4 +1,7 @@
 {
+  "DATE_FORMAT": "%m/%d/%Y",
+  "TIME_FORMAT": "%I:%M %p",
+
   "ILYASH_NAME": "ilyash",
   "CARD_NAME": "card",
   "PAY_NAME": "pay",
@@ -55,8 +58,8 @@
   "TOP_CATEGORY_DESCRIPTION": "Top category",
   "TITLE_DESCRIPTION": "Title for fundraising",
   "FORUM_DESCRIPTION": "Target forum channel on the current server",
-  "START_DATE_DESCRIPTION": "Start date, format DD.MM.YYYY",
-  "END_DATE_DESCRIPTION": "End date, format DD.MM.YYYY",
+  "START_DATE_DESCRIPTION": "Start date, format MM/DD/YYYY",
+  "END_DATE_DESCRIPTION": "End date, format MM/DD/YYYY",
   "DETAIL_DESCRIPTION": "Show additional information",
   "CHANNEL_DESCRIPTION": "Target text channel on the current server",
   "GIFT_MESSAGE_DESCRIPTION": "A message to send with the gift",
@@ -133,6 +136,17 @@
   "WAIT_A_FEW_SECONDS": "(wait a few seconds)",
   "GIFT": "Gift",
   "NOT_FOR_YOU": "It's not for you",
-  "NOTIFY_GIFT_COINS": "You have received a gift of %coins% coins"
-
+  "NOTIFY_GIFT_COINS": "You have received a gift of %coins% coins",
+  "STATISTIC_TITLE": "From %start% to %end%",
+  "STATISTIC_FOOTER": "If the day is not yet over, the data may not be correct",
+  "INVALID_DATE": "The date `%date%` is invalid. The expected format is `MM/DD/YYYY`",
+  "TOO_EARLY_DATE": "No data is available for the specified period. The earliest available date is <t:1601233740:d>",
+  "PLAYERS_ACTIVITY": "Players activity",
+  "MAX_ONLINE": "Max online",
+  "AVERAGE_ONLINE": "Average online",
+  "AVERAGE_PLAYER_TIME": "Average time per player",
+  "NEW_REGISTERED": "New accounts registered",
+  "PLAYER_RETENTION": "Player retention",
+  "ECONOMIC_DATA": "Economic data",
+  "MICROTRANSACTION_REVENUE": "Total revenue from microtransactions"
 }

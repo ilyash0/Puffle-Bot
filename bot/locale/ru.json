@@ -1,4 +1,7 @@
 {
+  "DATE_FORMAT": "%d.%m.%Y",
+  "TIME_FORMAT": "%H:%M",
+
   "ILYASH_NAME": "ilyash",
   "CARD_NAME": "card",
   "PAY_NAME": "pay",
@@ -134,5 +137,17 @@
   "WAIT_A_FEW_SECONDS": "(ждём несколько секунд)",
   "GIFT": "Подарок",
   "NOT_FOR_YOU": "Это не для вас",
-  "NOTIFY_GIFT_COINS": "Вы получили подарок в размере %coins%м"
+  "NOTIFY_GIFT_COINS": "Вы получили подарок в размере %coins%м",
+  "STATISTIC_TITLE": "С %start% по %end%",
+  "STATISTIC_FOOTER": "Если день ещё не закончился, то данные могут быть не верные",
+  "INVALID_DATE": "Дата `%date%` невалидна. Ожидается формат `ДД.ММ.ГГГГ`",
+  "TOO_EARLY_DATE": "За указанный период данные отсутствуют. Самая ранняя доступная дата — <t:1601233740:d>",
+  "PLAYERS_ACTIVITY": "Активность игроков",
+  "MAX_ONLINE": "Максимальный онлайн",
+  "AVERAGE_ONLINE": "Средний онлайн",
+  "AVERAGE_PLAYER_TIME": "Среднее время на игрока",
+  "NEW_REGISTERED": "Зарегистрировано новых аккаунтов",
+  "PLAYER_RETENTION": "Удержание пользователей",
+  "ECONOMIC_DATA": "Экономические данные",
+  "MICROTRANSACTION_REVENUE": "Общая выручка от микротранзакций"
 }

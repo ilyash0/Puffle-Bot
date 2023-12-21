@@ -82,7 +82,7 @@ class PrivateCommands(Cog):
 
     @slash_command(guild_ids=guild_ids)
     async def statistics(self, inter: AppCommandInter,
-                         start_date: str, end_date: str = None,
+                         start_date_str: str, end_date_str: str = None,
                          detail: str = Param(default="No",
                                              choices=[Localized("Yes", key="YES"), Localized("No", key="NO")])):
         """
@@ -91,36 +91,40 @@ class PrivateCommands(Cog):
         Parameters
         ----------
         inter: AppCommandInter
-        start_date: str
+        start_date_str: str
             Start date, format DD.MM.YYYY {{START_DATE}}
-        end_date:  Optional[str]
+        end_date_str:  Optional[str]
             End date, format DD.MM.YYYY {{END_DATE}}
         detail:  Optional[str]
             Show additional information {{DETAIL}}
         """
+        lang = str(inter.locale)
+        date_format: str = self.bot.i18n.get('DATE_FORMAT')[lang]
         await inter.response.defer()
-        try:
-            start_date_obj = datetime.strptime(start_date, "%d.%m.%Y").date()
-            if end_date:
-                end_date_obj = datetime.strptime(end_date, "%d.%m.%Y").date()
-                title = f"с {start_date_obj.strftime('%d.%m.%Y')} по {end_date_obj.strftime('%d.%m.%Y')}"
-            else:
-                end_date_obj = start_date_obj + timedelta(days=1)
-                title = f"{start_date_obj.strftime('%d.%m.%Y')} \n"
-        except ValueError:
-            return await inter.send(f"Дата `{start_date}` невалидна. Ожидается формат `ДД.ММ.ГГГГ`.")
 
-        if start_date_obj < datetime(2020, 9, 28).date():
-            return await inter.send(
-                f"За указанный период данные отсутствуют. Самая ранняя доступная дата — `28.09.2020`")
+        try:
+            start_datetime = datetime.strptime(start_date_str, date_format)
+            if end_date_str:
+                end_datetime = datetime.strptime(end_date_str, date_format)
+                title = (self.bot.i18n.get('STATISTIC_TITLE')[lang]
+                         .replace("%start%", f"<t:{int(start_datetime.timestamp())}:d>")
+                         .replace("%end%", f"<t:{int(end_datetime.timestamp())}:d>"))
+            else:
+                end_datetime = start_datetime + timedelta(days=1)
+                title = f"<t:{int(start_datetime.timestamp())}:d>\n"
+        except ValueError:
+            return await inter.send(self.bot.i18n.get('INVALID_DATE')[lang].replace("%date%", start_date_str))
+
+        if start_datetime < datetime(2020, 9, 28):
+            return await inter.send(self.bot.i18n.get('TOO_EARLY_DATE')[lang])
 
         embed = Embed(color=0x2B2D31, title=title)
-        embed.set_footer(text="Если день ещё не закончился, то данные могут быть не верные")
+        embed.set_footer(text=self.bot.i18n.get('STATISTIC_FOOTER')[lang])
         # embed.set_thumbnail("https://static10.tgstat.ru/channels/_0/49/49155b0c3f227c470ffa63db3f8923a2.jpg")
-        embed.description = "## Активность игроков\n"
+        embed.description = f"## {self.bot.i18n.get('PLAYERS_ACTIVITY')[lang]}\n"
         embed.set_image(url=placeholderImageLink)
 
-        logins_list = await Login.query.where((Login.date >= start_date_obj) & (Login.date <= end_date_obj)).gino.all()
+        logins_list = await Login.query.where((Login.date >= start_datetime) & (Login.date <= end_datetime)).gino.all()
         online_list = {}
         active_players = set()
         total_time_played = 0
@@ -145,13 +149,13 @@ class PrivateCommands(Cog):
             minutes=float(next(key for key, value in online_list.items() if value == max_online))) + datetime(1970, 1,
                                                                                                               1)
 
-        embed.description += f"""Максимальный онлайн: **{max_online}** ({max_online_date.strftime('%d.%m.%Y %H:%M')})
-        Средний онлайн: **{round(mean(online_list.values()), 3)}**
-        Среднее время на игрока: **{round(total_time_played / max(len(active_players), 1), 3)}** минут"""
+        embed.description += f"""{self.bot.i18n.get('MAX_ONLINE')[lang]}: **{max_online}** (<t:{int(max_online_date.timestamp())}:f>)
+        {self.bot.i18n.get('AVERAGE_ONLINE')[lang]}: **{round(mean(online_list.values()), 3)}**
+        {self.bot.i18n.get('AVERAGE_PLAYER_TIME')[lang]}: **{round(total_time_played / max(len(active_players), 1), 3)}** {self.bot.i18n.get('MINUTES_ABBR')[lang]}"""
 
         if detail == "Yes":
             new_accounts = await Penguin.query.where(
-                (Penguin.registration_date >= start_date_obj) & (Penguin.registration_date <= end_date_obj)).gino.all()
+                (Penguin.registration_date >= start_datetime) & (Penguin.registration_date <= end_datetime)).gino.all()
             returning_players = set()
             for p in new_accounts:
                 if p.minutes_played > 30:
@@ -163,7 +167,7 @@ class PrivateCommands(Cog):
 
             all_accounts = len(await Penguin.query.gino.all())
             transactions_list = await Transactions.query.where(
-                (Transactions.time >= start_date_obj) & (Transactions.time <= end_date_obj)).gino.all()
+                (Transactions.time >= start_datetime) & (Transactions.time <= end_datetime)).gino.all()
             all_rub = 0
             paying_accounts = set()
             for transaction in transactions_list:
@@ -171,12 +175,13 @@ class PrivateCommands(Cog):
                 paying_accounts.add(transaction.penguin_id)
 
             embed.description += f"""
-            Зарегистрировано новых аккаунтов: **{f'{len(new_accounts):,}'.replace(',', ' ')}**
-            Удержание пользователей: **{round((len(returning_players) / len(new_accounts) * 100), 1)}**%\n"""
-            embed.description += f"""## Экономические данные
-            Общая выручка от микротранзакций: **||{f'{max(all_rub, 0):,}'.replace(',', ' ')}||** ₽
+            {self.bot.i18n.get('NEW_REGISTERED')[lang]}: **{f'{len(new_accounts):,}'.replace(',', ' ')}**
+            {self.bot.i18n.get('PLAYER_RETENTION')[lang]}: **{round((len(returning_players) / len(new_accounts) * 100), 1)}**%
+            
+            ## {self.bot.i18n.get('ECONOMIC_DATA')[lang]}
+            {self.bot.i18n.get('MICROTRANSACTION_REVENUE')[lang]}: **||{f'{max(all_rub, 0):,}'.replace(',', ' ')}||** ₽
             ARPU: **||{round(all_rub / all_accounts, 3) if all_rub > 0 else 0}||** ₽
-            ARPPU: **||{round(all_rub / len(paying_accounts), 3) if all_rub > 0 else 0}||** ₽\n"""
+            ARPPU: **||{round(all_rub / len(paying_accounts), 3) if all_rub > 0 else 0}||** ₽"""
 
         await inter.send(embeds=[embed])
 
