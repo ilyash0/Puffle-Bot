@@ -53,7 +53,7 @@
 
   "USER_DESCRIPTION": "Пользователь Discord",
   "COINS_DESCRIPTION": "Количество монет",
-  "MESSAGE_DESCRIPTION": "Сообщение получателю",
+  "MESSAGE_DESCRIPTION": "Сообщение для получателя монет",
   "PLAYER_DESCRIPTION": "Никнейм пингвина в игре",
   "TOP_CATEGORY_DESCRIPTION": "Категория топа",
   "TITLE_DESCRIPTION": "Заголовок сбора монет",
