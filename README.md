@@ -42,4 +42,8 @@ Available languages:
 
 ## Screenshots
 
-Soon
+![Screenshot 0](https://github.com/ilyash0/Puffle-Bot/assets/119329448/b0fe3a20-24f6-4778-9dfa-7a927fc1a0e8)
+![Screenshot 1](https://github.com/ilyash0/Puffle-Bot/assets/119329448/09e8c5a9-1fc3-47ea-a8b4-f0431cae886d)
+![Screenshot 2](https://github.com/ilyash0/Puffle-Bot/assets/119329448/867b81a1-eab9-456d-b16a-0d2577c23b81)
+![Screenshot 3](https://github.com/ilyash0/Puffle-Bot/assets/119329448/ed0fcdef-946b-4cd0-8577-50031ca11fe6)
+
