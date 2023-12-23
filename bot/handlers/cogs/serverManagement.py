@@ -52,6 +52,7 @@ class ServerManagementCommands(Cog):
         message = await webhook.send(embeds=[embedRuleImageRu, embedRuleRu], wait=True)
         await message.edit(view=Rules(message))
         await inter.send("Success", ephemeral=True)
+        await webhook.delete()
 
 
 def setup(bot):
