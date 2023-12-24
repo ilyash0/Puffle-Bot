@@ -36,6 +36,8 @@ async def notify_coins_receive(sender_penguin: Penguin, receiver_penguin: Pengui
                                command: str = None):
     user_id, = await PenguinIntegrations.select("discord_id").where(
         PenguinIntegrations.penguin_id == receiver_penguin.id).gino.first()
+    if user_id is None:
+        return
     user: disnake.User = await bot.get_or_fetch_user(int(user_id))
     sender_user_id, = await User.select("id").where(User.penguin_id == sender_penguin.id).gino.first()
     lang = (await user.db).language
