@@ -13,7 +13,7 @@ from bot.handlers.notification import notify_gift_coins, notify_coins_receive
 from bot.misc.constants import embedRuleImageRu, embedRuleRu, embedRuleImageEn, embedRuleEn, embedRolesRu, \
     embedRolesEn, enFullRulesLink, ruFullRulesLink, embedRoles2Ru, embedRoles2En
 from bot.misc.penguin import Penguin
-from bot.misc.utils import getMyPenguinFromUserId, transferCoins
+from bot.misc.utils import get_my_penguin_from_user_id, transfer_coins
 
 
 class Buttons(disnake.ui.View):
@@ -63,8 +63,8 @@ class FundraisingButtons(Buttons):
 
     async def donate(self, inter: MessageInteraction, coins: int):
         await inter.response.defer()
-        p: Penguin = await getMyPenguinFromUserId(inter.author.id)
-        await transferCoins(p, self.receiver, int(coins))
+        p: Penguin = await get_my_penguin_from_user_id(inter.author.id)
+        await transfer_coins(p, self.receiver, int(coins))
         await notify_coins_receive(p, self.receiver, coins, None, self.command)
         await inter.send(
             inter.bot.i18n.get("COINS_TRANSFERRED")[str(inter.avail_lang)].
@@ -332,14 +332,14 @@ class Gift(Buttons):
         button.disabled = True
         await self.message.edit(view=self)
         await inter.response.defer()
-        p = await getMyPenguinFromUserId(inter.user.id)
+        p = await get_my_penguin_from_user_id(inter.user.id)
         if p.moderator or p.id == self.giver_penguin.id:
             await inter.send(inter.bot.i18n.get("NOT_FOR_YOU")[str(inter.locale)], ephemeral=True)
             button.disabled = False
             await self.message.edit(view=self)
             return
 
-        await transferCoins(self.giver_penguin, p, self.coins)
+        await transfer_coins(self.giver_penguin, p, self.coins)
         await inter.send(inter.bot.i18n.get("GIFT_RESPONSE")[str(inter.locale)].
                          replace("%coins%", str(self.coins)).replace("%nickname%", p.safe_name()))
         await notify_gift_coins(inter.user, p, self.coins)

@@ -3,7 +3,7 @@ import disnake
 import bot.data.pufflebot.user
 from bot.misc.constants import available_languages
 from bot.misc.penguin import Penguin
-from bot.misc.utils import getPenguinOrNoneFromUserId
+from bot.misc.utils import get_penguin_or_none_from_user_id
 
 
 class NewUser(disnake.User):
@@ -12,7 +12,7 @@ class NewUser(disnake.User):
 
     @property
     async def penguin(self) -> Penguin or None:
-        return await getPenguinOrNoneFromUserId(self.id)
+        return await get_penguin_or_none_from_user_id(self.id)
 
     @property
     async def db(self) -> bot.data.pufflebot.user.User:
@@ -25,7 +25,7 @@ class NewMember(disnake.Member):
 
     @property
     async def penguin(self) -> Penguin or None:
-        return await getPenguinOrNoneFromUserId(self.id)
+        return await get_penguin_or_none_from_user_id(self.id)
 
     @property
     async def db(self) -> bot.data.pufflebot.user.User:

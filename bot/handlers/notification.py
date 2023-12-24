@@ -7,7 +7,7 @@ from bot.data.pufflebot.user import User, PenguinIntegrations
 from bot.events import event
 from bot.misc.constants import emojiCoin
 from bot.misc.penguin import Penguin
-from bot.misc.utils import getPenguinOrNoneFromUserId
+from bot.misc.utils import get_penguin_or_none_from_user_id
 
 
 @event.on("boot")
@@ -22,7 +22,7 @@ async def check_membership():
     while True:
         await sleep(86_400)  # 24 hours
         for user in await User.query.gino.all():
-            p = await getPenguinOrNoneFromUserId(user.id)
+            p = await get_penguin_or_none_from_user_id(user.id)
 
             if p.membership_days_remain == 0:
                 await notify_membership_ended(user.id)

@@ -1,12 +1,10 @@
-import asyncio
-
 from disnake.ext.commands import CommandError
-from loguru import logger
 
 from bot.data.clubpenguin.moderator import Logs
 from bot.data.pufflebot.user import User
 from bot.events import event
 from bot.misc.penguin import Penguin
+
 
 @event.on("boot")
 async def setup(server):
@@ -14,7 +12,7 @@ async def setup(server):
     client = server.client_object
 
 
-async def getMyPenguinFromUserId(user_id: int) -> Penguin:
+async def get_my_penguin_from_user_id(user_id: int) -> Penguin:
     """
     Retrieves a penguin object from the database based on the discord user ID.
 
@@ -36,10 +34,10 @@ async def getMyPenguinFromUserId(user_id: int) -> Penguin:
     user = await User.get(user_id)
     if user is None:
         raise KeyError("MY_PENGUIN_NOT_FOUND")
-    return await getPenguinFromPenguinId(user.penguin_id)
+    return await get_penguin_from_penguin_id(user.penguin_id)
 
 
-async def getPenguinOrNoneFromUserId(user_id: int) -> Penguin or None:
+async def get_penguin_or_none_from_user_id(user_id: int) -> Penguin or None:
     """
     Get a penguin object from a user ID.
 
@@ -56,10 +54,10 @@ async def getPenguinOrNoneFromUserId(user_id: int) -> Penguin or None:
     user = await User.get(user_id)
     if user is None:
         return None
-    return await getPenguinFromPenguinId(user.penguin_id)
+    return await get_penguin_from_penguin_id(user.penguin_id)
 
 
-async def getPenguinFromPenguinId(penguin_id: int) -> Penguin:
+async def get_penguin_from_penguin_id(penguin_id: int) -> Penguin:
     """
     Get a penguin object from a penguin ID.
 
@@ -78,7 +76,7 @@ async def getPenguinFromPenguinId(penguin_id: int) -> Penguin:
     return p
 
 
-async def transferCoins(sender: Penguin, receiver: Penguin, coins: int):
+async def transfer_coins(sender: Penguin, receiver: Penguin, coins: int):
     """
     Transfer coins from one penguin to another and return a status dictionary.
 

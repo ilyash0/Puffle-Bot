@@ -18,7 +18,7 @@ from bot.handlers.censure import is_message_valid
 from bot.handlers.notification import notify_coins_receive
 from bot.misc.constants import online_url, headers, emojiCuteSad, emojiCoin, emojiGame, emojiStamp
 from bot.misc.penguin import Penguin
-from bot.misc.utils import transferCoins, getPenguinFromPenguinId
+from bot.misc.utils import transfer_coins, get_penguin_from_penguin_id
 
 
 class UserCommands(Cog):
@@ -105,7 +105,7 @@ class UserCommands(Cog):
             return await inter.send(self.bot.i18n.get("PENGUIN_NOT_FOUND")[str(inter.avail_lang)], ephemeral=True)
         r: Penguin = await Penguin.get(int(receiver_id))
 
-        await transferCoins(p, r, coins)
+        await transfer_coins(p, r, coins)
         await notify_coins_receive(p, r, coins, message, inter.data.name)
         await inter.send(
             self.bot.i18n.get("COINS_TRANSFERRED")[str(inter.avail_lang)].
@@ -133,7 +133,7 @@ class UserCommands(Cog):
         if r is None:
             return await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[str(inter.avail_lang)], ephemeral=True)
 
-        await transferCoins(p, r, coins)
+        await transfer_coins(p, r, coins)
         await notify_coins_receive(p, r, coins, message, inter.data.name)
         await inter.send(
             self.bot.i18n.get("COINS_TRANSFERRED")[str(inter.avail_lang)].
@@ -212,7 +212,7 @@ class UserCommands(Cog):
                 .limit(10).gino.all()
             result = []
             for penguin_id in penguins_ids_list:
-                p = await getPenguinFromPenguinId(int(penguin_id[0]))
+                p = await get_penguin_from_penguin_id(int(penguin_id[0]))
                 result.append({"nickname": p.nickname, "stamps": len(p.stamps) + p.count_epf_awards()})
             result.sort(key=lambda x: x["stamps"], reverse=True)
             for i, p in enumerate(result):
