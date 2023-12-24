@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 from statistics import mean
 
 import disnake
-from disnake import AppCommandInter, Embed, Localized
+from disnake import AppCommandInter, Embed, Localized, Permissions
 from disnake.ext.commands import Cog, slash_command, Param
 from loguru import logger
 
@@ -22,7 +22,7 @@ class PrivateCommands(Cog):
 
         logger.info(f"Loaded {len(self.get_application_commands())} private app commands")
 
-    @slash_command(guild_ids=guild_ids)
+    @slash_command(guild_ids=guild_ids, default_member_permissions=Permissions(manage_guild=True))
     async def about(self, inter: AppCommandInter):
         """
         Send about embed {{ABOUT}}

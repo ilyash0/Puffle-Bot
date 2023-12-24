@@ -1,5 +1,5 @@
 import disnake
-from disnake import AppCommandInter, AllowedMentions, Webhook
+from disnake import AppCommandInter, AllowedMentions, Webhook, Permissions
 from disnake.ext.commands import Cog, slash_command
 from loguru import logger
 
@@ -13,7 +13,7 @@ class ServerManagementCommands(Cog):
 
         logger.info(f"Loaded {len(self.get_application_commands())} app commands for server management")
 
-    @slash_command()
+    @slash_command(default_member_permissions=Permissions(manage_guild=True))
     async def transfer(self, inter: AppCommandInter, forum: disnake.ForumChannel):
         """
         Transfer images from the current channel to the forum {{TRANSFER}}
@@ -39,7 +39,7 @@ class ServerManagementCommands(Cog):
                                                         )
         await inter.edit_original_response(f"Success transferred in {forum.mention}!")
 
-    @slash_command()
+    @slash_command(default_member_permissions=Permissions(manage_guild=True))
     async def rules(self, inter: AppCommandInter):
         """
         Send rules embed {{RULES}}
