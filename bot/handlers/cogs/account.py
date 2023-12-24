@@ -25,7 +25,7 @@ class AccountManagementCommands(Cog):
         ----------
         inter: AppCommandInter
         """
-        await inter.send(self.bot.i18n.get("LOGIN_RESPONSE")[str(inter.locale)],
+        await inter.send(self.bot.i18n.get("LOGIN_RESPONSE")[str(inter.avail_lang)],
                          view=Login(inter))
 
     @slash_command()
@@ -42,7 +42,7 @@ class AccountManagementCommands(Cog):
         penguin_ids = await db_pb.select([PenguinIntegrations.penguin_id]).where(
             (PenguinIntegrations.discord_id == inter.user.id)).gino.all()
 
-        await inter.send(self.bot.i18n.get("LOGOUT_RESPONSE")[str(inter.locale)].replace("%nickname%", p.safe_name()),
+        await inter.send(self.bot.i18n.get("LOGOUT_RESPONSE")[str(inter.avail_lang)].replace("%nickname%", p.safe_name()),
                          view=Logout(p, user, penguin_ids, inter), ephemeral=True)
 
     @slash_command()
@@ -72,11 +72,11 @@ class AccountManagementCommands(Cog):
 
         if p is None:
             return await inter.send(
-                self.bot.i18n.get("SWITCH_RESPONSE_ALT")[str(inter.locale)],
+                self.bot.i18n.get("SWITCH_RESPONSE_ALT")[str(inter.avail_lang)],
                 view=view, ephemeral=True)
 
         return await inter.send(
-            self.bot.i18n.get("SWITCH_RESPONSE")[str(inter.locale)].replace("%nickname%", p.safe_name()),
+            self.bot.i18n.get("SWITCH_RESPONSE")[str(inter.avail_lang)].replace("%nickname%", p.safe_name()),
             view=view, ephemeral=True)
 
     @slash_command()
@@ -91,7 +91,7 @@ class AccountManagementCommands(Cog):
         user: User = await inter.user.db
         if user is None:
             user: User = await User.create(inter.user.id)
-        await inter.send(self.bot.i18n.get("SETTINGS_RESPONSE")[str(inter.locale)], view=Settings(inter, user),
+        await inter.send(self.bot.i18n.get("SETTINGS_RESPONSE")[str(inter.avail_lang)], view=Settings(inter, user),
                          ephemeral=True)
 
 

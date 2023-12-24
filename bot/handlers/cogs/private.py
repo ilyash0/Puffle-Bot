@@ -49,13 +49,13 @@ class PrivateCommands(Cog):
         ----------
         inter: AppCommandInter
         start_date_str: str
-            Start date, format DD.MM.YYYY {{START_DATE}}
+            Start date, format DD/MM/YYYY {{START_DATE}}
         end_date_str:  Optional[str]
-            End date, format DD.MM.YYYY {{END_DATE}}
+            End date, format DD/MM/YYYY {{END_DATE}}
         detail:  Optional[str]
             Show additional information {{DETAIL}}
         """
-        lang = str(inter.locale)
+        lang = str(inter.avail_lang)
         date_format: str = self.bot.i18n.get('DATE_FORMAT')[lang]
         await inter.response.defer()
 

@@ -36,7 +36,7 @@ class UserCommands(Cog):
         ----------
         inter: AppCommandInter
         """
-        await inter.send(self.bot.i18n.get("ILYASH_RESPONSE")[str(inter.locale)])
+        await inter.send(self.bot.i18n.get("ILYASH_RESPONSE")[str(inter.avail_lang)])
 
     @slash_command()
     async def card(self, inter: AppCommandInter,
@@ -51,7 +51,7 @@ class UserCommands(Cog):
             The Discord user {{USER}}
         """
         # TODO: replace the embed with a picture.
-        lang: str = str(inter.locale)
+        lang: str = str(inter.avail_lang)
         if user:
             p = await user.penguin
             if p is None:
@@ -102,13 +102,13 @@ class UserCommands(Cog):
         p: Penguin = await inter.user.penguin
         receiver_id, = await Penguin.select('id').where(Penguin.username == nickname.lower()).gino.first()
         if receiver_id is None:
-            return await inter.send(self.bot.i18n.get("PENGUIN_NOT_FOUND")[str(inter.locale)], ephemeral=True)
+            return await inter.send(self.bot.i18n.get("PENGUIN_NOT_FOUND")[str(inter.avail_lang)], ephemeral=True)
         r: Penguin = await Penguin.get(int(receiver_id))
 
         await transferCoins(p, r, coins)
         await notify_coins_receive(p, r, coins, message, inter.data.name)
         await inter.send(
-            self.bot.i18n.get("COINS_TRANSFERRED")[str(inter.locale)].
+            self.bot.i18n.get("COINS_TRANSFERRED")[str(inter.avail_lang)].
             replace("%coins%", str(coins)).replace("%receiver%", r.safe_name()))
 
     @slash_command()
@@ -131,12 +131,12 @@ class UserCommands(Cog):
         p: Penguin = await inter.user.penguin
         r: Penguin = await user.penguin
         if r is None:
-            return await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[str(inter.locale)], ephemeral=True)
+            return await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[str(inter.avail_lang)], ephemeral=True)
 
         await transferCoins(p, r, coins)
         await notify_coins_receive(p, r, coins, message, inter.data.name)
         await inter.send(
-            self.bot.i18n.get("COINS_TRANSFERRED")[str(inter.locale)].
+            self.bot.i18n.get("COINS_TRANSFERRED")[str(inter.avail_lang)].
             replace("%coins%", str(coins)).replace("%receiver%", r.safe_name()))
 
     @slash_command()
@@ -149,7 +149,7 @@ class UserCommands(Cog):
         inter: AppCommandInter
         """
         # await inter.response.defer()
-        lang = str(inter.locale)
+        lang = str(inter.avail_lang)
         with Session() as s:
             s.headers.update(headers)
             response = s.get(online_url)
@@ -175,7 +175,7 @@ class UserCommands(Cog):
         category: str
             Top category {{TOP_CATEGORY}}
         """
-        lang = str(inter.locale)
+        lang = str(inter.avail_lang)
         await inter.response.defer()
         description = f"## {self.bot.i18n.get('PENGUIN')[lang].capitalize()} — "
         if category == "coins":
@@ -240,7 +240,7 @@ class UserCommands(Cog):
         message: Optional[str]
             A message to send with the gift {{GIFT_MESSAGE}}
         """
-        lang = str(inter.locale)
+        lang = str(inter.avail_lang)
         p = await inter.user.penguin
         if message is None:
             message = self.bot.i18n.get("GIFT_DEFAULT_RESPONSE")[lang]

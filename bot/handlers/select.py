@@ -14,7 +14,7 @@ class ChoosePenguin(Select):
         options = []
         for penguin in penguinsList:
             options.append(SelectOption(label=penguin["safe_name"], value=penguin["id"]))
-        super().__init__(placeholder=inter.bot.i18n.get("CHOOSE_PENGUIN")[str(inter.locale)], options=options,
+        super().__init__(placeholder=inter.bot.i18n.get("CHOOSE_PENGUIN")[str(inter.avail_lang)], options=options,
                          custom_id="penguins")
 
     async def callback(self, inter: MessageInteraction):
@@ -24,8 +24,8 @@ class ChoosePenguin(Select):
         await self.user.update(penguin_id=penguin_id).apply()
 
         await inter.send(
-            inter.bot.i18n.get("PENGUIN_CHOSEN")[str(inter.locale)].replace("%nickname%",
-                                                                            newCurrentPenguin.safe_name()),
+            inter.bot.i18n.get("PENGUIN_CHOSEN")[str(inter.avail_lang)].replace("%nickname%",
+                                                                                newCurrentPenguin.safe_name()),
             ephemeral=True)
 
 

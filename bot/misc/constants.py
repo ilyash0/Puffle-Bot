@@ -1,5 +1,6 @@
 from io import BytesIO
 
+import disnake.i18n
 from requests import get
 from disnake import Embed
 
@@ -25,6 +26,8 @@ headers = {
 guild_ids = [cppsapp_server_id, test_server_id]
 non_deferred_commands = ["settings"]
 commands_without_penguin_requirement = ["ilyash", "online", "login", "top", "settings"]
+available_languages = [disnake.i18n.Locale.en_GB, disnake.i18n.Locale.en_US, disnake.i18n.Locale.ru,
+                       disnake.i18n.Locale.pl, disnake.i18n.Locale.uk]
 
 # Bytearrays
 avatarImageBytearray = BytesIO(get(avatarImageLink).content).getvalue()

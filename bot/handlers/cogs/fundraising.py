@@ -34,7 +34,7 @@ class FundraisingCommands(Cog):
         """
         # TODO: notifications about the collection of goal amount.
         # TODO: replace the embed with a picture.
-        lang: str = str(inter.locale)
+        lang: str = str(inter.avail_lang)
         if not is_message_valid(title):
             return await inter.send(self.bot.i18n.get("KEEP_RULES")[lang], ephemeral=True)
 
@@ -73,7 +73,7 @@ class FundraisingCommands(Cog):
         ----------
         inter: AppCommandInter
         """
-        lang: str = str(inter.locale)
+        lang: str = str(inter.avail_lang)
         p: Penguin = await inter.user.penguin
         fundraising = await Fundraising.query.where(Fundraising.penguin_id == p.id).gino.first()
         try:

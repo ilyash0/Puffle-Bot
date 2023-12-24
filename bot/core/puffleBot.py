@@ -7,7 +7,7 @@ from disnake.ext.commands import InteractionBot, CommandError
 from loguru import logger
 import bot.locale
 import bot.handlers.cogs
-from bot.core.disnaleOverride import NewUser, NewMember
+from bot.core.disnaleOverride import NewUser, NewMember, NewAppInter
 from bot.data.pufflebot.fundraising import Fundraising, FundraisingBackers
 from bot.data.pufflebot.user import User
 from bot.handlers.button import Rules, FundraisingButtons
@@ -30,6 +30,7 @@ class PuffleBot(InteractionBot):
         disnake.User.db = NewUser.db
         disnake.Member.penguin = NewMember.penguin
         disnake.Member.db = NewMember.db
+        disnake.Interaction.avail_lang = NewAppInter.avail_lang
 
     def load_cogs(self):
         for file in os.listdir(bot.handlers.cogs.__path__[0]):
@@ -62,8 +63,8 @@ class PuffleBot(InteractionBot):
         if not user_db:
             await User.create(id=inter.user.id)
 
-        if user_db.language != str(inter.locale):
-            await user_db.update(language=str(inter.locale)).apply()
+        if user_db.language != str(inter.avail_lang):
+            await user_db.update(language=str(inter.avail_lang)).apply()
 
     async def on_connect(self):
         logger.info(f'Bot connected')
@@ -99,7 +100,7 @@ class PuffleBot(InteractionBot):
     async def on_slash_command_error(self, inter: AppCommandInter, exception: CommandError):
         try:
             logger.error(f"User error: {exception.args[0]}")
-            await inter.send(f"{self.i18n.get(exception.args[0])[str(inter.locale)]}", ephemeral=True)
+            await inter.send(f"{self.i18n.get(exception.args[0])[str(inter.avail_lang)]}", ephemeral=True)
         except (KeyError, TypeError, AttributeError):
             logger.error(exception)
             traceback.print_exception(type(exception), exception, exception.__traceback__)

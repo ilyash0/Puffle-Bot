@@ -25,7 +25,7 @@ class Buttons(disnake.ui.View):
 
         for item in self.children:
             try:
-                item.label = self.original_inter.bot.i18n.get(item.label)[str(self.original_inter.locale)]
+                item.label = self.original_inter.bot.i18n.get(item.label)[str(self.original_inter.avail_lang)]
             except KeyError and TypeError:
                 pass
 
@@ -42,7 +42,7 @@ class Buttons(disnake.ui.View):
     async def on_error(self, error: Exception, item: Item, inter: MessageInteraction):
         try:
             logger.error(f"User error: {error.args[0]}")
-            await inter.send(f"{inter.bot.i18n.get(error.args[0])[str(inter.locale)]}", ephemeral=True)
+            await inter.send(f"{inter.bot.i18n.get(error.args[0])[str(inter.avail_lang)]}", ephemeral=True)
         except (KeyError, TypeError, AttributeError):
             logger.error(f"Ignoring exception in buttons {self} for item {item}:", file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__)
@@ -67,7 +67,7 @@ class FundraisingButtons(Buttons):
         await transferCoins(p, self.receiver, int(coins))
         await notify_coins_receive(p, self.receiver, coins, None, self.command)
         await inter.send(
-            inter.bot.i18n.get("COINS_TRANSFERRED")[str(inter.locale)].
+            inter.bot.i18n.get("COINS_TRANSFERRED")[str(inter.avail_lang)].
             replace("%coins%", str(coins)).replace("%receiver%", self.receiver.safe_name()))
 
         self.raised += int(coins)
@@ -106,7 +106,8 @@ class FundraisingButtons(Buttons):
     async def other_sum_button(self, _, inter: disnake.CommandInteraction):
         modal = FundraisingModal(
             self.donate,
-            inter.bot.i18n.get("FR_MODAL_TITLE")[str(inter.locale)].replace("%nickname%", self.receiver.safe_name()),
+            inter.bot.i18n.get("FR_MODAL_TITLE")[str(inter.avail_lang)].replace("%nickname%",
+                                                                                self.receiver.safe_name()),
             inter)
         await inter.response.send_modal(modal)
 
@@ -213,7 +214,7 @@ class Logout(Buttons):
     @disnake.ui.button(label="CANCEL", style=disnake.ButtonStyle.gray, custom_id="cancel")
     async def cancel_button(self, _, inter: disnake.CommandInteraction):
         await self.disable_all_items()
-        await inter.send(inter.bot.i18n.get("CANCELLED")[str(inter.locale)], ephemeral=True)
+        await inter.send(inter.bot.i18n.get("CANCELLED")[str(inter.avail_lang)], ephemeral=True)
 
     @disnake.ui.button(label="LOGOUT", style=disnake.ButtonStyle.red, custom_id="logout")
     async def logout_button(self, _, inter: disnake.CommandInteraction):
@@ -222,13 +223,13 @@ class Logout(Buttons):
         if len(self.penguin_ids) == 1:
             await self.user.update(penguin_id=None).apply()
             return await inter.send(
-                inter.bot.i18n.get("LOGOUT_SUCCESS")[str(inter.locale)].replace("%nickname%", self.p.safe_name()),
+                inter.bot.i18n.get("LOGOUT_SUCCESS")[str(inter.avail_lang)].replace("%nickname%", self.p.safe_name()),
                 ephemeral=True)
 
         if len(self.penguin_ids) == 2:
             new_current_penguin: Penguin = await Penguin.get(self.penguin_ids[0][0])
             await self.user.update(penguin_id=self.penguin_ids[0][0]).apply()
-            message = inter.bot.i18n.get("LOGOUT_SUCCESS_ALT")[str(inter.locale)]
+            message = inter.bot.i18n.get("LOGOUT_SUCCESS_ALT")[str(inter.avail_lang)]
             message.replace("%nickname%", self.p.safe_name())
             message.replace("%new_nickname%", new_current_penguin.safe_name())
             return await inter.send(message, ephemeral=True)
@@ -336,7 +337,7 @@ class Gift(Buttons):
             button.disabled = False
             await self.message.edit(view=self)
             return
-        
+
         button.disabled = True
         await self.message.edit(view=self)
         await transferCoins(self.giver_penguin, p, self.coins)
