@@ -62,7 +62,6 @@ class FundraisingButtons(Buttons):
         self.command = "fundraising"
 
     async def donate(self, inter: MessageInteraction, coins: int):
-        await inter.response.defer()
         p: Penguin = await get_my_penguin_from_user_id(inter.author.id)
         await transfer_coins(p, self.receiver, int(coins))
         await notify_coins_receive(p, self.receiver, coins, None, self.command)
