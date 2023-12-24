@@ -36,7 +36,6 @@ class PrivateCommands(Cog):
         webhook = await inter.channel.create_webhook(name="CPPS.APP", avatar=avatarImageBytearray)
         await webhook.send(embeds=[embedAboutImage, embedAbout], view=view)
         await inter.send("Success", ephemeral=True)
-        await webhook.delete()
 
     @slash_command(guild_ids=guild_ids)
     async def statistics(self, inter: AppCommandInter,
