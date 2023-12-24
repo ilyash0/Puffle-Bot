@@ -67,7 +67,7 @@ class FundraisingButtons(Buttons):
         await notify_coins_receive(p, self.receiver, coins, None, self.command)
         await inter.send(
             inter.bot.i18n.get("COINS_TRANSFERRED")[str(inter.avail_lang)].
-            replace("%coins%", str(coins)).replace("%receiver%", self.receiver.safe_name()))
+            replace("%coins%", str(coins)).replace("%receiver%", self.receiver.safe_name()), ephemeral=True)
 
         self.raised += int(coins)
         embed = self.message.embeds[0]
