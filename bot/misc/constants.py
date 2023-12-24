@@ -1,5 +1,6 @@
 from io import BytesIO
 
+import disnake.i18n
 from requests import get
 from disnake import Embed
 
@@ -23,6 +24,10 @@ headers = {
 
 # Arrays
 guild_ids = [cppsapp_server_id, test_server_id]
+non_deferred_commands = ["settings"]
+commands_without_penguin_requirement = ["ilyash", "online", "login", "top", "settings"]
+available_languages = [disnake.i18n.Locale.en_GB, disnake.i18n.Locale.en_US, disnake.i18n.Locale.ru,
+                       disnake.i18n.Locale.pl, disnake.i18n.Locale.uk]
 
 # Bytearrays
 avatarImageBytearray = BytesIO(get(avatarImageLink).content).getvalue()
@@ -38,7 +43,8 @@ emojiModerator = "<:moderator:789476531915325510>"
 emojiGame = "<:game:788396232456011796>"
 emojiVk = "<:VK:1121760227994382459>"
 emojiYt = "<:yt:1121764618239496263>"
-emojiGameFavicon = "<:favicon:1121758719634571405>"
+emojiTg = "<:tg:1183095180816031804>"
+emojiGameFavicon = "<:newFavicon:1150030271471689748>"
 emojiWikiFavicon = "<:wiki:1121764147307237447>"
 emojiCuteSad = "<:cuteSad:794874872835735553>"
 emojiCoin = "<:coin:788877461588279336>"
@@ -96,6 +102,8 @@ embedLinks = Embed(color=0x2B2D31)
 embedLinks.description = f"""
 ```Links to social networks and other```
 > **{emojiVk} • VK – https://vk.com/cppsapp/**
+
+> **{emojiTg} • TELEGRAM – https://t.me/cpps_app/**
 
 > **{emojiYt} • YOUTUBE – https://www.youtube.com/@cppsapp/**
 

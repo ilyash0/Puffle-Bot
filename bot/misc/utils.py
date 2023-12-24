@@ -1,41 +1,43 @@
-import asyncio
-from disnake import ApplicationCommandInteraction
-from loguru import logger
+from disnake.ext.commands import CommandError
 
 from bot.data.clubpenguin.moderator import Logs
 from bot.data.pufflebot.user import User
-from bot.misc.constants import loginCommand
+from bot.events import event
 from bot.misc.penguin import Penguin
 
-penguins_by_id = {}
+
+@event.on("boot")
+async def setup(server):
+    global client
+    client = server.client_object
 
 
-async def getPenguinFromInter(inter: ApplicationCommandInteraction, *, cache=True) -> Penguin:
+async def get_my_penguin_from_user_id(user_id: int) -> Penguin:
     """
     Retrieves a penguin object from the database based on the discord user ID.
-    **If the penguin is not found, the function sends a response to the interaction**
 
     Parameters
     ----------
-    inter: ApplicationCommandInteraction
-        The interaction object representing the user's command.
-    cache : bool, optional
-        Whether to cache the penguin object, by default True
+    user_id: int
+        The user's unique identifier in the database.
 
     Returns
     ----------
     Penguin
-        The penguin object retrieved from the database.
+        The penguin object associated with the provided user ID.
+
+    Raises
+    ------
+    KeyError
+        If the penguin is not found, this function raises a KeyError with the message "MY_PENGUIN_NOT_FOUND."
     """
-    user = await User.get(inter.user.id)
+    user = await User.get(user_id)
     if user is None:
-        return await inter.send(
-            f"Мы не нашли вашего пингвина. Пожалуйста воспользуйтесь командой {loginCommand}",
-            ephemeral=True)
-    return await getPenguinFromPenguinId(user.penguin_id, cache=cache)
+        raise KeyError("MY_PENGUIN_NOT_FOUND")
+    return await get_penguin_from_penguin_id(user.penguin_id)
 
 
-async def getPenguinOrNoneFromUserId(user_id: int, *, cache=True) -> Penguin:
+async def get_penguin_or_none_from_user_id(user_id: int) -> Penguin or None:
     """
     Get a penguin object from a user ID.
 
@@ -43,8 +45,6 @@ async def getPenguinOrNoneFromUserId(user_id: int, *, cache=True) -> Penguin:
     ----------
     user_id: int
         The ID of the discord user to get the penguin object for.
-    cache : bool, optional
-        Whether to cache the penguin object, by default True
 
     Returns
     -------
@@ -54,10 +54,10 @@ async def getPenguinOrNoneFromUserId(user_id: int, *, cache=True) -> Penguin:
     user = await User.get(user_id)
     if user is None:
         return None
-    return await getPenguinFromPenguinId(user.penguin_id, cache=cache)
+    return await get_penguin_from_penguin_id(user.penguin_id)
 
 
-async def getPenguinFromPenguinId(penguin_id: int, *, cache=True) -> Penguin:
+async def get_penguin_from_penguin_id(penguin_id: int) -> Penguin:
     """
     Get a penguin object from a penguin ID.
 
@@ -65,26 +65,20 @@ async def getPenguinFromPenguinId(penguin_id: int, *, cache=True) -> Penguin:
     ----------
     penguin_id: int
         The ID of the discord user to get the penguin object for.
-    cache : bool, optional
-        Whether to cache the penguin object, by default True
 
     Returns
     -------
     Optional[Penguin]
         The penguin object, or `None` if the user is not found.
     """
-    # if cache and penguin_id in penguins_by_id:
-    #     return penguins_by_id[penguin_id]
-
     p = await Penguin.get(penguin_id)
     await p.setup()
-    penguins_by_id[penguin_id] = p
     return p
 
 
-async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amount: int) -> dict:
+async def transfer_coins(sender: Penguin, receiver: Penguin, coins: int):
     """
-    Transfer coins between two penguins and return a status dictionary.
+    Transfer coins from one penguin to another and return a status dictionary.
 
     Parameters
     ----------
@@ -92,53 +86,38 @@ async def transferCoinsAndReturnStatus(sender: Penguin, receiver: Penguin, amoun
         The penguin object representing the sender of the coins.
     receiver: Penguin
         The penguin object representing the receiver of the coins.
-    amount: int
-        The number of coins to transfer.
+    coins: int
+        The number of coins to be transferred. It must be a positive integer.
+
+    Raises
+    ------
+    CommandError
+        - If the provided `coins` is not a positive integer (coins <= 0).
+        - If the `sender` and `receiver` penguins have the same ID, indicating an incorrect receiver.
+        - If the `sender` does not have enough coins to complete the transfer.
 
     Returns
-    ----------
-    dict
-        A dictionary containing the status code and message.
+    ------
+    None
     """
-    if amount <= 0:
-        return {"code": 400, "message": "Пожалуйста введите правильное число монет"}
+    if coins <= 0:
+        raise CommandError("INCORRECT_COINS_AMOUNT")
 
     if sender.id == receiver.id:
-        return {"code": 400, "message": "Вы не можете передать монеты самому себе!"}
+        raise CommandError("INCORRECT_RECEIVER")
 
-    if sender.coins < amount:
-        return {"code": 400, "message": "У вас недостаточно монет для перевода"}
+    if sender.coins < coins:
+        raise CommandError("NOT_ENOUGH_COINS")
 
-    await sender.update(coins=sender.coins - amount).apply()
-    await receiver.update(coins=receiver.coins + amount).apply()
+    await sender.update(coins=sender.coins - coins).apply()
+    await receiver.update(coins=receiver.coins + coins).apply()
     await Logs.create(penguin_id=int(sender.id), type=4,
-                      text=f"Перевёл игроку {receiver.username} {int(amount)} монет. Через Discord бота", room_id=0,
+                      text=f"Перевёл игроку {receiver.username} {int(coins)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
     await Logs.create(penguin_id=int(receiver.id), type=4,
-                      text=f"Получил от {sender.username} {int(amount)} монет. Через Discord бота", room_id=0,
+                      text=f"Получил от {sender.username} {int(coins)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
 
-    await send_xml("cdu", sender.id, -amount)
-    await send_xml("cdu", receiver.id, amount)
-
-    return {"code": 200, "message": f"Вы успешно передали `{amount}` монет игроку `{receiver.safe_name()}`!"}
-
-
-async def send_xml(name: str, penguinId: int = None, data=None) -> None:
-    reader, writer = await asyncio.open_connection('localhost', 9879)
-    logger.info("Server ('0.0.0.0', 9879) connected")
-
-    if penguinId is None:
-        ...
-    data = f"<msg t='sys'><body action='pb-{name}' r='0'><penguin p='{penguinId}' /><amount {type(data).__name__}='{data}' /></body></msg>"
-    if not writer.is_closing():
-        logger.debug(f'Outgoing data: {data}')
-        writer.write(data.encode('utf-8') + b'\x00')
-    await writer.drain()
-
-    response = await reader.read(100)
-    logger.debug(f'Received data: {response.decode()}')
-
-    writer.close()
-    await writer.wait_closed()
-    logger.info("Server ('0.0.0.0', 9879) disconnected")
+    await client.send_xml({'body': {'action': 'pb-cdu', 'r': '0'}, 'penguin': {'p': str(sender.id)}})
+    await client.send_xml({'body': {'action': 'pb-cdu', 'r': '0'}, 'penguin': {'p': str(receiver.id)}})
+    return
