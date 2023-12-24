@@ -27,7 +27,7 @@ Available languages:
 
 ## Features
 
-- **Integration**: link CP and Discord accounts;
+  - **Integration**: link multiple CP and one Discord accounts;
 - **Commands**: Use a slash-commands for:
     - Switch between multiple penguins account;
     - Transfer coins;
