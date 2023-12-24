@@ -61,7 +61,7 @@ class UserCommands(Cog):
             p = await inter.user.penguin
 
         if p.get_custom_attribute("mood") and not p.get_custom_attribute("mood").isspace():
-            mood = f'_{p.get_custom_attribute("mood")}_'.replace("#", "\#")
+            mood = f'_\{p.get_custom_attribute("mood")}_'
         else:
             mood = None
 
