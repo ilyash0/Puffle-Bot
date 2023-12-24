@@ -149,5 +149,6 @@
   "NEW_REGISTERED": "Зарегистрировано новых аккаунтов",
   "PLAYER_RETENTION": "Удержание пользователей",
   "ECONOMIC_DATA": "Экономические данные",
-  "MICROTRANSACTION_REVENUE": "Общая выручка от микротранзакций"
+  "MICROTRANSACTION_REVENUE": "Общая выручка от микротранзакций",
+  "GIFT_RESPONSE": "Подарок в виде %coins% монет забирает %nickname%"
 }

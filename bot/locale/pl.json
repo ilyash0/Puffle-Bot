@@ -149,5 +149,6 @@
   "NEW_REGISTERED": "Zarejestrowano nowe konta",
   "PLAYER_RETENTION": "Zatrzymanie użytkowników",
   "ECONOMIC_DATA": "Dane ekonomiczne",
-  "MICROTRANSACTION_REVENUE": "Całkowite przychody od mikrotranzakcji"
+  "MICROTRANSACTION_REVENUE": "Całkowite przychody od mikrotranzakcji",
+  "GIFT_RESPONSE": "Prezent w postaci %coins% monet został odebrany przez %nickname%"
 }

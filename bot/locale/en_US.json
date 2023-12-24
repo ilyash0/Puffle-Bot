@@ -148,5 +148,6 @@
   "NEW_REGISTERED": "New accounts registered",
   "PLAYER_RETENTION": "Player retention",
   "ECONOMIC_DATA": "Economic data",
-  "MICROTRANSACTION_REVENUE": "Total revenue from microtransactions"
+  "MICROTRANSACTION_REVENUE": "Total revenue from microtransactions",
+  "GIFT_RESPONSE": "A gift of %coins% coins is claimed by %nickname%"
 }

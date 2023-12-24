@@ -149,5 +149,6 @@
   "NEW_REGISTERED": "Зареєстровано нових гравців",
   "PLAYER_RETENTION": "Утримання користувачів",
   "ECONOMIC_DATA": "Экономічні дані",
-  "MICROTRANSACTION_REVENUE": "Загальна виручка від мікротранзакцій"
+  "MICROTRANSACTION_REVENUE": "Загальна виручка від мікротранзакцій",
+  "GIFT_RESPONSE": "Подарунок у вигляді %coins% монет забирає %nickname%"
 }
