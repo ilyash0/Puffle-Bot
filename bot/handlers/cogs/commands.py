@@ -253,8 +253,8 @@ class UserCommands(Cog):
         if p.coins < coins:
             raise CommandError("NOT_ENOUGH_COINS")
 
-        await inter.send(self.bot.i18n.get("SUCCESS")[lang], ephemeral=True)
         message_object = await channel.send(f"{message} {self.bot.i18n.get('WAIT_A_FEW_SECONDS')[lang]}")
+        await inter.send(self.bot.i18n.get("SUCCESS")[lang], ephemeral=True)
         await sleep(randrange(3, 15))
         await message_object.edit(message, view=Gift(inter, message_object, coins, p))
 
