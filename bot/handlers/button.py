@@ -88,17 +88,17 @@ class FundraisingButtons(Buttons):
     @disnake.ui.button(label="100", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
                        custom_id="100")
     async def coins100_button(self, button: disnake.ui.Button, inter: MessageInteraction):
-        await self.donate(inter, int(button.label))
+        await self.donate(inter, int(button.custom_id))
 
     @disnake.ui.button(label="500", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
                        custom_id="500")
     async def coins500_button(self, button: disnake.ui.Button, inter: MessageInteraction):
-        await self.donate(inter, int(button.label))
+        await self.donate(inter, int(button.custom_id))
 
     @disnake.ui.button(label="1000", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
-                       custom_id="1000")
+                       custom_id="1 000")
     async def coins1000_button(self, button: disnake.ui.Button, inter: MessageInteraction):
-        await self.donate(inter, int(button.label))
+        await self.donate(inter, int(button.custom_id))
 
     @disnake.ui.button(label="OTHER_AMOUNT", style=disnake.ButtonStyle.gray,
                        custom_id="other")
