@@ -328,16 +328,14 @@ class Gift(Buttons):
 
     @disnake.ui.button(label="GIFT", style=disnake.ButtonStyle.blurple, custom_id="gift", emoji="🎁")
     async def gift(self, button, inter: MessageInteraction):
-        button.disabled = True
-        await self.message.edit(view=self)
         await inter.response.defer()
         p = await get_my_penguin_from_user_id(inter.user.id)
         if p.moderator or p.id == self.giver_penguin.id:
             await inter.send(inter.bot.i18n.get("NOT_FOR_YOU")[str(inter.locale)], ephemeral=True)
-            button.disabled = False
-            await self.message.edit(view=self)
             return
 
+        button.disabled = True
+        await self.message.edit(view=self)
         await transfer_coins(self.giver_penguin, p, self.coins)
         await inter.send(inter.bot.i18n.get("GIFT_RESPONSE")[str(inter.locale)].
                          replace("%coins%", str(self.coins)).replace("%nickname%", p.safe_name()))
