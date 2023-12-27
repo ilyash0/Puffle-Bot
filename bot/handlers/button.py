@@ -334,9 +334,9 @@ class Gift(Buttons):
             await inter.send(inter.bot.i18n.get("NOT_FOR_YOU")[str(inter.locale)], ephemeral=True)
             return
 
-        button.disabled = True
-        await self.message.edit(view=self)
         await transfer_coins(self.giver_penguin, p, self.coins)
         await inter.send(inter.bot.i18n.get("GIFT_RESPONSE")[str(inter.locale)].
                          replace("%coins%", str(self.coins)).replace("%nickname%", p.safe_name()))
         await notify_gift_coins(inter.user, p, self.coins)
+        button.disabled = True
+        await self.message.edit(view=self)
