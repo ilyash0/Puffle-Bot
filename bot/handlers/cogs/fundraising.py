@@ -86,8 +86,6 @@ class FundraisingCommands(Cog):
             await message.edit(self.bot.i18n.get("CLOSED")[lang], view=None)
         except disnake.NotFound:
             pass
-        except disnake.errors.Forbidden:
-            return await inter.send(self.bot.i18n.get("BOT_DOESNT_HAVE_PERMISSION")[lang], ephemeral=True)
         await inter.send(self.bot.i18n.get("SUCCESS")[lang], ephemeral=True)
 
 

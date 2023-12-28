@@ -20,10 +20,11 @@
 Puffle Bot is a public Discord bot for interaction with online game "CPPS.APP".
 Available languages:
 
-- English
-- Russian
-- Polski
-- Ukrainian
+- English, Great Britain;
+- English, USA;
+- Russian;
+- Polski;
+- Ukrainian.
 
 ## Features
 

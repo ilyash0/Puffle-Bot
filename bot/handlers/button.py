@@ -62,13 +62,12 @@ class FundraisingButtons(Buttons):
         self.command = "fundraising"
 
     async def donate(self, inter: MessageInteraction, coins: int):
-        await inter.response.defer()
         p: Penguin = await get_my_penguin_from_user_id(inter.author.id)
         await transfer_coins(p, self.receiver, int(coins))
         await notify_coins_receive(p, self.receiver, coins, None, self.command)
         await inter.send(
             inter.bot.i18n.get("COINS_TRANSFERRED")[str(inter.avail_lang)].
-            replace("%coins%", str(coins)).replace("%receiver%", self.receiver.safe_name()))
+            replace("%coins%", str(coins)).replace("%receiver%", self.receiver.safe_name()), ephemeral=True)
 
         self.raised += int(coins)
         embed = self.message.embeds[0]
@@ -89,17 +88,17 @@ class FundraisingButtons(Buttons):
     @disnake.ui.button(label="100", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
                        custom_id="100")
     async def coins100_button(self, button: disnake.ui.Button, inter: MessageInteraction):
-        await self.donate(inter, int(button.label))
+        await self.donate(inter, int(button.custom_id))
 
     @disnake.ui.button(label="500", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
                        custom_id="500")
     async def coins500_button(self, button: disnake.ui.Button, inter: MessageInteraction):
-        await self.donate(inter, int(button.label))
+        await self.donate(inter, int(button.custom_id))
 
     @disnake.ui.button(label="1000", style=disnake.ButtonStyle.blurple, emoji="<:coin:788877461588279336>",
-                       custom_id="1000")
+                       custom_id="1 000")
     async def coins1000_button(self, button: disnake.ui.Button, inter: MessageInteraction):
-        await self.donate(inter, int(button.label))
+        await self.donate(inter, int(button.custom_id))
 
     @disnake.ui.button(label="OTHER_AMOUNT", style=disnake.ButtonStyle.gray,
                        custom_id="other")
@@ -329,17 +328,15 @@ class Gift(Buttons):
 
     @disnake.ui.button(label="GIFT", style=disnake.ButtonStyle.blurple, custom_id="gift", emoji="🎁")
     async def gift(self, button, inter: MessageInteraction):
-        button.disabled = True
-        await self.message.edit(view=self)
         await inter.response.defer()
         p = await get_my_penguin_from_user_id(inter.user.id)
         if p.moderator or p.id == self.giver_penguin.id:
             await inter.send(inter.bot.i18n.get("NOT_FOR_YOU")[str(inter.locale)], ephemeral=True)
-            button.disabled = False
-            await self.message.edit(view=self)
             return
 
         await transfer_coins(self.giver_penguin, p, self.coins)
         await inter.send(inter.bot.i18n.get("GIFT_RESPONSE")[str(inter.locale)].
                          replace("%coins%", str(self.coins)).replace("%nickname%", p.safe_name()))
         await notify_gift_coins(inter.user, p, self.coins)
+        button.disabled = True
+        await self.message.edit(view=self)

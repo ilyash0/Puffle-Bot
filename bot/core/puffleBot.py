@@ -99,8 +99,15 @@ class PuffleBot(InteractionBot):
 
     async def on_slash_command_error(self, inter: AppCommandInter, exception: CommandError):
         try:
-            logger.error(f"User error: {exception.args[0]}")
-            await inter.send(f"{self.i18n.get(exception.args[0])[str(inter.avail_lang)]}", ephemeral=True)
+            if (exception.args[0] ==
+                    "Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions"):
+                logger.error(f"403 Forbidden: Missing Permissions")
+                await inter.send(f"{self.i18n.get('BOT_DOESNT_HAVE_PERMISSION')[str(inter.avail_lang)]}",
+                                 ephemeral=True)
+            else:
+                logger.error(f"User error: {exception.args[0]}")
+                await inter.send(f"{self.i18n.get(exception.args[0])[str(inter.avail_lang)]}", ephemeral=True)
+
         except (KeyError, TypeError, AttributeError):
             logger.error(exception)
             traceback.print_exception(type(exception), exception, exception.__traceback__)
