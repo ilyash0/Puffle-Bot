@@ -150,4 +150,5 @@
   "ECONOMIC_DATA": "Dane ekonomiczne",
   "MICROTRANSACTION_REVENUE": "Całkowite przychody od mikrotranzakcji",
   "GIFT_RESPONSE": "Prezent w postaci %coins% monet został odebrany przez %nickname%"
+  "TOO_LATE": "Jest już za późno",
 }

@@ -150,4 +150,5 @@
   "ECONOMIC_DATA": "Экономические данные",
   "MICROTRANSACTION_REVENUE": "Общая выручка от микротранзакций",
   "GIFT_RESPONSE": "Подарок в виде %coins% монет забирает %nickname%"
+  "TOO_LATE": "Слишком поздно",
 }
