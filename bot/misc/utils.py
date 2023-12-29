@@ -52,7 +52,7 @@ async def get_penguin_or_none_from_user_id(user_id: int) -> Penguin or None:
         The penguin object, or `None` if the user is not found.
     """
     user = await User.get(user_id)
-    if user is None:
+    if user is None or user.penguin_id is None:
         return None
     return await get_penguin_from_penguin_id(user.penguin_id)
 
