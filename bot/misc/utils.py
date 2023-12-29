@@ -32,7 +32,7 @@ async def get_my_penguin_from_user_id(user_id: int) -> Penguin:
         If the penguin is not found, this function raises a KeyError with the message "MY_PENGUIN_NOT_FOUND."
     """
     user = await User.get(user_id)
-    if user is None:
+    if user is None or user.penguin_id is None:
         raise KeyError("MY_PENGUIN_NOT_FOUND")
     return await get_penguin_from_penguin_id(user.penguin_id)
 
