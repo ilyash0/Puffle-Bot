@@ -258,7 +258,8 @@ class UserCommands(Cog):
                                             allowed_mentions=AllowedMentions(roles=False, users=False, everyone=False))
         await inter.send(self.bot.i18n.get("SUCCESS")[lang], ephemeral=True)
         await sleep(randrange(3, 15))
-        await message_object.edit(message, view=Gift(inter, message_object, coins, p))
+        await message_object.edit(message, view=Gift(inter, message_object, coins, p),
+                                  allowed_mentions=AllowedMentions(roles=False, users=False, everyone=False))
 
 
 def setup(bot):
