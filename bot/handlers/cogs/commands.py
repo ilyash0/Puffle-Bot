@@ -5,10 +5,10 @@ from asyncio import sleep
 from random import randrange
 
 from bs4 import BeautifulSoup
-from disnake import AppCommandInter, Localized
+from disnake import AppCommandInter, Localized, AllowedMentions
 from loguru import logger
 import disnake
-from disnake.ext.commands import Cog, Param, slash_command, CommandError
+from disnake.ext.commands import Cog, Param, slash_command, CommandError, cooldown, BucketType
 from requests import Session
 
 from bot.data import db_pb
@@ -226,6 +226,7 @@ class UserCommands(Cog):
         await inter.send(embed=embed, view=view)
 
     @slash_command()
+    @cooldown(1, 60, BucketType.user)
     async def gift(self, inter: AppCommandInter, channel: disnake.TextChannel, coins: int, message: str = None):
         """
         Gift coins to users in a specific channel {{GIFT}}
@@ -253,7 +254,8 @@ class UserCommands(Cog):
         if p.coins < coins:
             raise CommandError("NOT_ENOUGH_COINS")
 
-        message_object = await channel.send(f"{message} {self.bot.i18n.get('WAIT_A_FEW_SECONDS')[lang]}")
+        message_object = await channel.send(f"{message} {self.bot.i18n.get('WAIT_A_FEW_SECONDS')[lang]}",
+                                            allowed_mentions=AllowedMentions(roles=False, users=False, everyone=False))
         await inter.send(self.bot.i18n.get("SUCCESS")[lang], ephemeral=True)
         await sleep(randrange(3, 15))
         await message_object.edit(message, view=Gift(inter, message_object, coins, p))

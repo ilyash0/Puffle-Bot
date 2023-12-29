@@ -149,6 +149,7 @@
   "PLAYER_RETENTION": "Утримання користувачів",
   "ECONOMIC_DATA": "Экономічні дані",
   "MICROTRANSACTION_REVENUE": "Загальна виручка від мікротранзакцій",
-  "GIFT_RESPONSE": "Подарунок у вигляді %coins% монет забирає %nickname%"
+  "GIFT_RESPONSE": "Подарунок у вигляді %coins% монет забирає %nickname%",
+  "COMMAND_COOLDOWN_RESPONSE": "Ця команда перебуває у стані охолодження. Спробуйте ще раз через %time% сек",
   "TOO_LATE": "Занадто пізно",
 }

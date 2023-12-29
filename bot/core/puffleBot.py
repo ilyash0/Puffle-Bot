@@ -3,7 +3,7 @@ import traceback
 
 import disnake
 from disnake import Webhook, Game, AppCommandInter
-from disnake.ext.commands import InteractionBot, CommandError
+from disnake.ext.commands import InteractionBot, CommandError, CommandOnCooldown
 from loguru import logger
 import bot.locale
 import bot.handlers.cogs
@@ -97,9 +97,12 @@ class PuffleBot(InteractionBot):
             # except asyncpg.exceptions.UndefinedTableError:
             #     pass
 
-    async def on_slash_command_error(self, inter: AppCommandInter, exception: CommandError):
+    async def on_slash_command_error(self, inter: AppCommandInter, exception: CommandError or CommandOnCooldown):
         try:
-            if (exception.args[0] ==
+            if isinstance(exception, CommandOnCooldown):
+                logger.error(f"User error: {exception.args[0]}")
+                await inter.send(f"{self.i18n.get(exception.args[0])[str(inter.avail_lang)]}", ephemeral=True)
+            elif (exception.args[0] ==
                     "Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions"):
                 logger.error(f"403 Forbidden: Missing Permissions")
                 await inter.send(f"{self.i18n.get('BOT_DOESNT_HAVE_PERMISSION')[str(inter.avail_lang)]}",
