@@ -101,9 +101,11 @@ class PuffleBot(InteractionBot):
         try:
             if isinstance(exception, CommandOnCooldown):
                 logger.error(f"User error: {exception.args[0]}")
-                await inter.send(f"{self.i18n.get(exception.args[0])[str(inter.avail_lang)]}", ephemeral=True)
+                await inter.send(
+                    f"{self.i18n.get('COMMAND_COOLDOWN_RESPONSE')[str(inter.avail_lang)].replace('%time%', str(int(exception.retry_after)))}",
+                    ephemeral=True)
             elif (exception.args[0] ==
-                    "Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions"):
+                  "Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions"):
                 logger.error(f"403 Forbidden: Missing Permissions")
                 await inter.send(f"{self.i18n.get('BOT_DOESNT_HAVE_PERMISSION')[str(inter.avail_lang)]}",
                                  ephemeral=True)
