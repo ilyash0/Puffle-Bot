@@ -106,24 +106,24 @@ class PuffleBot(InteractionBot):
     async def on_slash_command_error(self, inter: AppCommandInter, exception: CommandError or CommandOnCooldown):
         try:
             if isinstance(exception, CommandOnCooldown):
-                logger.error(f"User error: {exception.args[0]}")
                 end_time = f"<t:{int((datetime.now() + timedelta(seconds=exception.retry_after)).timestamp())}:R>"
                 await inter.send(
                     f"{self.i18n.get('COMMAND_COOLDOWN_RESPONSE')[str(inter.avail_lang)].replace('%time%',end_time)}",
                     ephemeral=True)
+                logger.error(f"User error: {exception.args[0]}")
             elif (exception.args[0] ==
                   "Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions"):
-                logger.error(f"403 Forbidden: Missing Permissions")
                 await inter.send(f"{self.i18n.get('BOT_DOESNT_HAVE_PERMISSION')[str(inter.avail_lang)]}",
                                  ephemeral=True)
+                logger.error(f"403 Forbidden: Missing Permissions")
             else:
-                logger.error(f"User error: {exception.args[0]}")
                 await inter.send(f"{self.i18n.get(exception.args[0])[str(inter.avail_lang)]}", ephemeral=True)
+                logger.error(f"User error: {exception.args[0]}")
 
         except (KeyError, TypeError, AttributeError):
+            await inter.send(f"Unknown error", ephemeral=True)
             logger.error(exception)
             traceback.print_exception(type(exception), exception, exception.__traceback__)
-            await inter.send(f"Unknown error", ephemeral=True)
 
     async def on_error(self, event_method: str, *args, **kwargs):
         logger.error(f"Ignoring exception in {event_method}")
