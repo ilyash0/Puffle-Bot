@@ -121,7 +121,6 @@
   "TOP-UP": "Поповнення балансу",
   "END_MEMBERSHIP": "Закінчення підписки",
   "OTHER_AMOUNT": "Інша сума",
-  "All": "Все",
   "CLOSED": "Закритий",
   "MESSAGE": "Повідомлення",
   "COMMAND": "Команда",
@@ -150,5 +149,7 @@
   "PLAYER_RETENTION": "Утримання користувачів",
   "ECONOMIC_DATA": "Экономічні дані",
   "MICROTRANSACTION_REVENUE": "Загальна виручка від мікротранзакцій",
-  "GIFT_RESPONSE": "Подарунок у вигляді %coins% монет забирає %nickname%"
+  "GIFT_RESPONSE": "Подарунок у вигляді %coins% монет забирає %nickname%",
+  "COMMAND_COOLDOWN_RESPONSE": "Ця команда перебуває у стані охолодження. Спробуйте ще раз через %time%",
+  "TOO_LATE": "Занадто пізно"
 }

@@ -1,6 +1,6 @@
 import disnake
 from disnake import AppCommandInter, Embed
-from disnake.ext.commands import Cog, slash_command
+from disnake.ext.commands import Cog, slash_command, cooldown, BucketType
 from loguru import logger
 
 from bot.data.pufflebot.fundraising import Fundraising
@@ -20,6 +20,7 @@ class FundraisingCommands(Cog):
         ...
 
     @fundraising.sub_command(name="open")
+    @cooldown(1, 300, BucketType.user)
     async def fundraising_open(self, inter: AppCommandInter, title: str, coins: int = None):
         """
         Start a fundraising {{FR_OPEN}}

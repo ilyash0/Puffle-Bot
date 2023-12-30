@@ -1,9 +1,10 @@
 import os
 import traceback
+from datetime import datetime, timedelta
 
 import disnake
 from disnake import Webhook, Game, AppCommandInter
-from disnake.ext.commands import InteractionBot, CommandError
+from disnake.ext.commands import InteractionBot, CommandError, CommandOnCooldown
 from loguru import logger
 import bot.locale
 import bot.handlers.cogs
@@ -46,7 +47,12 @@ class PuffleBot(InteractionBot):
         logger.info(f"Bot {self.user} ready")
 
     async def on_slash_command(self, inter: AppCommandInter):
-        logger.debug(f"{inter.author} use slash command /{inter.data.name} in #{inter.channel}")
+        if not len(inter.data.options):
+            logger.debug(
+                f"{inter.author} use slash command /{inter.data.name} in #{inter.channel} in guild {inter.guild}")
+        else:
+            logger.debug(
+                f"{inter.author} use slash command /{inter.data.name} in #{inter.channel} in guild {inter.guild} with options: {inter.data.options} ")
         if self.defer and inter.data.name not in non_deferred_commands:
             try:
                 await inter.response.defer()
@@ -97,21 +103,27 @@ class PuffleBot(InteractionBot):
             # except asyncpg.exceptions.UndefinedTableError:
             #     pass
 
-    async def on_slash_command_error(self, inter: AppCommandInter, exception: CommandError):
+    async def on_slash_command_error(self, inter: AppCommandInter, exception: CommandError or CommandOnCooldown):
         try:
-            if (exception.args[0] ==
-                    "Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions"):
-                logger.error(f"403 Forbidden: Missing Permissions")
+            if isinstance(exception, CommandOnCooldown):
+                end_time = f"<t:{int((datetime.now() + timedelta(seconds=exception.retry_after)).timestamp())}:R>"
+                await inter.send(
+                    f"{self.i18n.get('COMMAND_COOLDOWN_RESPONSE')[str(inter.avail_lang)].replace('%time%',end_time)}",
+                    ephemeral=True)
+                logger.error(f"User error: {exception.args[0]}")
+            elif (exception.args[0] ==
+                  "Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions"):
                 await inter.send(f"{self.i18n.get('BOT_DOESNT_HAVE_PERMISSION')[str(inter.avail_lang)]}",
                                  ephemeral=True)
+                logger.error(f"403 Forbidden: Missing Permissions")
             else:
-                logger.error(f"User error: {exception.args[0]}")
                 await inter.send(f"{self.i18n.get(exception.args[0])[str(inter.avail_lang)]}", ephemeral=True)
+                logger.error(f"User error: {exception.args[0]}")
 
         except (KeyError, TypeError, AttributeError):
+            await inter.send(f"Unknown error", ephemeral=True)
             logger.error(exception)
             traceback.print_exception(type(exception), exception, exception.__traceback__)
-            await inter.send(f"Unknown error", ephemeral=True)
 
     async def on_error(self, event_method: str, *args, **kwargs):
         logger.error(f"Ignoring exception in {event_method}")

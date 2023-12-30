@@ -325,18 +325,28 @@ class Gift(Buttons):
         self.message = message
         self.coins = coins
         self.giver_penguin: Penguin = giver_penguin
+        self.collected: bool = False
+        self.processed: bool = False
 
     @disnake.ui.button(label="GIFT", style=disnake.ButtonStyle.blurple, custom_id="gift", emoji="🎁")
     async def gift(self, button, inter: MessageInteraction):
-        await inter.response.defer()
-        p = await get_my_penguin_from_user_id(inter.user.id)
-        if p.moderator or p.id == self.giver_penguin.id:
-            await inter.send(inter.bot.i18n.get("NOT_FOR_YOU")[str(inter.locale)], ephemeral=True)
-            return
+        if self.processed:
+            raise Exception("TOO_LATE")
+        self.processed = True
 
-        await transfer_coins(self.giver_penguin, p, self.coins)
-        await inter.send(inter.bot.i18n.get("GIFT_RESPONSE")[str(inter.locale)].
-                         replace("%coins%", str(self.coins)).replace("%nickname%", p.safe_name()))
-        await notify_gift_coins(inter.user, p, self.coins)
-        button.disabled = True
-        await self.message.edit(view=self)
+        await inter.response.defer()
+
+        try:
+            p = await get_my_penguin_from_user_id(inter.user.id)
+            if p.moderator or p.id == self.giver_penguin.id:
+                raise Exception("NOT_FOR_YOU")
+
+            await transfer_coins(self.giver_penguin, p, self.coins)
+            await inter.send(inter.bot.i18n.get("GIFT_RESPONSE")[str(inter.locale)].
+                             replace("%coins%", str(self.coins)).replace("%nickname%", p.safe_name()))
+            self.collected = True
+            await notify_gift_coins(inter.user, p, self.coins)
+        finally:
+            self.processed = self.collected
+            button.disabled = self.collected
+            await self.message.edit(view=self)
