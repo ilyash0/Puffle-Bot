@@ -1,5 +1,6 @@
 import os
 import traceback
+from datetime import datetime, timedelta
 
 import disnake
 from disnake import Webhook, Game, AppCommandInter
@@ -106,8 +107,9 @@ class PuffleBot(InteractionBot):
         try:
             if isinstance(exception, CommandOnCooldown):
                 logger.error(f"User error: {exception.args[0]}")
+                end_time = f"<t:{int((datetime.now() + timedelta(seconds=exception.retry_after)).timestamp())}:R>"
                 await inter.send(
-                    f"{self.i18n.get('COMMAND_COOLDOWN_RESPONSE')[str(inter.avail_lang)].replace('%time%', str(int(exception.retry_after)))}",
+                    f"{self.i18n.get('COMMAND_COOLDOWN_RESPONSE')[str(inter.avail_lang)].replace('%time%',end_time)}",
                     ephemeral=True)
             elif (exception.args[0] ==
                   "Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions"):

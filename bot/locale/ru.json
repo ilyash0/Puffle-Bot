@@ -150,6 +150,6 @@
   "ECONOMIC_DATA": "Экономические данные",
   "MICROTRANSACTION_REVENUE": "Общая выручка от микротранзакций",
   "GIFT_RESPONSE": "Подарок в виде %coins% монет забирает %nickname%",
-  "COMMAND_COOLDOWN_RESPONSE": "Эта команда находится в режиме ожидания. Повторите попытку через %time% сек",
+  "COMMAND_COOLDOWN_RESPONSE": "Эта команда находится в режиме ожидания. Повторите попытку через %time%",
   "TOO_LATE": "Слишком поздно"
 }

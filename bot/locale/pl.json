@@ -150,6 +150,6 @@
   "ECONOMIC_DATA": "Dane ekonomiczne",
   "MICROTRANSACTION_REVENUE": "Całkowite przychody od mikrotranzakcji",
   "GIFT_RESPONSE": "Prezent w postaci %coins% monet został odebrany przez %nickname%",
-  "COMMAND_COOLDOWN_RESPONSE": "To polecenie jest w trakcie odnawiania. Spróbuj ponownie za %time% sek",
+  "COMMAND_COOLDOWN_RESPONSE": "To polecenie jest w trakcie odnawiania. Spróbuj ponownie za %time%",
   "TOO_LATE": "Jest już za późno"
 }

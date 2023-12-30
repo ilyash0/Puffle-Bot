@@ -150,6 +150,6 @@
   "ECONOMIC_DATA": "Economic data",
   "MICROTRANSACTION_REVENUE": "Total revenue from microtransactions",
   "GIFT_RESPONSE": "A gift of %coins% coins is claimed by %nickname%",
-  "COMMAND_COOLDOWN_RESPONSE": "This command is on cooldown. Try again in %time% sec",
+  "COMMAND_COOLDOWN_RESPONSE": "This command is on cooldown. Try again in %time%",
   "TOO_LATE": "It's too late"
 }
