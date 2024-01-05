@@ -23,6 +23,7 @@ headers = {
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"}
 
 # Arrays
+owner_ids = [527140180696629248]
 guild_ids = [cppsapp_server_id, test_server_id]
 non_deferred_commands = ["settings"]
 commands_without_penguin_requirement = ["ilyash", "online", "login", "top", "settings"]
