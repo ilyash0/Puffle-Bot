@@ -7,9 +7,9 @@ from bot.misc.penguin import Penguin
 
 
 @event.on("boot")
-async def setup(server):
-    global client
-    client = server.client_object
+async def setup(_server):
+    global server
+    server = _server
 
 
 async def get_my_penguin_from_user_id(user_id: int) -> Penguin:
@@ -76,6 +76,11 @@ async def get_penguin_from_penguin_id(penguin_id: int) -> Penguin:
     return p
 
 
+async def check_connection_to_houdini():
+    if server.client_object.__writer.is_closing():
+        await server.connect_to_houdini()
+
+
 async def transfer_coins(sender: Penguin, receiver: Penguin, coins: int):
     """
     Transfer coins from one penguin to another and return a status dictionary.
@@ -118,6 +123,7 @@ async def transfer_coins(sender: Penguin, receiver: Penguin, coins: int):
                       text=f"Получил от {sender.username} {int(coins)} монет. Через Discord бота", room_id=0,
                       server_id=8000)
 
-    await client.send_xml({'body': {'action': 'pb-cdu', 'r': '0'}, 'penguin': {'p': str(sender.id)}})
-    await client.send_xml({'body': {'action': 'pb-cdu', 'r': '0'}, 'penguin': {'p': str(receiver.id)}})
+    await check_connection_to_houdini()
+    await server.client_object.send_xml({'body': {'action': 'pb-cdu', 'r': '0'}, 'penguin': {'p': str(sender.id)}})
+    await server.client_object.send_xml({'body': {'action': 'pb-cdu', 'r': '0'}, 'penguin': {'p': str(receiver.id)}})
     return

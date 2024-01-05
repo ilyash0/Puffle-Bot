@@ -82,5 +82,5 @@ class Server:
         except ConnectionRefusedError:
             logger.error("The remote computer refused the network connection")
             return
-        logger.info(f"Server ('{self.config.houdini_address}', {self.config.houdini_port}) connected")
+        logger.info(f"Connected to server ('{self.config.houdini_address}', {self.config.houdini_port})")
         self.client_object = self.client_class(self, reader, writer)
