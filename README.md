@@ -1,3 +1,7 @@
+<div style="background-color: orange; color: black; border-radius: 0 0 10px 10px; padding: 5px" align="center">
+As CPPS.APP will be shut down on 25 January  2024, the bot will soon be disabled
+</div>
+
 <h1 align="center">
    Puffle Bot
 </h1>

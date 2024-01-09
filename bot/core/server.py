@@ -9,6 +9,7 @@ from bot.core.puffleBot import PuffleBot
 from bot.events import event
 from bot.events.module import hot_reload_module
 import bot.handlers
+from bot.misc.constants import owner_ids
 
 
 class Server:
@@ -58,7 +59,7 @@ class Server:
         command_sync_flags.sync_commands = True
 
         self.bot = PuffleBot(defer=self.config.defer, intents=intents, command_sync_flags=command_sync_flags,
-                             owner_id=527140180696629248)  # test_guilds=[755445822920982548],
+                             owner_ids=owner_ids)  # test_guilds=[guild_ids]
 
         await hot_reload_module(bot.handlers)
         await event.emit("boot", self)
@@ -81,5 +82,5 @@ class Server:
         except ConnectionRefusedError:
             logger.error("The remote computer refused the network connection")
             return
-        logger.info(f"Server ('{self.config.houdini_address}', {self.config.houdini_port}) connected")
+        logger.info(f"Connected to server ('{self.config.houdini_address}', {self.config.houdini_port})")
         self.client_object = self.client_class(self, reader, writer)

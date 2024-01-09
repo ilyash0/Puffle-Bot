@@ -55,8 +55,7 @@ class UserCommands(Cog):
         if user:
             p = await user.penguin
             if p is None:
-                await inter.send(self.bot.i18n.get("USER_PENGUIN_NOT_FOUND")[lang], ephemeral=True)
-                return
+                raise CommandError("USER_PENGUIN_NOT_FOUND")
         else:
             p = await inter.user.penguin
 
@@ -100,9 +99,11 @@ class UserCommands(Cog):
         """
         await inter.response.defer()
         p: Penguin = await inter.user.penguin
-        receiver_id, = await Penguin.select('id').where(Penguin.username == nickname.lower()).gino.first()
-        if receiver_id is None:
-            return await inter.send(self.bot.i18n.get("PENGUIN_NOT_FOUND")[str(inter.avail_lang)], ephemeral=True)
+        try:
+            receiver_id, = await Penguin.select('id').where(Penguin.username == nickname.lower()).gino.first()
+        except TypeError:
+            raise CommandError("PENGUIN_NOT_FOUND")
+
         r: Penguin = await Penguin.get(int(receiver_id))
 
         await transfer_coins(p, r, coins)
@@ -246,7 +247,7 @@ class UserCommands(Cog):
         if message is None:
             message = self.bot.i18n.get("GIFT_DEFAULT_RESPONSE")[lang]
         elif not is_message_valid(message):
-            return await inter.send(self.bot.i18n.get("KEEP_RULES")[lang], ephemeral=True)
+            raise CommandError("KEEP_RULES")
 
         if coins <= 0:
             raise CommandError("INCORRECT_COINS_AMOUNT")
