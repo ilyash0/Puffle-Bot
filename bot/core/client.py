@@ -41,6 +41,9 @@ class Client:
 
         super().__init__()
 
+    def is_closing(self):
+        return self.__writer.is_closing()
+
     async def send_tag(self, handler_id, *data):
         tag_data = "|".join(map(str, data))
         line = f"[{handler_id}]|{tag_data}|"
