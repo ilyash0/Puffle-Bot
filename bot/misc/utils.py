@@ -77,7 +77,7 @@ async def get_penguin_from_penguin_id(penguin_id: int) -> Penguin:
 
 
 async def check_connection_to_houdini():
-    if server.client_object.__writer.is_closing():
+    if server.client_object.is_closing():
         await server.connect_to_houdini()
 
 
