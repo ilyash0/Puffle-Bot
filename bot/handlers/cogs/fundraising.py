@@ -1,6 +1,6 @@
 import disnake
 from disnake import AppCommandInter, Embed
-from disnake.ext.commands import Cog, slash_command, cooldown, BucketType
+from disnake.ext.commands import Cog, slash_command, cooldown, BucketType, CommandError
 from loguru import logger
 
 from bot.data.pufflebot.fundraising import Fundraising
@@ -37,7 +37,9 @@ class FundraisingCommands(Cog):
         # TODO: replace the embed with a picture.
         lang: str = str(inter.avail_lang)
         if not is_message_valid(title):
-            return await inter.send(self.bot.i18n.get("KEEP_RULES")[lang], ephemeral=True)
+            raise CommandError("KEEP_RULES")
+        elif len(title) > 100:
+            raise CommandError("TEXT_TOO_LONG")
 
         p: Penguin = await inter.user.penguin
         current_fundraising = await Fundraising.query.where(Fundraising.penguin_id == p.id).gino.first()
