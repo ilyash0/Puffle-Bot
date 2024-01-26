@@ -1,5 +1,5 @@
 <div style="background-color: orange; color: black; border-radius: 0 0 10px 10px; padding: 5px" align="center">
-As CPPS.APP will be shut down on 25 January  2024, the bot will soon be disabled
+The bot has shut down
 </div>
 
 <h1 align="center">
@@ -14,7 +14,7 @@ As CPPS.APP will be shut down on 25 January  2024, the bot will soon be disabled
 [![Discord](https://img.shields.io/discord/755445822920982548?logo=discord&logoColor=white&label=discord)](https://discord.gg/ntZUXsWZaM)
 </div>
 
-<p align="center">CPPS.APP ❤️ Discord</p>
+<p align="center">Goodbye CPPS.APP ❤️</p>
 
 - [Place for Terms of Service]()
 - [Place for Documentation]()
