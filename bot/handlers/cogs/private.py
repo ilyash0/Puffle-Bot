@@ -12,7 +12,7 @@ from bot.misc.constants import (
     embedAboutImage,
     embedAbout,
     guild_ids,
-    avatarImageBytearray, placeholderImageLink)
+    avatarImageBytearray, placeholderImageLink, default_language)
 from bot.handlers.select import AboutSelect
 
 
@@ -60,7 +60,11 @@ class PrivateCommands(Cog):
         await inter.response.defer()
 
         try:
-            start_datetime = datetime.strptime(start_date_str, date_format)
+            if start_date_str.lower() == self.bot.i18n.get('TODAY')[lang].lower() or start_date_str.lower() == \
+                    self.bot.i18n.get('TODAY')[str(default_language)].lower():
+                start_datetime = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+            else:
+                start_datetime = datetime.strptime(start_date_str, date_format)
             if end_date_str:
                 end_datetime = datetime.strptime(end_date_str, date_format)
                 title = (self.bot.i18n.get('STATISTIC_TITLE')[lang]

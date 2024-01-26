@@ -1,7 +1,7 @@
 import disnake
 
 import bot.data.pufflebot.user
-from bot.misc.constants import available_languages
+from bot.misc.constants import available_languages, default_language
 from bot.misc.penguin import Penguin
 from bot.misc.utils import get_penguin_or_none_from_user_id
 
@@ -38,4 +38,4 @@ class NewAppInter(disnake.AppCommandInter):
 
     @property
     def avail_lang(self) -> disnake.i18n.Locale:
-        return self.locale if self.locale in available_languages else disnake.i18n.Locale.en_GB
+        return self.locale if self.locale in available_languages else default_language

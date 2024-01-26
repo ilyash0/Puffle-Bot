@@ -139,7 +139,7 @@
   "NOTIFY_GIFT_COINS": "Otrzymałeś w prezent %coins%м",
   "STATISTIC_TITLE": "Z %start% po %end%",
   "STATISTIC_FOOTER": "Jeżeli dzień jeszcze nie skończył, dane mogą być nieprawidłowe",
-  "INVALID_DATE": "Data `%date%` nieprawidłowa. Potrzebuje format `DD.MM.RRRR`",
+  "INVALID_DATE": "Data `%date%` nieprawidłowa. Potrzebuje format `DD.MM.RRRR`, np. <t:1601233740:d>",
   "TOO_EARLY_DATE": "Za ten period niema danych. Najwcześniejsze dane — <t:1601233740:d>",
   "PLAYERS_ACTIVITY": "Aktywność użytkowników",
   "MAX_ONLINE": "Maksymalny online",
@@ -150,6 +150,8 @@
   "ECONOMIC_DATA": "Dane ekonomiczne",
   "MICROTRANSACTION_REVENUE": "Całkowite przychody od mikrotranzakcji",
   "GIFT_RESPONSE": "Prezent w postaci %coins% monet został odebrany przez %nickname%",
-  "COMMAND_COOLDOWN_RESPONSE": "To polecenie jest w trakcie odnawiania. Spróbuj ponownie za %time%",
-  "TOO_LATE": "Jest już za późno"
+  "COMMAND_COOLDOWN_RESPONSE": "To polecenie jest w trakcie odnawiania. Spróbuj ponownie %time%",
+  "TOO_LATE": "Jest już za późno",
+  "TEXT_TOO_LONG": "Tekst jest zbyt długi",
+  "TODAY": "Dzisiaj"
 }

@@ -227,7 +227,7 @@ class UserCommands(Cog):
         await inter.send(embed=embed, view=view)
 
     @slash_command()
-    @cooldown(1, 60, BucketType.user)
+    @cooldown(1, 300, BucketType.user)
     async def gift(self, inter: AppCommandInter, channel: disnake.TextChannel, coins: int, message: str = None):
         """
         Gift coins to users in a specific channel {{GIFT}}
@@ -248,6 +248,8 @@ class UserCommands(Cog):
             message = self.bot.i18n.get("GIFT_DEFAULT_RESPONSE")[lang]
         elif not is_message_valid(message):
             raise CommandError("KEEP_RULES")
+        elif len(message) > 100:
+            raise CommandError("TEXT_TOO_LONG")
 
         if coins <= 0:
             raise CommandError("INCORRECT_COINS_AMOUNT")

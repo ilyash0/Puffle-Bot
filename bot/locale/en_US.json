@@ -139,7 +139,7 @@
   "NOTIFY_GIFT_COINS": "You have received a gift of %coins% coins",
   "STATISTIC_TITLE": "From %start% to %end%",
   "STATISTIC_FOOTER": "If the day is not yet over, the data may not be correct",
-  "INVALID_DATE": "The date `%date%` is invalid. The expected format is `MM/DD/YYYY`",
+  "INVALID_DATE": "The date `%date%` is invalid. The expected format is `MM/DD/YYYY`, e.g. <t:1601233740:d>",
   "TOO_EARLY_DATE": "No data is available for the specified period. The earliest available date is <t:1601233740:d>",
   "PLAYERS_ACTIVITY": "Players activity",
   "MAX_ONLINE": "Max online",
@@ -150,6 +150,8 @@
   "ECONOMIC_DATA": "Economic data",
   "MICROTRANSACTION_REVENUE": "Total revenue from microtransactions",
   "GIFT_RESPONSE": "A gift of %coins% coins is claimed by %nickname%",
-  "COMMAND_COOLDOWN_RESPONSE": "This command is on cooldown. Try again in %time%",
-  "TOO_LATE": "It's too late"
+  "COMMAND_COOLDOWN_RESPONSE": "This command is on cooldown. Try again %time%",
+  "TOO_LATE": "It's too late",
+  "TEXT_TOO_LONG": "The text is too long",
+  "TODAY": "Today"
 }
